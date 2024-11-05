@@ -17,7 +17,7 @@ public class SecurityConfig {
                 .authorizeExchange(exchange -> exchange
                         .pathMatchers("/", "/product_detail", "/cart/**",
                                 "/login**", "/error",
-                                "/images/**", "/webjars/**").permitAll()
+                                "/images/**", "/css/**", "/webjars/**").permitAll()
                         .anyExchange().authenticated()
                 )
                 // Configure OAuth2 login using a Customizer<OAuth2LoginSpec>

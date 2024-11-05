@@ -12,8 +12,8 @@ spring:
             scope: profile, email
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
           facebook:
-            client-id: YOUR_FACEBOOK_CLIENT_ID
-            client-secret: YOUR_FACEBOOK_CLIENT_SECRET
+            client-id:
+            client-secret: 
             scope: public_profile, email
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
         provider:
@@ -36,3 +36,14 @@ spring:
       enabled: true
       initial-size: 5
       max-size: 20
+    generate-ddl: true
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+
+
+logging:
+  level:
+    org.springframework.r2dbc: DEBUG
+    io.r2dbc.spi: DEBUG

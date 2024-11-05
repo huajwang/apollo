@@ -21,7 +21,7 @@ public class ProductController {
         this.cartService = cartService;
     }
 
-    @GetMapping("/products")
+    @GetMapping("/")
     public String listProducts(Model model) {
         Flux<ProductDto> products = productService.getAllProducts();
         Mono<Integer> count = cartService.getCartItemCount();

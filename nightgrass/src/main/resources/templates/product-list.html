@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product List</title>
+    <link rel="stylesheet" th:href="@{/styles.css}">
+    <link rel="stylesheet" th:href="@{/css/cart.css}">
+    <link rel="stylesheet" th:href="@{/css/bottom_nav.css}">
+</head>
+<body>
+
+<header>
+
+</header>
+
+<div class="product-list">
+    <div th:each="product : ${products}" class="product-card">
+        <a th:href="@{/product_detail(id=${product.id})}">
+            <img th:src="${product.imageUrl}" th:alt="${product.name}">
+            <h3 th:text="${product.name}">Product Name</h3>
+            <p th:text="${product.description}">Product description goes here.</p>
+            <span class="price" th:text="${product.price}">Price</span>
+        </a>
+    </div>
+</div>
+
+<!-- Include the bottom navigation bar -->
+<div th:replace="nav :: bottom-nav"></div>
+<script>
+    // console.log("Script loaded");
+
+    // Forces a reload when navigating back to the cart page
+    window.addEventListener("pageshow", function (event) {
+        // console.log("pageshow event triggered");
+        if (event.persisted) {
+            //console.log("Page loaded from cache, reloading...");
+            window.location.reload();
+        }
+    });
+</script>
+
+</body>
+</html>

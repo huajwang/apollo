@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Shopping Cart</title>
+    <link rel="stylesheet" th:href="@{/shopping-cart.css}">
+    <link rel="stylesheet" th:href="@{/css/bottom_nav.css}">
+</head>
+<body>
+<h1>Shopping Cart</h1>
+<!-- Message Section -->
+<div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+
+<table>
+    <thead>
+    <tr>
+        <th>Product Name</th>
+        <th>Price</th>
+        <th>Quantity</th>
+        <th>Total</th>
+        <th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="item : ${cartItems}">
+        <td th:text="${item.productName}">Product Name</td>
+        <td th:text="${item.price}">0.00</td>
+        <td th:text="${item.quantity}">0</td>
+        <td th:text="${item.price * item.quantity}">0.00</td>
+        <td>
+            <form th:action="@{/cart/remove}" method="post">
+                <input type="hidden" name="productId" th:value="${item.productId}">
+                <button type="submit">Remove</button>
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<h2>Total Price: <span th:text="${totalPrice}">0.00</span></h2>
+<div th:replace="nav :: bottom-nav"></div>
+</body>
+</html>

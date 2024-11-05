@@ -1,0 +1,18 @@
+.cat_icon {
+    position: relative; /* Make the icon the positioning reference for the badge */
+}
+
+.cart-count {
+    position: absolute;
+    top: -5px; /* Adjust as needed to position the badge over the icon */
+    right: -5px; /* Adjust to fine-tune horizontal position */
+    background-color: #ff0000; /* Red for visibility */
+    color: white;
+    font-size: 12px;
+    padding: 3px 6px;
+    border-radius: 50%; /* Makes it circular */
+    font-weight: bold;
+    min-width: 18px; /* Ensure badge is round even with single-digit numbers */
+    text-align: center;
+}
+

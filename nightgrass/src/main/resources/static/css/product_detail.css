@@ -1,0 +1,109 @@
+/* Basic reset */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+}
+
+/* Container for the entire product detail page */
+.product-detail-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Carousel styling */
+.carousel {
+    display: flex;
+    overflow: hidden;
+    width: 100%;
+    height: 300px;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.carousel img {
+    width: 100%;
+    transition: transform 0.5s ease;
+}
+
+/* Product Options styling */
+.product-options {
+    margin-bottom: 20px;
+}
+
+.option-group {
+    margin-bottom: 15px;
+}
+
+.option-group h3 {
+    font-size: 18px;
+    margin-bottom: 8px;
+}
+
+.option-button {
+    padding: 10px 15px;
+    margin: 5px;
+    border: 1px solid #ddd;
+    background-color: #f9f9f9;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.option-button:hover {
+    background-color: #e0e0e0;
+}
+
+/* User Comments styling */
+.user-comments {
+    margin-bottom: 20px;
+}
+
+.user-comments h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.comment {
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: #f1f1f1;
+    border-radius: 5px;
+}
+
+/* Action Buttons styling */
+.action-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.action-buttons button {
+    flex: 1;
+    padding: 15px;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    color: white;
+    border-radius: 5px;
+}
+
+.add-to-cart {
+    background-color: #ff9800; /* Orange */
+}
+
+.buy-now {
+    background-color: #4caf50; /* Green */
+}
+
+.add-to-cart:hover {
+    background-color: #e68900;
+}
+
+.buy-now:hover {
+    background-color: #388e3c;
+}

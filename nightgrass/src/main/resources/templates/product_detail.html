@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Detail</title>
+  <link rel="stylesheet" href="css/product_detail.css">
+  <link rel="stylesheet" th:href="@{/css/bottom_nav.css}">
+  <link rel="stylesheet" th:href="@{/css/cart.css}">
+</head>
+<body>
+<div class="product-detail-container">
+  <!-- Carousel Section -->
+  <div class="carousel">
+    <img src="images/product1.jpg" alt="Product Image 1">
+    <img src="images/product2.jpg" alt="Product Image 2">
+    <img src="images/product3.jpg" alt="Product Image 3">
+  </div>
+
+  <!-- Product Options Section -->
+  <div class="product-options">
+    <div class="option-group">
+      <h3>Select Color:</h3>
+      <button class="option-button">Red</button>
+      <button class="option-button">Blue</button>
+      <button class="option-button">Green</button>
+    </div>
+    <div class="option-group">
+      <h3>Select Size:</h3>
+      <button class="option-button">S</button>
+      <button class="option-button">M</button>
+      <button class="option-button">L</button>
+      <button class="option-button">XL</button>
+    </div>
+  </div>
+
+  <!-- User Comments Section -->
+  <div class="user-comments">
+    <h3>Customer Reviews</h3>
+    <div class="comment">
+      <p><strong>Jane Doe:</strong> Love the product! Great quality and perfect fit.</p>
+    </div>
+    <div class="comment">
+      <p><strong>John Smith:</strong> The color options are amazing! Highly recommend.</p>
+    </div>
+  </div>
+
+  <!-- Action Buttons Section -->
+  <div class="action-buttons">
+    <form th:action="@{/cart/add}" method="post">
+      <input type="hidden" name="productId" th:value="${product.id}">
+      <button type="submit" class="add-to-cart">Add to Cart</button>
+    </form>
+
+    <button class="buy-now">Buy Now</button>
+  </div>
+</div>
+
+<!-- Include the bottom navigation bar -->
+<div th:replace="nav :: bottom-nav"></div>
+
+<script>
+  // console.log("Script loaded");
+
+  // Forces a reload when navigating back to the cart page
+  window.addEventListener("pageshow", function (event) {
+      // console.log("pageshow event triggered");
+      if (event.persisted) {
+          //console.log("Page loaded from cache, reloading...");
+          window.location.reload();
+      }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,272 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    max-width: 1200px;
+    margin: auto;
+    background-color: #f8f8f8;
+    padding: 10px;
+}
+
+/* Header Section */
+.header {
+    background-color: #ffe6c8;
+    border-radius: 10px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    position: relative;
+    flex-direction: column;
+    text-align: center;
+}
+
+.profile-img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    margin-bottom: 10px;
+}
+
+.profile-info {
+    text-align: center;
+}
+
+.profile-name {
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+}
+
+.profile-status {
+    color: #b08968;
+    font-size: 14px;
+}
+
+.profile-description {
+    color: #b08968;
+    font-size: 12px;
+}
+
+.vip-icon {
+    background-color: #b08968;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 14px;
+    margin-top: 10px;
+}
+
+/* Features Section */
+.features {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 15px;
+    background-color: white;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.feature {
+    text-align: center;
+}
+
+.feature span {
+    display: block;
+    font-size: 14px;
+    color: #666;
+}
+
+.feature p {
+    font-size: 16px;
+    color: #333;
+    margin-top: 5px;
+}
+
+/* Coupons and Balance Section */
+.coupons-balance {
+    display: flex;
+    justify-content: space-between;
+    background-color: white;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 10px;
+}
+
+.coupon, .balance {
+    text-align: center;
+    flex: 1;
+    border-right: 1px solid #eee;
+}
+
+.balance {
+    border-right: none;
+}
+
+/* Membership Card Section */
+.membership-card {
+    background-color: #f53b2a;
+    color: white;
+    border-radius: 10px;
+    margin-top: 10px;
+    padding: 15px;
+    text-align: center;
+}
+
+.card-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.card-title span {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.member-benefits {
+    background-color: white;
+    color: #f53b2a;
+    padding: 5px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.options {
+    margin-top: 10px;
+    list-style: none;
+    padding: 0;
+    background-color: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.options li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px;
+    font-size: 16px;
+    color: #333;
+    border-bottom: 1px solid #eee;
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+    position: relative;
+}
+
+.options li:last-child {
+    border-bottom: none;
+}
+
+.options li:hover {
+    background-color: #f3f3f3;
+}
+
+.options li .icon {
+    font-size: 20px;
+    margin-right: 15px;
+    color: #f53b2a;
+}
+
+.options li::after {
+    content: "›";
+    font-size: 18px;
+    color: #ccc;
+    position: absolute;
+    right: 15px;
+}
+
+
+
+.bottom-nav div {
+    text-align: center;
+    font-size: 16px;
+    color: #666;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        padding: 5px;
+    }
+
+    .header {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .profile-img {
+        width: 50px;
+        height: 50px;
+        margin-bottom: 5px;
+    }
+
+    .profile-name {
+        font-size: 18px;
+    }
+
+    .vip-icon {
+        font-size: 12px;
+    }
+
+    .features {
+        flex-direction: column;
+        padding: 5px;
+    }
+
+    .feature {
+        margin-bottom: 10px;
+    }
+
+    .coupons-balance {
+        flex-direction: column;
+        padding: 5px;
+    }
+
+    .membership-card {
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    .options li {
+        font-size: 14px;
+        padding: 10px;
+    }
+
+    .bottom-nav {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .profile-img {
+        width: 40px;
+        height: 40px;
+    }
+
+    .features {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .feature p {
+        font-size: 14px;
+    }
+
+    .options li {
+        font-size: 14px;
+        padding: 8px;
+    }
+
+    .member-benefits {
+        font-size: 12px;
+        padding: 4px 10px;
+    }
+}

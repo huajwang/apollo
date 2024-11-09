@@ -1,6 +1,8 @@
 spring:
   application:
     name: nightgrass
+  profiles:
+      include: secret
 
   security:
     oauth2:
@@ -12,8 +14,8 @@ spring:
             scope: profile, email
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
           facebook:
-            client-id:
-            client-secret:
+            client-id: ${FACEBOOK_CLIENT_ID}
+            client-secret: ${FACEBOOK_CLIENT_SECRET}
             scope: public_profile, email
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
         provider:
@@ -53,5 +55,3 @@ logging:
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n"
 
-stripe:
-  secret-key:

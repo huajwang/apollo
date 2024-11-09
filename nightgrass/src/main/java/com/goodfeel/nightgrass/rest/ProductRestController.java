@@ -2,7 +2,7 @@ package com.goodfeel.nightgrass.rest;
 
 import com.goodfeel.nightgrass.data.Product;
 import com.goodfeel.nightgrass.serviceImpl.ProductService;
-import com.goodfeel.nightgrass.web.ProductDto;
+import com.goodfeel.nightgrass.dto.ProductDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;

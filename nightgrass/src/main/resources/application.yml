@@ -13,7 +13,7 @@ spring:
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
           facebook:
             client-id:
-            client-secret: 
+            client-secret:
             scope: public_profile, email
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
         provider:
@@ -45,5 +45,13 @@ spring:
 
 logging:
   level:
+    root: INFO
     org.springframework.r2dbc: DEBUG
     io.r2dbc.spi: DEBUG
+    org.springframework.web: DEBUG
+    com.goodfeel.nightgrass: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n"
+
+stripe:
+  secret-key:

@@ -15,12 +15,11 @@ public class SecurityConfig {
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         http
                 .authorizeExchange(exchange -> exchange
-                        .pathMatchers("/", "/product_detail", "/cart/**",
+                        .pathMatchers("/", "/product/**", "/cart/**",
                                 "/login**", "/error",
                                 "/images/**", "/css/**", "/webjars/**").permitAll()
                         .anyExchange().authenticated()
                 )
-                // Configure OAuth2 login using a Customizer<OAuth2LoginSpec>
                 .oauth2Login(Customizer.withDefaults())
                 .oauth2Client(Customizer.withDefaults())
                 .csrf(ServerHttpSecurity.CsrfSpec::disable);

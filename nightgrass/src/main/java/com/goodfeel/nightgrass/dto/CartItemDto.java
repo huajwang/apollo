@@ -1,4 +1,4 @@
-package com.goodfeel.nightgrass.web;
+package com.goodfeel.nightgrass.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

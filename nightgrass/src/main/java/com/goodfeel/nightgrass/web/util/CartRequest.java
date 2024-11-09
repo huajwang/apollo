@@ -1,4 +1,4 @@
-package com.goodfeel.nightgrass.web;
+package com.goodfeel.nightgrass.web.util;
 
 import lombok.Getter;
 import lombok.Setter;

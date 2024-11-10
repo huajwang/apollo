@@ -32,13 +32,13 @@ public class CustomReactiveOAuth2UserService extends DefaultReactiveOAuth2UserSe
                                 newUser.setOauthId(oauthId);
                                 newUser.setName(name);
                                 newUser.setEmail(email);
-                                return userRepository.save(newUser);
+                                return Mono.just(newUser);
                             }))
-                            .flatMap(existingUser -> {
+                            .flatMap(user -> {
                                 // Update existing user details if needed
-                                existingUser.setName(name);
-                                existingUser.setEmail(email);
-                                return userRepository.save(existingUser);
+                                user.setName(name);
+                                user.setEmail(email);
+                                return userRepository.save(user);
                             })
                             .thenReturn(oAuth2User);
                 });

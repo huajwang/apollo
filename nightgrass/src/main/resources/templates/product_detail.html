@@ -4,17 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Product Detail</title>
-  <link rel="stylesheet" href="css/product_detail.css">
+  <link rel="stylesheet" href="/css/product_detail.css" th:href="@{/css/product_detail.css}">
   <link rel="stylesheet" th:href="@{/css/bottom_nav.css}">
   <link rel="stylesheet" th:href="@{/css/cart.css}">
 </head>
 <body>
 <div class="product-detail-container">
   <!-- Carousel Section -->
-  <div class="carousel">
-    <img src="images/product1.jpg" alt="Product Image 1">
-    <img src="images/product2.jpg" alt="Product Image 2">
-    <img src="images/product3.jpg" alt="Product Image 3">
+  <div th:each="productPhoto : ${productPhotos}" class="carousel">
+    <img th:src="${productPhoto.photoUrl}">
   </div>
 
   <!-- Product Options Section -->

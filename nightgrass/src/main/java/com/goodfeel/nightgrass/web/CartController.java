@@ -3,6 +3,7 @@ package com.goodfeel.nightgrass.web;
 import com.goodfeel.nightgrass.dto.CartItemDto;
 import com.goodfeel.nightgrass.serviceImpl.CartService;
 import com.goodfeel.nightgrass.web.util.CartRequest;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +17,9 @@ import reactor.core.publisher.Mono;
 @RequestMapping(path = "/cart")
 public class CartController {
 
+    @Value("${STRIPE_PUBLIC_KEY}")
+    private String stripePublicKey;
+
     private final CartService cartService;
 
     public CartController(CartService cartService) {
@@ -24,11 +28,12 @@ public class CartController {
 
     // View cart contents
     @GetMapping
-    public String viewCart(Model model) {
+    public Mono<String> viewCart(Model model) {
         Flux<CartItemDto> cartItems = cartService.getCartItems();
         model.addAttribute("cartItems", cartItems);
         model.addAttribute("totalPrice", cartService.getTotalPrice());
-        return "cart"; // Thymeleaf template for viewing the cart
+        model.addAttribute("STRIPE_PUBLIC_KEY", stripePublicKey);
+        return Mono.just("/cart"); // Thymeleaf template for viewing the cart
     }
 
     @PostMapping(path = "/add")

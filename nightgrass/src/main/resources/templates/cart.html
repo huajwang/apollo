@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>Shopping Cart</title>
-    <link rel="stylesheet" th:href="@{/shopping-cart.css}">
+    <link rel="stylesheet" th:href="@{/css/shopping-cart.css}">
     <link rel="stylesheet" th:href="@{/css/bottom_nav.css}">
+    <script src="https://js.stripe.com/v3/"></script>
 </head>
 <body>
 <h1>Shopping Cart</h1>
@@ -38,6 +39,32 @@
 </table>
 
 <h2>Total Price: <span th:text="${totalPrice}">0.00</span></h2>
+
+<h2>Checkout</h2>
+<button id="checkout-button">Pay Now</button>
 <div th:replace="nav :: bottom-nav"></div>
+
+<script th:inline="javascript">
+    const stripe = Stripe([[${STRIPE_PUBLIC_KEY}]]);
+    document.getElementById("checkout-button").addEventListener("click", function () {
+        fetch("/create-checkout-session", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams({ amount: "1.00" })
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.text().then(errorText => {
+                    throw new Error('Network response was not ok: ' + errorText);
+                });
+            }
+            return response.text();
+        })
+        .then(sessionUrl => {
+            window.location = sessionUrl;
+        })
+        .catch(error => console.error('Error: ', error));
+    });
+</script>
 </body>
 </html>

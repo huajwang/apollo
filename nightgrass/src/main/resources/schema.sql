@@ -4,3 +4,9 @@ CREATE TABLE IF NOT EXISTS user (
     name VARCHAR(255),
     email VARCHAR(255)
 );
+
+CREATE TABLE IF NOT EXISTS e_mall_product_photo (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    product_id BIGINT NOT NULL,
+    photo_url VARCHAR(255) NOT NULL
+);

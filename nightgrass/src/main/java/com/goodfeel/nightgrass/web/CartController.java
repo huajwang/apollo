@@ -38,7 +38,7 @@ public class CartController {
 
     @PostMapping(path = "/add")
     public Mono<String> addToCart(@ModelAttribute CartRequest cartRequest, Model model) {
-        return cartService.addProductToCart(cartRequest.getProductId(), 1)
+        return cartService.addProductToCart(cartRequest.getProductId())
                 .thenReturn("redirect:/product/detail?id=" + cartRequest.getProductId());
     }
 

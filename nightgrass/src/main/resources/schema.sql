@@ -32,15 +32,23 @@ CREATE TABLE IF NOT EXISTS e_mall_order (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     order_id VARCHAR(10) NOT NULL,
     user_id VARCHAR(255),
-    amount DECIMAL(10, 2) NOT NULL,
+    total DECIMAL(10, 2) NOT NULL,
     delivery_address VARCHAR(100) NOT NULL,
     created_at TIMESTAMP NOT NULL,
     introducer VARCHAR(255),
-    order_process_date TIMESTAMP,
+    updated_date TIMESTAMP,
     logistics_no VARCHAR(30),
     delivery_date TIMESTAMP,
-    order_status VARCHAR(10),
-    pay_no VARCHAR (20),
+    status VARCHAR(10),
+    pay_no VARCHAR(20),
     pay_type VARCHAR(10),
     remark VARCHAR(255)
+);
+
+CREATE TABLE IF NOT EXISTS e_mall_order_item (
+    order_item_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    order_id VARCHAR(10) NOT NULL,
+    product_id BIGINT NOT NULL,
+    quantity INT NOT NULL,
+    properties VARCHAR(255)
 );

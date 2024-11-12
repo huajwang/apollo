@@ -3,8 +3,8 @@ package com.goodfeel.nightgrass.serviceImpl;
 import com.goodfeel.nightgrass.data.Cart;
 import com.goodfeel.nightgrass.data.CartItem;
 import com.goodfeel.nightgrass.dto.CartItemDto;
-import com.goodfeel.nightgrass.repo.CartItemRepo;
-import com.goodfeel.nightgrass.repo.CartRepo;
+import com.goodfeel.nightgrass.repo.CartItemRepository;
+import com.goodfeel.nightgrass.repo.CartRepository;
 import com.goodfeel.nightgrass.repo.ProductRepo;
 import com.goodfeel.nightgrass.service.ICartService;
 import org.slf4j.Logger;
@@ -35,13 +35,13 @@ public class CartService implements ICartService {
 
     private final Logger logger = LoggerFactory.getLogger(CartService.class);
 
-    private final CartRepo cartRepo;
-    private final CartItemRepo cartItemRepo;
+    private final CartRepository cartRepository;
+    private final CartItemRepository cartItemRepository;
     private final ProductRepo productRepo;
 
-    public CartService(CartRepo cartRepo, CartItemRepo cartItemRepo, ProductRepo productRepo) {
-        this.cartRepo = cartRepo;
-        this.cartItemRepo = cartItemRepo;
+    public CartService(CartRepository cartRepository, CartItemRepository cartItemRepository, ProductRepo productRepo) {
+        this.cartRepository = cartRepository;
+        this.cartItemRepository = cartItemRepository;
         this.productRepo = productRepo;
     }
 
@@ -51,9 +51,9 @@ public class CartService implements ICartService {
             // Handle guest cart logic (e.g., use session storage or a temporary in-memory cart)
             return Mono.just(new Cart()); // TODO - retrieve from session storage or local cache in browser?
         }
-        return cartRepo.findByUserId(userId)
+        return cartRepository.findByUserId(userId)
                 .switchIfEmpty(
-                    cartRepo.save(new Cart(null, BigDecimal.ZERO, userId, ""))
+                    cartRepository.save(new Cart(null, BigDecimal.ZERO, userId, ""))
                 );
     }
 
@@ -63,19 +63,19 @@ public class CartService implements ICartService {
         // Retrieve the cart and its items asynchronously
                 .flatMap(cart -> {
                     // Check if the product already exists in the cart asynchronously
-                    return cartItemRepo.findByCartId(cart.getCartId())
+                    return cartItemRepository.findByCartId(cart.getCartId())
                             .filter(item -> item.getProductId().equals(productId))  // Filter to find matching item
                             .next()  // Take the first match, if any
                             .flatMap(existingItem -> {
                                 // If product exists, increment quantity and save the updated item
                                 existingItem.setQuantity(existingItem.getQuantity() + 1);
-                                return cartItemRepo.save(existingItem)
+                                return cartItemRepository.save(existingItem)
                                         .then(Mono.just(cart)); // Return cart after saving item
                             })
                             .switchIfEmpty(
                                     productRepo.findById(productId).flatMap(product ->
                                                     // If product does not exist, add it as a new CartItem
-                                                    cartItemRepo.save(new CartItem(null, cart.getCartId(),
+                                                    cartItemRepository.save(new CartItem(null, cart.getCartId(),
                                                                     productId, 1, "blue"))
                                                             .then(Mono.just(cart)) // Return cart after adding new item
                                     )
@@ -83,14 +83,14 @@ public class CartService implements ICartService {
                             );
                 })
                 // Save the cart itself after processing items
-                .flatMap(cartRepo::save); // Save the updated cart
+                .flatMap(cartRepository::save); // Save the updated cart
 
     }
 
     @Override
     public Mono<Integer> getCartItemCount() {
         return getCurrentUserId().flatMap(this::getCartForUser).flatMap(cart ->
-                cartItemRepo.findByCartId(cart.getCartId())
+                cartItemRepository.findByCartId(cart.getCartId())
                         .map(CartItem::getQuantity)    // Extract quantity of each item
                         .reduce(0, Integer::sum)
 
@@ -100,7 +100,7 @@ public class CartService implements ICartService {
     @Override
     public Mono<Void> removeProductFromCart(Long productId) {
         return getCurrentUserId().flatMap(this::getCartForUser).flatMap( cart ->
-                cartItemRepo.deleteByCartIdAndProductId(cart.getCartId(), productId)
+                cartItemRepository.deleteByCartIdAndProductId(cart.getCartId(), productId)
         );
     }
 
@@ -108,7 +108,7 @@ public class CartService implements ICartService {
     public Flux<CartItemDto> getCartItems() {
         return getCurrentUserId()
                 .flatMap(this::getCartForUser)
-                .flatMapMany(cart -> cartItemRepo.findByCartId(cart.getCartId()))
+                .flatMapMany(cart -> cartItemRepository.findByCartId(cart.getCartId()))
                 .flatMap(this::mapToCartItemDto);
     }
 

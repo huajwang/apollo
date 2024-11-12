@@ -5,7 +5,7 @@ import com.goodfeel.nightgrass.data.CartItem;
 import com.goodfeel.nightgrass.dto.CartItemDto;
 import com.goodfeel.nightgrass.repo.CartItemRepository;
 import com.goodfeel.nightgrass.repo.CartRepository;
-import com.goodfeel.nightgrass.repo.ProductRepo;
+import com.goodfeel.nightgrass.repo.ProductRepository;
 import com.goodfeel.nightgrass.service.ICartService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,12 +39,12 @@ public class CartService implements ICartService {
 
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
-    private final ProductRepo productRepo;
+    private final ProductRepository productRepository;
 
-    public CartService(CartRepository cartRepository, CartItemRepository cartItemRepository, ProductRepo productRepo) {
+    public CartService(CartRepository cartRepository, CartItemRepository cartItemRepository, ProductRepository productRepository) {
         this.cartRepository = cartRepository;
         this.cartItemRepository = cartItemRepository;
-        this.productRepo = productRepo;
+        this.productRepository = productRepository;
     }
 
     @Override
@@ -75,7 +75,7 @@ public class CartService implements ICartService {
                                         .then(Mono.just(cart)); // Return cart after saving item
                             })
                             .switchIfEmpty(
-                                    productRepo.findById(productId).flatMap(product ->
+                                    productRepository.findById(productId).flatMap(product ->
                                                     // If product does not exist, add it as a new CartItem
                                                     cartItemRepository.save(new CartItem(null, cart.getCartId(),
                                                                     productId, 1, "blue"))
@@ -117,7 +117,7 @@ public class CartService implements ICartService {
     private Mono<CartItemDto> mapToCartItemDto(CartItem cartItem) {
         // Format price in Canadian dollars
         NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(Locale.CANADA);
-        return productRepo.findById(cartItem.getProductId())
+        return productRepository.findById(cartItem.getProductId())
                 .map(product -> new CartItemDto(
                         cartItem.getItemId(),
                         cartItem.getCartId(),
@@ -150,8 +150,25 @@ public class CartService implements ICartService {
         return cartItemRepository.findById(itemId)
                 .flatMap(cartItem -> {
                     cartItem.setQuantity(quantity);
-                    return cartItemRepository.save(cartItem);
-                });
+                    return cartItemRepository.save(cartItem)
+                            .then(updateCartTotal(cartItem.getCartId())); // Update total after saving
+                })
+                .then(cartItemRepository.findById(itemId)); // Return updated cart item
     }
+
+    private Mono<Void> updateCartTotal(Long cartId) {
+        // Retrieve all items in the cart
+        return cartItemRepository.findByCartId(cartId)
+                .flatMap(cartItem -> productRepository.findById(cartItem.getProductId())
+                        .map(product -> product.getPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity()))))
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .flatMap(total -> cartRepository.findById(cartId)
+                        .flatMap(cart -> {
+                            cart.setTotal(total);
+                            return cartRepository.save(cart);
+                        }))
+                .then();
+    }
+
 
 }

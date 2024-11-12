@@ -1,7 +1,7 @@
 package com.goodfeel.nightgrass.serviceImpl;
 
 import com.goodfeel.nightgrass.data.Product;
-import com.goodfeel.nightgrass.repo.ProductRepo;
+import com.goodfeel.nightgrass.repo.ProductRepository;
 import com.goodfeel.nightgrass.service.IProductService;
 import com.goodfeel.nightgrass.dto.ProductDto;
 import org.springframework.stereotype.Service;
@@ -11,16 +11,16 @@ import reactor.core.publisher.Mono;
 @Service
 public class ProductService implements IProductService {
 
-    private final ProductRepo productRepo;
+    private final ProductRepository productRepository;
 
-    public ProductService(ProductRepo productRepo) {
-        this.productRepo = productRepo;
+    public ProductService(ProductRepository productRepository) {
+        this.productRepository = productRepository;
     }
 
     @Override
     public Flux<ProductDto> getAllProducts() {
 
-        Flux<Product> products = productRepo.findAll();
+        Flux<Product> products = productRepository.findAll();
         return products.map(product ->
                 new ProductDto(
                         product.getId(),
@@ -30,7 +30,7 @@ public class ProductService implements IProductService {
 
     @Override
     public Mono<ProductDto> getProductById(Long id) {
-        return productRepo.findById(id).map(product -> {
+        return productRepository.findById(id).map(product -> {
             return new ProductDto(product.getId(), product.getName(),
                     product.getDescription(), product.getImageUrl(), product.getPrice());
         });
@@ -38,12 +38,12 @@ public class ProductService implements IProductService {
 
     @Override
     public Mono<Product> saveProduct(Product product) {
-        return productRepo.save(product);
+        return productRepository.save(product);
     }
 
     @Override
     public Mono<Void> deleteProduct(Long id) {
-        return productRepo.deleteById(id);
+        return productRepository.deleteById(id);
     }
 
 }

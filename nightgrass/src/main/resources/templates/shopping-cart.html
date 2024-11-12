@@ -185,7 +185,7 @@
   </div>
 
     <form th:action="@{/cart/remove}" method="post" style="display:inline;">
-      <input type="hidden" name="productId" th:value="${item.ProductId}">
+      <input type="hidden" name="itemId" th:value="${item.itemId}">
       <button type="submit" class="delete-btn">Delete</button>
     </form>
   </div>

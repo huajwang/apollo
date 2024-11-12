@@ -6,5 +6,6 @@ import lombok.Setter;
 @Setter
 @Getter
 public class CartRequest {
+    private Long itemId;
     private Long productId;
 }

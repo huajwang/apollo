@@ -18,20 +18,7 @@ import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.Locale;
 
-/**
- * Case 1. user is logged in
- * when user logs in, retrieve cart from db, show item account besides the shopping cart icon, when add item to cart,
- * search if there is an existing item in the cart, if yes, add quantity. else create a cart item and update it in db.
- * Whenever there is update in the shopping cart, e.g. add a new item, delete an item, update the quantity, the db need to be
- * updated.
- *
- *
- *
- * case 2. user is not logged in, but has an account; first he adds products into his local cart. Then he logged in,
- * then the db cart is retrieved. This leads to 2 carts. need consolidate them. Incorporate the local cart items into
- * the db cart.
- * case 3. user does not have an account;
- */
+
 @Service
 public class CartService implements ICartService {
 
@@ -61,32 +48,27 @@ public class CartService implements ICartService {
 
     @Override
     public Mono<Cart> addProductToCart(Long productId) {
-        return getCurrentUserId().flatMap(this::getCartForUser)
-        // Retrieve the cart and its items asynchronously
-                .flatMap(cart -> {
-                    // Check if the product already exists in the cart asynchronously
-                    return cartItemRepository.findByCartId(cart.getCartId())
-                            .filter(item -> item.getProductId().equals(productId))  // Filter to find matching item
-                            .next()  // Take the first match, if any
-                            .flatMap(existingItem -> {
-                                // If product exists, increment quantity and save the updated item
-                                existingItem.setQuantity(existingItem.getQuantity() + 1);
-                                return cartItemRepository.save(existingItem)
-                                        .then(Mono.just(cart)); // Return cart after saving item
-                            })
-                            .switchIfEmpty(
-                                    productRepository.findById(productId).flatMap(product ->
-                                                    // If product does not exist, add it as a new CartItem
-                                                    cartItemRepository.save(new CartItem(null, cart.getCartId(),
-                                                                    productId, 1, "blue"))
-                                                            .then(Mono.just(cart)) // Return cart after adding new item
-                                    )
-
-                            );
-                })
-                // Save the cart itself after processing items
-                .flatMap(cartRepository::save); // Save the updated cart
-
+        return getCurrentUserId()
+                .flatMap(this::getCartForUser) // Retrieve or create cart for user
+                .flatMap(cart -> cartItemRepository.findByCartId(cart.getCartId())
+                        .filter(item -> item.getProductId().equals(productId))
+                        .next() // Take the first matching item, if any
+                        .flatMap(existingItem -> {
+                            // If product exists, increment quantity and save
+                            existingItem.setQuantity(existingItem.getQuantity() + 1);
+                            return cartItemRepository.save(existingItem).thenReturn(cart);
+                        })
+                        .switchIfEmpty(
+                                // If product does not exist in cart, add as new CartItem
+                                productRepository.findById(productId)
+                                        .flatMap(product -> {
+                                            CartItem newItem = new CartItem(null, cart.getCartId(), productId, 1, "blue");
+                                            return cartItemRepository.save(newItem).thenReturn(cart);
+                                        })
+                        )
+                        // After adding/updating the item, update the cart total
+                        .flatMap(updatedCart -> updateCartTotal(updatedCart.getCartId()).thenReturn(updatedCart))
+                );
     }
 
     @Override
@@ -100,10 +82,10 @@ public class CartService implements ICartService {
     }
 
     @Override
-    public Mono<Void> removeProductFromCart(Long productId) {
-        return getCurrentUserId().flatMap(this::getCartForUser).flatMap( cart ->
-                cartItemRepository.deleteByCartIdAndProductId(cart.getCartId(), productId)
-        );
+    public Mono<Void> removeCartItemFromCart(Long itemId) {
+        return cartItemRepository.findById(itemId)
+                .flatMap(cartItem -> cartItemRepository.delete(cartItem)
+                        .then(updateCartTotal(cartItem.getCartId()))); // Update total after deletion
     }
 
     @Override

@@ -44,7 +44,7 @@ public class CartController {
 
     @PostMapping(path = "/remove")
     public Mono<String> removeFromCart(@ModelAttribute CartRequest cartRequest, Model model) {
-        return cartService.removeProductFromCart(cartRequest.getProductId())
+        return cartService.removeCartItemFromCart(cartRequest.getItemId())
                 .then(Mono.fromRunnable(() ->
                         model.addAttribute(
                                 "message",

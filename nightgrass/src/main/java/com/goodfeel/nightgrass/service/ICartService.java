@@ -12,7 +12,7 @@ public interface ICartService {
     Mono<Cart> getCartForUser(String userId);
     Mono<Cart> addProductToCart(Long productId);
     Mono<Integer> getCartItemCount();
-    Mono<Void> removeProductFromCart(Long productId);
+    Mono<Void> removeCartItemFromCart(Long productId);
     Flux<CartItemDto> getCartItems();
     Mono<BigDecimal> getTotalPrice();
 }

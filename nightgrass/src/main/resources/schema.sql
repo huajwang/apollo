@@ -24,7 +24,6 @@ CREATE TABLE IF NOT EXISTS e_mall_cart_item (
     product_id BIGINT NOT NULL,
     quantity INT NOT NULL,
     properties VARCHAR(255),
-    price DECIMAL(10, 2) NOT NULL,
     FOREIGN KEY (cart_id) REFERENCES e_mall_cart(cart_id) ON DELETE CASCADE
 );
 

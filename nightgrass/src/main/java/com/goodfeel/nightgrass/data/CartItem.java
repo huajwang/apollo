@@ -24,5 +24,4 @@ public class CartItem {
     private Long productId;
     private Integer quantity;
     private String properties;
-    private BigDecimal price;
 }

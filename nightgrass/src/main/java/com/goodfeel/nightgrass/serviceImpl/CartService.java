@@ -15,9 +15,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
 
 /**
  * Case 1. user is logged in
@@ -41,7 +38,6 @@ public class CartService implements ICartService {
     private final CartRepo cartRepo;
     private final CartItemRepo cartItemRepo;
     private final ProductRepo productRepo;
-    private final Map<Long, CartItemDto> localCart = new HashMap<>();
 
     public CartService(CartRepo cartRepo, CartItemRepo cartItemRepo, ProductRepo productRepo) {
         this.cartRepo = cartRepo;
@@ -80,7 +76,7 @@ public class CartService implements ICartService {
                                     productRepo.findById(productId).flatMap(product ->
                                                     // If product does not exist, add it as a new CartItem
                                                     cartItemRepo.save(new CartItem(null, cart.getCartId(),
-                                                                    productId, 1, "blue", product.getPrice()))
+                                                                    productId, 1, "blue"))
                                                             .then(Mono.just(cart)) // Return cart after adding new item
                                     )
 
@@ -93,22 +89,40 @@ public class CartService implements ICartService {
 
     @Override
     public Mono<Integer> getCartItemCount() {
-        Integer totalCount = localCart.values().stream() // TODO blocking?
-                .mapToInt(CartItemDto::getQuantity)
-                .sum();
-        return Mono.just(totalCount);
+        return getCurrentUserId().flatMap(this::getCartForUser).flatMap(cart ->
+                cartItemRepo.findByCartId(cart.getCartId())
+                        .map(CartItem::getQuantity)    // Extract quantity of each item
+                        .reduce(0, Integer::sum)
+
+        );
     }
 
     @Override
     public Mono<Void> removeProductFromCart(Long productId) {
-        return Mono.fromRunnable(() -> {
-            localCart.remove(productId);
-        });
+        return getCurrentUserId().flatMap(this::getCartForUser).flatMap( cart ->
+                cartItemRepo.deleteByCartIdAndProductId(cart.getCartId(), productId)
+        );
     }
 
     @Override
     public Flux<CartItemDto> getCartItems() {
-        return Flux.fromIterable(localCart.values());
+        return getCurrentUserId()
+                .flatMap(this::getCartForUser)
+                .flatMapMany(cart -> cartItemRepo.findByCartId(cart.getCartId()))
+                .flatMap(this::mapToCartItemDto);
+    }
+
+    private Mono<CartItemDto> mapToCartItemDto(CartItem cartItem) {
+        return productRepo.findById(cartItem.getProductId())
+                .map(product -> new CartItemDto(
+                        cartItem.getItemId(),
+                        cartItem.getCartId(),
+                        cartItem.getProductId(),
+                        product.getName(),
+                        cartItem.getQuantity(),
+                        cartItem.getProperties(),
+                        product.getPrice()
+                ));
     }
 
     @Override

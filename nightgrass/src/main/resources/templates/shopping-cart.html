@@ -45,7 +45,7 @@
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
     }
 
-    .cart-item input[type="radio"] {
+    .cart-item input[type="checkbox"] {
         margin-right: 10px;
     }
 
@@ -126,6 +126,32 @@
         }
     }
   </style>
+
+  <script>
+    // Debounce function to limit the frequency of update requests
+    function debounce(func, delay) {
+      let debounceTimer;
+      return function(...args) {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => func.apply(this, args), delay);
+      };
+    }
+
+    // Function to handle quantity changes
+    const handleQuantityChange = debounce((itemId, quantity) => {
+      fetch('/cart/update-quantity', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ itemId, quantity })
+      })
+      .then(response => response.json())
+      .then(data => console.log('Quantity updated:', data))
+      .catch(error => console.error('Error updating quantity:', error));
+    }, 500); // 500 ms debounce delay
+  </script>
+
 </head>
 <body>
 
@@ -133,7 +159,7 @@
   <h1>Shopping Cart</h1>
   <div th:each="item : ${cartItems}" class="cart-item">
     <!-- Selection toggle -->
-    <input type="radio" th:id="'selected_' + ${item.itemId}" th:name="'selected_' + ${item.itemId}" th:value="${item.itemId}" />
+    <input type="checkbox" th:id="'selected_' + ${item.itemId}" th:name="'selected_' + ${item.itemId}" th:value="${item.itemId}" />
 
     <!-- Item image -->
     <img th:src="${item.imageUrl}" alt="Product Image" class="item-image" />
@@ -146,12 +172,17 @@
       <!-- Price display -->
       <span class="item-price" th:text="${item.formattedPrice}">Price: $0.00</span>
 
-      <!-- Quantity controls -->
-      <div class="quantity-controls">
-        <label th:for="'quantity_' + ${item.itemId}">Qty:</label>
-        <input type="number" th:id="'quantity_' + ${item.itemId}" th:name="'quantity_' + ${item.itemId}" th:value="${item.quantity}" min="1" />
-      </div>
+    <!-- Quantity controls with event listener for debounced update -->
+    <div class="quantity-controls">
+      <label th:for="'quantity_' + ${item.itemId}">Qty:</label>
+      <input type="number"
+             th:id="'quantity_' + ${item.itemId}"
+             th:name="'quantity_' + ${item.itemId}"
+             th:value="${item.quantity}"
+             min="1"
+             th:attr="onchange=|handleQuantityChange(${item.itemId}, this.value)|" />
     </div>
+  </div>
 
     <form th:action="@{/cart/remove}" method="post" style="display:inline;">
       <input type="hidden" name="productId" th:value="${item.ProductId}">

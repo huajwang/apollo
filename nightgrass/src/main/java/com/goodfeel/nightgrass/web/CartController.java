@@ -2,14 +2,14 @@ package com.goodfeel.nightgrass.web;
 
 import com.goodfeel.nightgrass.dto.CartItemDto;
 import com.goodfeel.nightgrass.serviceImpl.CartService;
+import com.goodfeel.nightgrass.web.util.CartItemUpdateRequest;
 import com.goodfeel.nightgrass.web.util.CartRequest;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -52,4 +52,12 @@ public class CartController {
                 ))
                 .thenReturn("redirect:/cart");  // Redirect to the cart view after removal
     }
+
+    @PostMapping("/update-quantity")
+    public Mono<ResponseEntity<String>> updateQuantity(@RequestBody CartItemUpdateRequest updateRequest) {
+        return cartService.updateQuantity(updateRequest.getItemId(), updateRequest.getQuantity())
+                .map(updated -> ResponseEntity.ok("Quantity updated"))
+                .defaultIfEmpty(ResponseEntity.status(HttpStatus.NOT_FOUND).body("Item not found"));
+    }
+
 }

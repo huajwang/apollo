@@ -146,4 +146,12 @@ public class CartService implements ICartService {
                 .doOnSuccess(it -> logger.debug("The current user is {}", it));
     }
 
+    public Mono<CartItem> updateQuantity(Long itemId, int quantity) {
+        return cartItemRepository.findById(itemId)
+                .flatMap(cartItem -> {
+                    cartItem.setQuantity(quantity);
+                    return cartItemRepository.save(cartItem);
+                });
+    }
+
 }

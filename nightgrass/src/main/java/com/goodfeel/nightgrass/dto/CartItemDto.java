@@ -13,10 +13,11 @@ public class CartItemDto {
     private Long itemId;
     private Long cartId;
     private Long productId;
+    private String imageUrl;
     private String productName;
+    private String description;
     private int quantity;
     private String properties;
     private BigDecimal price;
-
+    private String formattedPrice;
 }
-

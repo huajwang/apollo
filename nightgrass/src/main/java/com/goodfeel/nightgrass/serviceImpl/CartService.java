@@ -15,6 +15,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
+import java.text.NumberFormat;
+import java.util.Locale;
 
 /**
  * Case 1. user is logged in
@@ -113,15 +115,20 @@ public class CartService implements ICartService {
     }
 
     private Mono<CartItemDto> mapToCartItemDto(CartItem cartItem) {
+        // Format price in Canadian dollars
+        NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(Locale.CANADA);
         return productRepo.findById(cartItem.getProductId())
                 .map(product -> new CartItemDto(
                         cartItem.getItemId(),
                         cartItem.getCartId(),
                         cartItem.getProductId(),
+                        product.getImageUrl(),
                         product.getName(),
+                        product.getDescription(),
                         cartItem.getQuantity(),
                         cartItem.getProperties(),
-                        product.getPrice()
+                        product.getPrice(),
+                        currencyFormat.format(product.getPrice())
                 ));
     }
 

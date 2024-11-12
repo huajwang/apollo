@@ -20,6 +20,6 @@ public class Product {
     private Long id;
     private String name;
     private String description;
-    private String imageUrl;
+    private String imageUrl; // small image. other photos store in another table
     private BigDecimal price;
 }

@@ -7,6 +7,7 @@ import com.goodfeel.nightgrass.repo.CartItemRepository;
 import com.goodfeel.nightgrass.repo.CartRepository;
 import com.goodfeel.nightgrass.repo.ProductRepository;
 import com.goodfeel.nightgrass.service.ICartService;
+import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
@@ -136,7 +137,8 @@ public class CartService implements ICartService {
                 .flatMap(cartItem -> {
                     cartItem.setQuantity(quantity);
                     return cartItemRepository.save(cartItem)
-                            .then(updateCartTotal(cartItem.getCartId())); // Update total after saving
+                            //  ensure that the total is only updated when a cart item is selected
+                            .then(cartItem.getIsSelected() ? updateCartTotal(cartItem.getCartId()) : Mono.empty());
                 })
                 .then(cartItemRepository.findById(itemId)); // Return updated cart item
     }
@@ -166,23 +168,41 @@ public class CartService implements ICartService {
     /**
      * This function is used to update the cart total when user select/deselect the item by (un)check the checkbox
      * @param itemId - Cart item ID
-     * @param amount - The amount of the cart item
      * @param isSelected Is the cart item selected or not
      * @return
      */
-    public Mono<Void> updateCartTotal(Long itemId, BigDecimal amount, boolean isSelected) {
+    public Mono<Void> updateCartTotal(Long itemId, boolean isSelected) {
         return cartItemRepository.findById(itemId)
                 .flatMap(cartItem -> {
                     cartItem.setIsSelected(isSelected);
                     return cartItemRepository.save(cartItem);
                 })
-                .flatMap(cartItem -> cartRepository.findById(cartItem.getCartId()))
-                .flatMap(cart -> {
-                    BigDecimal newTotal = isSelected ? cart.getTotal().add(amount) : cart.getTotal().subtract(amount);
-                    cart.setTotal(newTotal);
-                    return cartRepository.save(cart);
-                })
+                .flatMap(cartItem -> productRepository.findById(cartItem.getProductId())
+                        .map(product -> {
+                            BigDecimal itemTotal = product.getPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity()));
+                            return new CartTotalUpdate(cartItem.getCartId(), itemTotal);
+                        }))
+                .flatMap(cartTotalUpdate -> cartRepository.findById(cartTotalUpdate.getCartId())
+                        .flatMap(cart -> {
+                            BigDecimal newTotal = isSelected ? cart.getTotal().add(cartTotalUpdate.getItemTotal())
+                                    : cart.getTotal().subtract(cartTotalUpdate.getItemTotal());
+                            cart.setTotal(newTotal);
+                            return cartRepository.save(cart);
+                        }))
                 .then();
+    }
+
+    // Helper class to carry cart ID and item total to avoid recalculations
+    @Getter
+    private static class CartTotalUpdate {
+        private final Long cartId;
+        private final BigDecimal itemTotal;
+
+        public CartTotalUpdate(Long cartId, BigDecimal itemTotal) {
+            this.cartId = cartId;
+            this.itemTotal = itemTotal;
+        }
+
     }
 
 }

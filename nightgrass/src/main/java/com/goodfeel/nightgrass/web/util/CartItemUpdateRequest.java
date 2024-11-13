@@ -8,9 +8,8 @@ import java.math.BigDecimal;
 @Getter @Setter
 public class CartItemUpdateRequest {
     private Long itemId;
-    private int quantity;
+    private Integer quantity;
 
     // the below is for check box
-    private BigDecimal amount;
     private Boolean isChecked;
 }

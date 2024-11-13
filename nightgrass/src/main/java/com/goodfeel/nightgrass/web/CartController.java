@@ -4,6 +4,8 @@ import com.goodfeel.nightgrass.dto.CartItemDto;
 import com.goodfeel.nightgrass.serviceImpl.CartService;
 import com.goodfeel.nightgrass.web.util.CartItemUpdateRequest;
 import com.goodfeel.nightgrass.web.util.CartRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,8 @@ import reactor.core.publisher.Mono;
 @Controller
 @RequestMapping(path = "/cart")
 public class CartController {
+
+    private final Logger logger = LoggerFactory.getLogger(CartController.class);
 
     @Value("${STRIPE_PUBLIC_KEY}")
     private String stripePublicKey;
@@ -55,6 +59,7 @@ public class CartController {
 
     @PostMapping("/update-quantity")
     public Mono<ResponseEntity<String>> updateQuantity(@RequestBody CartItemUpdateRequest updateRequest) {
+        logger.debug("Huajian --- updateRequest {}", updateRequest);
         return cartService.updateQuantity(updateRequest.getItemId(), updateRequest.getQuantity())
                 .map(updated -> ResponseEntity.ok("Quantity updated"))
                 .defaultIfEmpty(ResponseEntity.status(HttpStatus.NOT_FOUND).body("Item not found"));
@@ -62,7 +67,7 @@ public class CartController {
 
     @PostMapping("/update-total-on-checkbox")
     public Mono<ResponseEntity<String>> updateTotal(@RequestBody CartItemUpdateRequest request) {
-        return cartService.updateCartTotal(request.getItemId(), request.getAmount(), request.getIsChecked())
+        return cartService.updateCartTotal(request.getItemId(), request.getIsChecked())
                 .thenReturn(ResponseEntity.ok("Cart total updated"));
     }
 

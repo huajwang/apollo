@@ -152,13 +152,13 @@
     }, 500); // 500 ms debounce delay
 
     // Function to handle checkbox changes for adding/subtracting item amounts
-    const handleCheckboxChange = (itemId, amount, isChecked) => {
+    const handleCheckboxChange = (itemId, isChecked) => {
       fetch('/cart/update-total-on-checkbox', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ itemId, amount, isChecked })
+        body: JSON.stringify({ itemId, isChecked })
       })
       .then(response => response.json())
       .then(data => console.log('Cart total updated:', data))
@@ -175,7 +175,7 @@
   <div th:each="item : ${cartItems}" class="cart-item">
 
     <input type="checkbox" th:id="'selected_' + ${item.itemId}" th:name="'selected_' + ${item.itemId}" th:value="${item.itemId}"
-           th:attr="onchange=|handleCheckboxChange(${item.itemId}, ${item.price.multiply(item.quantity)}, this.checked)|"
+           th:attr="onchange=|handleCheckboxChange(${item.itemId}, this.checked)|"
            th:checked="${item.isSelected}" />
 
 

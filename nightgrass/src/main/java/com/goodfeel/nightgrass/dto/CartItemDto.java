@@ -20,4 +20,5 @@ public class CartItemDto {
     private String properties;
     private BigDecimal price;
     private String formattedPrice;
+    private Boolean isSelected;
 }

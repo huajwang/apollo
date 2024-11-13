@@ -24,7 +24,9 @@ CREATE TABLE IF NOT EXISTS e_mall_cart_item (
     product_id BIGINT NOT NULL,
     quantity INT NOT NULL,
     properties VARCHAR(255),
-    FOREIGN KEY (cart_id) REFERENCES e_mall_cart(cart_id) ON DELETE CASCADE
+    is_selected TINYINT(1) DEFAULT 0,  -- 0 = false, 1 = true
+    FOREIGN KEY (cart_id) REFERENCES e_mall_cart(cart_id) ON DELETE CASCADE,
+    FOREIGN KEY (product_id) REFERENCES product(id) ON DELETE CASCADE
 );
 
 

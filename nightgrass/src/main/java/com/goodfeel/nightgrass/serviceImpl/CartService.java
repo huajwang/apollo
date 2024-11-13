@@ -62,7 +62,9 @@ public class CartService implements ICartService {
                                 // If product does not exist in cart, add as new CartItem
                                 productRepository.findById(productId)
                                         .flatMap(product -> {
-                                            CartItem newItem = new CartItem(null, cart.getCartId(), productId, 1, "blue");
+                                            CartItem newItem = new CartItem(
+                                                    null, cart.getCartId(), productId, 1, "blue",
+                                                    true);
                                             return cartItemRepository.save(newItem).thenReturn(cart);
                                         })
                         )
@@ -110,7 +112,8 @@ public class CartService implements ICartService {
                         cartItem.getQuantity(),
                         cartItem.getProperties(),
                         product.getPrice(),
-                        currencyFormat.format(product.getPrice())
+                        currencyFormat.format(product.getPrice()),
+                        cartItem.getIsSelected()
                 ));
     }
 
@@ -138,6 +141,14 @@ public class CartService implements ICartService {
                 .then(cartItemRepository.findById(itemId)); // Return updated cart item
     }
 
+    /**
+     * This item is used to update the cart total when
+     * 1. A product is added to the shopping cart;
+     * 2. quantity is changed;
+     * 3. cart item is deleted from the cart;
+     * @param cartId
+     * @return
+     */
     private Mono<Void> updateCartTotal(Long cartId) {
         // Retrieve all items in the cart
         return cartItemRepository.findByCartId(cartId)
@@ -152,5 +163,26 @@ public class CartService implements ICartService {
                 .then();
     }
 
+    /**
+     * This function is used to update the cart total when user select/deselect the item by (un)check the checkbox
+     * @param itemId - Cart item ID
+     * @param amount - The amount of the cart item
+     * @param isSelected Is the cart item selected or not
+     * @return
+     */
+    public Mono<Void> updateCartTotal(Long itemId, BigDecimal amount, boolean isSelected) {
+        return cartItemRepository.findById(itemId)
+                .flatMap(cartItem -> {
+                    cartItem.setIsSelected(isSelected);
+                    return cartItemRepository.save(cartItem);
+                })
+                .flatMap(cartItem -> cartRepository.findById(cartItem.getCartId()))
+                .flatMap(cart -> {
+                    BigDecimal newTotal = isSelected ? cart.getTotal().add(amount) : cart.getTotal().subtract(amount);
+                    cart.setTotal(newTotal);
+                    return cartRepository.save(cart);
+                })
+                .then();
+    }
 
 }

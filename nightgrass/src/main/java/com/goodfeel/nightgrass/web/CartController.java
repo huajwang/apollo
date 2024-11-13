@@ -60,4 +60,11 @@ public class CartController {
                 .defaultIfEmpty(ResponseEntity.status(HttpStatus.NOT_FOUND).body("Item not found"));
     }
 
+    @PostMapping("/update-total-on-checkbox")
+    public Mono<ResponseEntity<String>> updateTotal(@RequestBody CartItemUpdateRequest request) {
+        return cartService.updateCartTotal(request.getItemId(), request.getAmount(), request.getIsChecked())
+                .thenReturn(ResponseEntity.ok("Cart total updated"));
+    }
+
+
 }

@@ -150,6 +150,21 @@
       .then(data => console.log('Quantity updated:', data))
       .catch(error => console.error('Error updating quantity:', error));
     }, 500); // 500 ms debounce delay
+
+    // Function to handle checkbox changes for adding/subtracting item amounts
+    const handleCheckboxChange = (itemId, amount, isChecked) => {
+      fetch('/cart/update-total-on-checkbox', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ itemId, amount, isChecked })
+      })
+      .then(response => response.json())
+      .then(data => console.log('Cart total updated:', data))
+      .catch(error => console.error('Error updating cart total:', error));
+    };
+
   </script>
 
 </head>
@@ -158,8 +173,11 @@
 <div class="cart-container">
   <h1>Shopping Cart</h1>
   <div th:each="item : ${cartItems}" class="cart-item">
-    <!-- Selection toggle -->
-    <input type="checkbox" th:id="'selected_' + ${item.itemId}" th:name="'selected_' + ${item.itemId}" th:value="${item.itemId}" />
+
+    <input type="checkbox" th:id="'selected_' + ${item.itemId}" th:name="'selected_' + ${item.itemId}" th:value="${item.itemId}"
+           th:attr="onchange=|handleCheckboxChange(${item.itemId}, ${item.price.multiply(item.quantity)}, this.checked)|"
+           th:checked="${item.isSelected}" />
+
 
     <!-- Item image -->
     <img th:src="${item.imageUrl}" alt="Product Image" class="item-image" />

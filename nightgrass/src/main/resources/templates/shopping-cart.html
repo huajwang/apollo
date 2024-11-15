@@ -178,10 +178,13 @@
         },
         body: JSON.stringify({ itemId, quantity })
       })
-      .then(response => response.json())
+      .then(response => {
+        console.log('Raw response:', response);
+        return response.text();
+       })
       .then(data => {
           console.log('Quantity updated:', data);
-          // updateCartTotal();
+          updateCartTotal();
           })
       .catch(error => console.error('Error updating quantity:', error));
     }, 500); // 500 ms debounce delay
@@ -195,10 +198,12 @@
         },
         body: JSON.stringify({ itemId, isChecked })
       })
-      .then(response => response.json())
+      .then(response => {
+        return response.json();
+        })
       .then(data => {
                     console.log('Cart total updated:', data);
-                    // updateCartTotal(); // Update cart total
+                    updateCartTotal();
                     })
       .catch(error => console.error('Error updating cart total:', error));
     };

@@ -17,6 +17,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
 
 @Controller
 @RequestMapping(path = "/cart")
@@ -62,16 +64,18 @@ public class CartController {
 
     @PostMapping("/update-quantity")
     public Mono<ResponseEntity<String>> updateQuantity(@RequestBody CartItemUpdateRequest updateRequest) {
-        logger.debug("Huajian --- updateRequest {}", updateRequest);
+        logger.debug("Received updateRequest request body from front end ajax call: {}", updateRequest);
         return cartService.updateQuantity(updateRequest.getItemId(), updateRequest.getQuantity())
                 .map(updated -> ResponseEntity.ok("Quantity updated"))
                 .defaultIfEmpty(ResponseEntity.status(HttpStatus.NOT_FOUND).body("Item not found"));
     }
 
     @PostMapping("/update-total-on-checkbox")
-    public Mono<ResponseEntity<String>> updateTotal(@RequestBody CartItemUpdateRequest request) {
+    public Mono<ResponseEntity<Map<String, String>>> updateTotal(@RequestBody CartItemUpdateRequest request) {
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Cart total updated on checkbox change");
         return cartService.updateCartTotal(request.getItemId(), request.getIsChecked())
-                .thenReturn(ResponseEntity.ok("Cart total updated"));
+                .thenReturn(ResponseEntity.ok(response));
     }
 
     @PostMapping("/checkout")

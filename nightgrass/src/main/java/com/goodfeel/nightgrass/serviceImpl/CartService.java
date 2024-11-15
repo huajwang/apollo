@@ -130,6 +130,7 @@ public class CartService implements ICartService {
     @Override
     public Mono<BigDecimal> getTotalPrice() {
         return getCartItems()
+                .filter(CartItemDto::getIsSelected) // Only include items that are selected
                 .map(item -> item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }

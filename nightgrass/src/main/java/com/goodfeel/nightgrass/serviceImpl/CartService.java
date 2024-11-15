@@ -275,10 +275,16 @@ public class CartService implements ICartService {
         return orderItemRepository.save(orderItem);
     }
 
+    /**
+     * After user press Checkout button, all selected cart items are all deleted. The rest of cart items, if there is
+     * any, are 'unselected'. So, just write cart total as zero.
+     * @param cart
+     * @return
+     */
     private Mono<Void> clearCartItemsAndTotal(Cart cart) {
         // Delete selected cart items and reset cart total
         return cartItemRepository.deleteByCartIdAndIsSelected(cart.getCartId(), true)
-                .then(cartRepository.updateTotal(cart.getCartId(), BigDecimal.ZERO)) // TODO update total correctly if there are items left
+                .then(cartRepository.updateTotal(cart.getCartId(), BigDecimal.ZERO))
                 .then();
     }
 

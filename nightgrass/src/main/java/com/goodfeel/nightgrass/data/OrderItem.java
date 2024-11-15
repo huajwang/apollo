@@ -7,6 +7,8 @@ import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
+import java.math.BigDecimal;
+
 @Table("e_mall_order_item")
 @Getter
 @Setter
@@ -20,4 +22,5 @@ public class OrderItem {
     private Long productId;
     private Integer quantity;
     private String properties;
+    private BigDecimal unitPrice;
 }

@@ -31,11 +31,11 @@ CREATE TABLE IF NOT EXISTS e_mall_cart_item (
 
 
 CREATE TABLE IF NOT EXISTS e_mall_order (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    order_id VARCHAR(10) NOT NULL,
+    order_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    order_no VARCHAR(30) NOT NULL,
     user_id VARCHAR(255),
     total DECIMAL(10, 2) NOT NULL,
-    delivery_address VARCHAR(100) NOT NULL,
+    delivery_address VARCHAR(100),
     created_at TIMESTAMP NOT NULL,
     introducer VARCHAR(255),
     updated_date TIMESTAMP,
@@ -49,8 +49,11 @@ CREATE TABLE IF NOT EXISTS e_mall_order (
 
 CREATE TABLE IF NOT EXISTS e_mall_order_item (
     order_item_id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    order_id VARCHAR(10) NOT NULL,
+    order_id BIGINT REFERENCES e_mall_order(order_id),
     product_id BIGINT NOT NULL,
     quantity INT NOT NULL,
-    properties VARCHAR(255)
+    properties VARCHAR(255),
+    unit_price DECIMAL(10, 2) NOT NULL,  -- price at the time of order
+    FOREIGN KEY (order_id) REFERENCES e_mall_order(order_id) ON DELETE CASCADE,
+    FOREIGN KEY (product_id) REFERENCES product(id) ON DELETE CASCADE
 );

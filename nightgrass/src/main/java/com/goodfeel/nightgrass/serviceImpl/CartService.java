@@ -2,22 +2,27 @@ package com.goodfeel.nightgrass.serviceImpl;
 
 import com.goodfeel.nightgrass.data.Cart;
 import com.goodfeel.nightgrass.data.CartItem;
+import com.goodfeel.nightgrass.data.Order;
+import com.goodfeel.nightgrass.data.OrderItem;
 import com.goodfeel.nightgrass.dto.CartItemDto;
-import com.goodfeel.nightgrass.repo.CartItemRepository;
-import com.goodfeel.nightgrass.repo.CartRepository;
-import com.goodfeel.nightgrass.repo.ProductRepository;
+import com.goodfeel.nightgrass.repo.*;
 import com.goodfeel.nightgrass.service.ICartService;
+import com.goodfeel.nightgrass.web.util.Utility;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ThreadLocalRandom;
 
 
 @Service
@@ -28,11 +33,15 @@ public class CartService implements ICartService {
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
     private final ProductRepository productRepository;
+    private final OrderRepository orderRepository;
+    private final OrderItemRepository orderItemRepository;
 
-    public CartService(CartRepository cartRepository, CartItemRepository cartItemRepository, ProductRepository productRepository) {
+    public CartService(CartRepository cartRepository, CartItemRepository cartItemRepository, ProductRepository productRepository, OrderRepository orderRepository, OrderItemRepository orderItemRepository) {
         this.cartRepository = cartRepository;
         this.cartItemRepository = cartItemRepository;
         this.productRepository = productRepository;
+        this.orderRepository = orderRepository;
+        this.orderItemRepository = orderItemRepository;
     }
 
     @Override
@@ -49,7 +58,7 @@ public class CartService implements ICartService {
 
     @Override
     public Mono<Cart> addProductToCart(Long productId) {
-        return getCurrentUserId()
+        return Utility.getCurrentUserId()
                 .flatMap(this::getCartForUser) // Retrieve or create cart for user
                 .flatMap(cart -> cartItemRepository.findByCartId(cart.getCartId())
                         .filter(item -> item.getProductId().equals(productId))
@@ -76,7 +85,7 @@ public class CartService implements ICartService {
 
     @Override
     public Mono<Integer> getCartItemCount() {
-        return getCurrentUserId().flatMap(this::getCartForUser).flatMap(cart ->
+        return Utility.getCurrentUserId().flatMap(this::getCartForUser).flatMap(cart ->
                 cartItemRepository.findByCartId(cart.getCartId())
                         .map(CartItem::getQuantity)    // Extract quantity of each item
                         .reduce(0, Integer::sum)
@@ -93,7 +102,7 @@ public class CartService implements ICartService {
 
     @Override
     public Flux<CartItemDto> getCartItems() {
-        return getCurrentUserId()
+        return Utility.getCurrentUserId()
                 .flatMap(this::getCartForUser)
                 .flatMapMany(cart -> cartItemRepository.findByCartId(cart.getCartId()))
                 .flatMap(this::mapToCartItemDto);
@@ -125,12 +134,6 @@ public class CartService implements ICartService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    private Mono<String> getCurrentUserId() {
-        return ReactiveSecurityContextHolder.getContext()
-                .map(ctx -> ctx.getAuthentication().getName())
-                .defaultIfEmpty("Guest") // Guest if the user is not logged in
-                .doOnSuccess(it -> logger.debug("The current user is {}", it));
-    }
 
     public Mono<CartItem> updateQuantity(Long itemId, int quantity) {
         return cartItemRepository.findById(itemId)
@@ -203,6 +206,88 @@ public class CartService implements ICartService {
             this.itemTotal = itemTotal;
         }
 
+    }
+
+    @Transactional
+    public Mono<Void> checkout(String userId) {
+        return cartRepository.findByUserId(userId)
+                .flatMap(cart ->
+                        cartItemRepository.findByCartId(cart.getCartId())
+                                .filter(CartItem::getIsSelected)
+                                .flatMap(this::populateCartItemWithProductPrice)
+                                .collectList()
+                                .flatMap(cartItemDtos -> createOrder(cart, cartItemDtos)) // Creates the order and order items
+                                .then(clearCartItemsAndTotal(cart)) // Clears cart items and updates the total
+                );
+    }
+
+
+    private Mono<CartItemDto> populateCartItemWithProductPrice(CartItem cartItem) {
+        // Fetch the product price and store it temporarily in the CartItem
+        return productRepository.findById(cartItem.getProductId())
+                .map(product -> {
+                    CartItemDto cartItemDto = new CartItemDto();
+                    cartItemDto.setItemId(cartItem.getItemId());
+                    cartItemDto.setProductId(cartItem.getProductId());
+                    cartItemDto.setQuantity(cartItem.getQuantity());
+                    cartItemDto.setProperties(cartItem.getProperties());
+                    cartItemDto.setPrice(product.getPrice()); // Price is fetched from Product
+                    return cartItemDto;
+                });
+    }
+
+    private Mono<Order> createOrder(Cart cart, List<CartItemDto> cartItemDtos) {
+        // Calculate total from selected cart items TODO is this reactive way?
+        BigDecimal total = cartItemDtos.stream()
+                .map(item -> item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        // Create the order
+        Order order = new Order();
+        order.setOrderNo(generateOrderNo());
+        order.setUserId(cart.getUserId());
+        order.setCreatedAt(LocalDateTime.now());
+        order.setIntroducer(cart.getIntroducer());
+        order.setTotal(total);
+        logger.debug("Creating order for user {}, orderNo = {}, total = {}, introducer = {}",
+                order.getUserId(), order.getOrderNo(), order.getTotal(), order.getIntroducer());
+        // Save the order and create order items in a reactive chain
+        return orderRepository.save(order)
+                .flatMap(savedOrder ->
+                        Flux.fromIterable(cartItemDtos)
+                                .flatMap(cartItemDto -> createOrderItem(savedOrder, cartItemDto))
+                                .collectList()
+                                .thenReturn(savedOrder)
+                );
+    }
+
+    private Mono<OrderItem> createOrderItem(Order order, CartItemDto cartItemDto) {
+        // Map CartItem to OrderItem
+        OrderItem orderItem = new OrderItem();
+        orderItem.setOrderId(order.getOrderId());
+        orderItem.setProductId(cartItemDto.getProductId());
+        orderItem.setQuantity(cartItemDto.getQuantity());
+        orderItem.setProperties(cartItemDto.getProperties());
+        orderItem.setUnitPrice(cartItemDto.getPrice());
+
+        // Save OrderItem
+        return orderItemRepository.save(orderItem);
+    }
+
+    private Mono<Void> clearCartItemsAndTotal(Cart cart) {
+        // Delete selected cart items and reset cart total
+        return cartItemRepository.deleteByCartIdAndIsSelected(cart.getCartId(), true)
+                .then(cartRepository.updateTotal(cart.getCartId(), BigDecimal.ZERO)) // TODO update total correctly if there are items left
+                .then();
+    }
+
+    // Helper method to generate a human-readable order ID with date/time and a unique suffix
+    private String generateOrderNo() {
+        // Format current date-time to a string
+        String dateTimePart = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS"));
+        // Generate a random 4-digit number as a suffix to ensure uniqueness
+        int randomSuffix = ThreadLocalRandom.current().nextInt(1000, 9999);
+        return dateTimePart + randomSuffix;
     }
 
 }

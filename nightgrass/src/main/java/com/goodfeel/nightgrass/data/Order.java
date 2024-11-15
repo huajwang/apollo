@@ -17,8 +17,8 @@ import java.time.LocalDateTime;
 public class Order {
 
     @Id
-    private Long id;
-    private String orderId;
+    private Long orderId;
+    private String orderNo;
     private String userId;
     private String deliveryAddress;
     private BigDecimal total;

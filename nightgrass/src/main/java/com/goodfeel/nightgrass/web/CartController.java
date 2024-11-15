@@ -4,6 +4,7 @@ import com.goodfeel.nightgrass.dto.CartItemDto;
 import com.goodfeel.nightgrass.serviceImpl.CartService;
 import com.goodfeel.nightgrass.web.util.CartItemUpdateRequest;
 import com.goodfeel.nightgrass.web.util.CartRequest;
+import com.goodfeel.nightgrass.web.util.Utility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +15,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.math.BigDecimal;
 
 @Controller
 @RequestMapping(path = "/cart")
@@ -35,7 +38,7 @@ public class CartController {
     public Mono<String> viewCart(Model model) {
         Flux<CartItemDto> cartItems = cartService.getCartItems();
         model.addAttribute("cartItems", cartItems);
-        model.addAttribute("totalPrice", cartService.getTotalPrice());
+        model.addAttribute("cartTotal", cartService.getTotalPrice());
         model.addAttribute("STRIPE_PUBLIC_KEY", stripePublicKey); // TODO NOT NEEDED HERE?
         return Mono.just("shopping-cart"); // Thymeleaf template for viewing the cart
     }
@@ -71,5 +74,25 @@ public class CartController {
                 .thenReturn(ResponseEntity.ok("Cart total updated"));
     }
 
+    @PostMapping("/checkout")
+    public Mono<ResponseEntity<String>> checkout() { // TODO
+        return Utility.getCurrentUserId().flatMap( userId ->
+
+                cartService.checkout(userId)
+                        .then(Mono.just(ResponseEntity.ok("Order placed successfully!")))
+                        .onErrorResume(e -> {
+                            // logger.error("Error during checkout: " + e);
+                            return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Checkout failed"));
+                        })
+        );
+
+    }
+
+    @GetMapping("/total")
+    public Mono<ResponseEntity<BigDecimal>> getCartTotal() {
+        return cartService.getTotalPrice()
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.status(HttpStatus.NOT_FOUND).body(BigDecimal.ZERO));
+    }
 
 }

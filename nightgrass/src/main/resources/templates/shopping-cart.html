@@ -109,6 +109,38 @@
         background-color: #ff4a4a;
     }
 
+
+     /* Cart total and checkout button styling */
+    .cart-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid #ddd;
+    }
+
+    .cart-total {
+        font-size: 1.2em;
+        font-weight: bold;
+    }
+
+    .checkout-btn {
+        background-color: #28a745;
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        font-size: 1em;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+
+    .checkout-btn:hover {
+        background-color: #218838;
+    }
+
+
     /* Responsive adjustments */
     @media (max-width: 768px) {
         .cart-item {
@@ -147,7 +179,10 @@
         body: JSON.stringify({ itemId, quantity })
       })
       .then(response => response.json())
-      .then(data => console.log('Quantity updated:', data))
+      .then(data => {
+          console.log('Quantity updated:', data);
+          // updateCartTotal();
+          })
       .catch(error => console.error('Error updating quantity:', error));
     }, 500); // 500 ms debounce delay
 
@@ -161,9 +196,36 @@
         body: JSON.stringify({ itemId, isChecked })
       })
       .then(response => response.json())
-      .then(data => console.log('Cart total updated:', data))
+      .then(data => {
+                    console.log('Cart total updated:', data);
+                    // updateCartTotal(); // Update cart total
+                    })
       .catch(error => console.error('Error updating cart total:', error));
     };
+
+    // Function to handle checkout
+    function handleCheckout() {
+      fetch('/cart/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ action: 'checkout' })
+      })
+      .then(response => response.json())
+      .then(data => alert('Order placed successfully!'))
+      .catch(error => console.error('Error during checkout:', error));
+    }
+
+
+    function updateCartTotal() {
+      fetch('/cart/total')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById("cartTotal").textContent = `Total: $${data.toFixed(2)}`;
+        })
+        .catch(error => console.error('Error fetching cart total:', error));
+}
 
   </script>
 
@@ -207,6 +269,13 @@
       <button type="submit" class="delete-btn">Delete</button>
     </form>
   </div>
+
+  <!-- Cart total and checkout section -->
+  <div class="cart-footer">
+    <div id="cartTotal" class="cart-total">Total: $<span th:text="${cartTotal}">0.00</span></div>
+    <button class="checkout-btn" onclick="handleCheckout()">Checkout</button>
+  </div>
+
 </div>
 
 </body>

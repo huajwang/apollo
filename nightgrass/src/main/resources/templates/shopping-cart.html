@@ -217,11 +217,18 @@
         },
         body: JSON.stringify({ action: 'checkout' })
       })
-      .then(response => response.json())
-      .then(data => alert('Order placed successfully!'))
+      .then(response => {
+        if (!response.ok) {
+            throw new Error('Checkout failed');
+        }
+        return response.json();
+      })
+      .then(data => {
+        const orderId = data.orderId;  // Extract orderId from JSON response
+        window.location.href = `/checkout?orderId=${orderId}`;
+      })
       .catch(error => console.error('Error during checkout:', error));
     }
-
 
     function updateCartTotal() {
       fetch('/cart/total')

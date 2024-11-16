@@ -1,34 +1,77 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
-    <title>Checkout</title>
-    <script src="https://js.stripe.com/v3/"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout</title>
+  <link rel="stylesheet" th:href="@{/css/checkout.css}"/>
 </head>
 <body>
-<h2>Checkout</h2>
-<button id="checkout-button">Pay Now</button>
+<div class="checkout-container">
+  <!-- Customer Info -->
+  <div class="customer-info">
+    <p><strong>Customer:</strong> <span th:text="${user.name}"></span></p>
+    <p><strong>Phone:</strong> <span th:text="${user.phone}"></span></p>
+    <p><strong>Address:</strong> <span th:text="${user.address}"></span></p>
+  </div>
 
-<script th:inline="javascript">
-    const stripe = Stripe([[${STRIPE_PUBLIC_KEY}]]);
-    document.getElementById("checkout-button").addEventListener("click", function () {
-        fetch("/create-checkout-session", {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: new URLSearchParams({ amount: "1.00" })
-        })
-        .then(response => {
-            if (!response.ok) {
-                return response.text().then(errorText => {
-                    throw new Error('Network response was not ok: ' + errorText);
-                });
-            }
-            return response.text();
-        })
-        .then(sessionUrl => {
-            window.location = sessionUrl;
-        })
-        .catch(error => console.error('Error: ', error));
-    });
-</script>
+  <!-- Dashed Line Separator -->
+  <div class="dashed-line"></div>
+
+  <!-- Order Items -->
+  <div class="order-items">
+    <h3>Order Items</h3>
+    <ul>
+      <li th:each="item : ${orderItems}">
+        <span th:text="${item.productName}"></span> -
+        <span th:text="${item.unitPrice}"></span> x
+        <span th:text="${item.quantity}"></span>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Payment Options -->
+  <div class="payment-options">
+    <h3>Payment Options</h3>
+    <label><input type="radio" name="paymentMethod" value="Visa"> Visa</label>
+    <label><input type="radio" name="paymentMethod" value="PayPal"> PayPal</label>
+    <label><input type="radio" name="paymentMethod" value="ApplePay"> Apple Pay</label>
+  </div>
+
+  <!-- Apply Coupon Code -->
+  <div class="apply-coupon">
+    <label>Apply coupon code</label>
+    <input type="text" name="couponCode"/>
+    <button type="button">></button>
+  </div>
+
+  <!-- Totals and Discount -->
+  <div class="totals">
+    <p><strong>Total:</strong> <span th:text="${order.orderTotal}"></span></p>
+    <p><strong>Discount:</strong> <span th:text="${discount}"></span></p>
+    <p><strong>Total after discount:</strong> <span th:text="${discountedTotal}"></span></p>
+  </div>
+
+  <!-- Shipping Section -->
+  <div class="shipping">
+    <h3>Shipping</h3>
+    <p th:text="${shippingDetails}"></p>
+  </div>
+
+  <!-- Estimated HST -->
+  <div class="hst">
+    <p><strong>Estimated HST:</strong> <span th:text="${estimatedHST}"></span></p>
+  </div>
+
+  <!-- Order Total -->
+  <div class="order-total">
+    <p><strong>Order Total:</strong> <span th:text="${orderTotalFinal}"></span></p>
+  </div>
+
+  <!-- Submit Order Button -->
+  <div class="submit-order">
+    <button type="button">Submit Order</button>
+  </div>
+</div>
 </body>
 </html>

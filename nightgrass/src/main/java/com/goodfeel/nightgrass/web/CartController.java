@@ -79,17 +79,21 @@ public class CartController {
     }
 
     @PostMapping("/checkout")
-    public Mono<ResponseEntity<String>> checkout() { // TODO
+    public Mono<ResponseEntity<Map<String, Long>>> checkout() {
         return Utility.getCurrentUserId().flatMap( userId ->
 
                 cartService.checkout(userId)
-                        .then(Mono.just(ResponseEntity.ok("Order placed successfully!")))
+                        .map(order -> {
+                            Map<String, Long> response = new HashMap<>();
+                            response.put("orderId", order.getOrderId());
+                            return ResponseEntity.ok(response);
+                        })
                         .onErrorResume(e -> {
-                            // logger.error("Error during checkout: " + e);
-                            return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Checkout failed"));
+                            Map<String, Long> errorResponse = new HashMap<>();
+                            errorResponse.put("orderId", null);
+                            return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse));
                         })
         );
-
     }
 
     @GetMapping("/total")

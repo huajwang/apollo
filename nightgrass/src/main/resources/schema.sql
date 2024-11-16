@@ -2,7 +2,9 @@ CREATE TABLE IF NOT EXISTS user (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     oauth_id VARCHAR(255) UNIQUE NOT NULL,
     name VARCHAR(255),
-    email VARCHAR(255)
+    email VARCHAR(255),
+    phone VARCHAR(15),
+    address VARCHAR(255)
 );
 
 CREATE TABLE IF NOT EXISTS e_mall_product_photo (
@@ -50,10 +52,9 @@ CREATE TABLE IF NOT EXISTS e_mall_order (
 CREATE TABLE IF NOT EXISTS e_mall_order_item (
     order_item_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     order_id BIGINT REFERENCES e_mall_order(order_id),
-    product_id BIGINT NOT NULL,
+    product_name VARCHAR(100) NOT NULL,
     quantity INT NOT NULL,
     properties VARCHAR(255),
     unit_price DECIMAL(10, 2) NOT NULL,  -- price at the time of order
-    FOREIGN KEY (order_id) REFERENCES e_mall_order(order_id) ON DELETE CASCADE,
-    FOREIGN KEY (product_id) REFERENCES product(id) ON DELETE CASCADE
+    FOREIGN KEY (order_id) REFERENCES e_mall_order(order_id) ON DELETE CASCADE
 );

@@ -19,7 +19,7 @@ public class OrderItem {
     @Id
     private Long orderItemId;
     private Long orderId;
-    private Long productId;
+    private String productName;
     private Integer quantity;
     private String properties;
     private BigDecimal unitPrice;

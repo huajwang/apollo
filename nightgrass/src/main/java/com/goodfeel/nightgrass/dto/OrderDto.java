@@ -11,11 +11,11 @@ import java.time.LocalDateTime;
 
 @Getter @Setter @AllArgsConstructor @NoArgsConstructor
 public class OrderDto {
-    private Long id;
-    private String orderId;
+    private Long orderId;
+    private String orderNo;
     private String userId;
     private String deliveryAddress;
-    private BigDecimal amount;
+    private BigDecimal orderTotal;
     private Instant createdAt;
     private String introducer;
     private LocalDateTime orderProcessDate;

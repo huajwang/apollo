@@ -2,6 +2,9 @@ package com.goodfeel.nightgrass.rest;
 
 import com.goodfeel.nightgrass.service.StripeService;
 import com.goodfeel.nightgrass.web.util.CheckoutRequest;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,6 +18,9 @@ import org.slf4j.LoggerFactory;
 public class PaymentController {
 
     private static final Logger logger = LoggerFactory.getLogger(PaymentController.class);
+
+    @Value("${STRIPE_PUBLIC_KEY}")
+    private String stripePublicKey;
 
     private final StripeService stripeService;
 
@@ -30,5 +36,12 @@ public class PaymentController {
         logger.debug("The amount = {}", checkoutRequest.amount);
         return stripeService.createCheckoutSession(checkoutRequest.amount, "cad", successUrl, cancelUrl)
                 .map(Session::getUrl);
+    }
+
+    @GetMapping("/submit-order") // TODO
+    public Mono<String> checkout(Model model) {
+        model.addAttribute("STRIPE_PUBLIC_KEY",
+                stripePublicKey);
+        return Mono.just("submit-order");
     }
 }

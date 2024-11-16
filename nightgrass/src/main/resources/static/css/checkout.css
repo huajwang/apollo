@@ -1,0 +1,37 @@
+.checkout-container {
+    width: 90%;
+    margin: auto;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+.customer-info, .order-items, .payment-options, .apply-coupon, .totals, .shipping, .hst, .order-total, .submit-order {
+    margin-bottom: 20px;
+}
+
+/* Dashed Line Separator */
+.dashed-line {
+    border-top: 2px dashed #bbb;
+    margin: 20px 0;
+}
+
+.apply-coupon {
+    display: flex;
+    justify-content: space-between;
+}
+
+.submit-order button {
+    width: 100%;
+    padding: 10px;
+    background-color: #4CAF50;
+    color: white;
+    font-size: 1.2em;
+}
+
+@media only screen and (max-width: 768px) {
+    /* Adjust styles for tablet */
+}
+
+@media only screen and (max-width: 480px) {
+    /* Adjust styles for mobile */
+}

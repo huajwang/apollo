@@ -210,26 +210,26 @@ public class CartService implements ICartService {
     }
 
     @Transactional
-    public Mono<Void> checkout(String userId) {
+    public Mono<Order> checkout(String userId) {
         return cartRepository.findByUserId(userId)
                 .flatMap(cart ->
                         cartItemRepository.findByCartId(cart.getCartId())
                                 .filter(CartItem::getIsSelected)
-                                .flatMap(this::populateCartItemWithProductPrice)
+                                .flatMap(this::populateCartItemWithProductInfo)
                                 .collectList()
-                                .flatMap(cartItemDtos -> createOrder(cart, cartItemDtos)) // Creates the order and order items
-                                .then(clearCartItemsAndTotal(cart)) // Clears cart items and updates the total
+                                .flatMap(cartItemDtos -> createOrder(cart, cartItemDtos))
+                                .flatMap(order -> clearCartItemsAndTotal(cart).thenReturn(order))
                 );
     }
 
 
-    private Mono<CartItemDto> populateCartItemWithProductPrice(CartItem cartItem) {
-        // Fetch the product price and store it temporarily in the CartItem
+    private Mono<CartItemDto> populateCartItemWithProductInfo(CartItem cartItem) {
         return productRepository.findById(cartItem.getProductId())
                 .map(product -> {
                     CartItemDto cartItemDto = new CartItemDto();
                     cartItemDto.setItemId(cartItem.getItemId());
                     cartItemDto.setProductId(cartItem.getProductId());
+                    cartItemDto.setProductName(product.getName());
                     cartItemDto.setQuantity(cartItem.getQuantity());
                     cartItemDto.setProperties(cartItem.getProperties());
                     cartItemDto.setPrice(product.getPrice()); // Price is fetched from Product
@@ -266,7 +266,7 @@ public class CartService implements ICartService {
         // Map CartItem to OrderItem
         OrderItem orderItem = new OrderItem();
         orderItem.setOrderId(order.getOrderId());
-        orderItem.setProductId(cartItemDto.getProductId());
+        orderItem.setProductName(cartItemDto.getProductName());
         orderItem.setQuantity(cartItemDto.getQuantity());
         orderItem.setProperties(cartItemDto.getProperties());
         orderItem.setUnitPrice(cartItemDto.getPrice());

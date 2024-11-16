@@ -9,7 +9,7 @@ import org.springframework.data.relational.core.mapping.Table;
 
 import java.math.BigDecimal;
 
-@Table("product")
+@Table("e_mall_product")
 @Getter
 @Setter
 @AllArgsConstructor
@@ -17,8 +17,8 @@ import java.math.BigDecimal;
 public class Product {
 
     @Id
-    private Long id;
-    private String name;
+    private Long productId;
+    private String productName;
     private String description;
     private String imageUrl; // small image. other photos store in another table
     private BigDecimal price;

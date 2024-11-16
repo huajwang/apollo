@@ -16,9 +16,9 @@
 
 <div class="product-list">
     <div th:each="product : ${products}" class="product-card">
-        <a th:href="@{/product/detail(id=${product.id})}">
-            <img th:src="${product.imageUrl}" th:alt="${product.name}">
-            <h3 th:text="${product.name}">Product Name</h3>
+        <a th:href="@{/product/detail(id=${product.productId})}">
+            <img th:src="${product.imageUrl}" th:alt="${product.productName}">
+            <h3 th:text="${product.productName}">Product Name</h3>
             <p th:text="${product.description}">Product description goes here.</p>
             <span class="price" th:text="${product.price}">Price</span>
         </a>

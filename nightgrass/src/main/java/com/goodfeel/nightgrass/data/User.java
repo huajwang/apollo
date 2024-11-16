@@ -9,7 +9,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
-@Table("user")
+@Table("e_mall_user")
 @Getter
 @Setter
 @AllArgsConstructor

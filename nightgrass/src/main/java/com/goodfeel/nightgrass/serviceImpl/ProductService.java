@@ -19,21 +19,24 @@ public class ProductService implements IProductService {
 
     @Override
     public Flux<ProductDto> getAllProducts() {
-
         Flux<Product> products = productRepository.findAll();
         return products.map(product ->
                 new ProductDto(
-                        product.getId(),
-                        product.getName(), product.getDescription(), product.getImageUrl(), product.getPrice())
+                        product.getProductId(),
+                        product.getProductName(),
+                        product.getDescription(),
+                        product.getImageUrl(),
+                        product.getPrice()
+                )
         );
     }
 
     @Override
     public Mono<ProductDto> getProductById(Long id) {
-        return productRepository.findById(id).map(product -> {
-            return new ProductDto(product.getId(), product.getName(),
-                    product.getDescription(), product.getImageUrl(), product.getPrice());
-        });
+        return productRepository.findById(id).map(product ->
+            new ProductDto(product.getProductId(), product.getProductName(),
+                    product.getDescription(), product.getImageUrl(), product.getPrice())
+        );
     }
 
     @Override

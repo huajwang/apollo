@@ -46,7 +46,7 @@
   <!-- Action Buttons Section -->
   <div class="action-buttons">
     <form th:action="@{/cart/add}" method="post">
-      <input type="hidden" name="productId" th:value="${product.id}">
+      <input type="hidden" name="productId" th:value="${product.productId}">
       <button type="submit" class="add-to-cart">Add to Cart</button>
     </form>
 

@@ -1,4 +1,13 @@
-CREATE TABLE IF NOT EXISTS user (
+CREATE TABLE IF NOT EXISTS e_mall_product (
+    product_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    product_name VARCHAR(255) NOT NULL,
+    description TEXT,
+    image_url VARCHAR(255),
+    price DECIMAL(10, 2) NOT NULL
+);
+
+
+CREATE TABLE IF NOT EXISTS e_mall_user (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     oauth_id VARCHAR(255) UNIQUE NOT NULL,
     nick_name VARCHAR(255),
@@ -11,15 +20,15 @@ CREATE TABLE IF NOT EXISTS user (
 CREATE TABLE IF NOT EXISTS e_mall_product_photo (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     product_id BIGINT NOT NULL,
-    photo_url VARCHAR(255) NOT NULL
+    photo_url VARCHAR(255) NOT NULL,
+    FOREIGN KEY (product_id) REFERENCES e_mall_product(product_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS e_mall_cart (
     cart_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     total DECIMAL(10, 2) NOT NULL,
     user_id VARCHAR(255) NOT NULL,
-    introducer VARCHAR(255),
-    FOREIGN KEY (user_id) REFERENCES user(id)
+    introducer VARCHAR(255)
 );
 
 CREATE TABLE IF NOT EXISTS e_mall_cart_item (
@@ -30,7 +39,7 @@ CREATE TABLE IF NOT EXISTS e_mall_cart_item (
     properties VARCHAR(255),
     is_selected TINYINT(1) DEFAULT 0,  -- 0 = false, 1 = true
     FOREIGN KEY (cart_id) REFERENCES e_mall_cart(cart_id) ON DELETE CASCADE,
-    FOREIGN KEY (product_id) REFERENCES product(id) ON DELETE CASCADE
+    FOREIGN KEY (product_id) REFERENCES e_mall_product(product_id) ON DELETE CASCADE
 );
 
 
@@ -48,8 +57,7 @@ CREATE TABLE IF NOT EXISTS e_mall_order (
     status VARCHAR(10),
     pay_no VARCHAR(20),
     pay_type VARCHAR(10),
-    remark VARCHAR(255),
-    FOREIGN KEY (user_id) REFERENCES user(id)
+    remark VARCHAR(255)
 );
 
 CREATE TABLE IF NOT EXISTS e_mall_order_item (

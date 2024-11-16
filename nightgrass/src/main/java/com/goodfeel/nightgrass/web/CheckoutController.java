@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 @Controller
@@ -46,14 +48,34 @@ public class CheckoutController {
 
         return Mono.zip(userMono, orderItemsMono, orderMono)
                 .doOnNext( tuple -> {
-                    model.addAttribute("user", tuple.getT1());
-                    model.addAttribute("orderItems", tuple.getT2());
-                    model.addAttribute("order", tuple.getT3());
-                    model.addAttribute("discount", "50");
-                    model.addAttribute("discountedTotal", "150");
+                    UserDto user = tuple.getT1();
+                    List<OrderItemDto> orderItems = tuple.getT2();
+                    OrderDto order = tuple.getT3();
+
+                    BigDecimal originalTotal = order.getOrderTotal().setScale(2, RoundingMode.HALF_UP);
+
+                    // Apply 10% discount
+                    BigDecimal discount = originalTotal.multiply(BigDecimal.valueOf(0.10))
+                            .setScale(2, RoundingMode.HALF_UP);
+                    BigDecimal discountedTotal = originalTotal.subtract(discount)
+                            .setScale(2, RoundingMode.HALF_UP);
+
+                    // Apply 13% HST on the discounted total
+                    BigDecimal estimatedHST = discountedTotal.multiply(BigDecimal.valueOf(0.13))
+                            .setScale(2, RoundingMode.HALF_UP);
+
+                    // Calculate final order total
+                    BigDecimal orderTotalFinal = discountedTotal.add(estimatedHST)
+                            .setScale(2, RoundingMode.HALF_UP);
+
+                    model.addAttribute("user", user);
+                    model.addAttribute("orderItems", orderItems);
+                    model.addAttribute("order", order);
+                    model.addAttribute("discount", discount);
+                    model.addAttribute("discountedTotal", discountedTotal);
                     model.addAttribute("shippingDetails", "Delivery to garage");
-                    model.addAttribute("estimatedHST", "30");
-                    model.addAttribute("orderTotalFinal", "2.01");
+                    model.addAttribute("estimatedHST", estimatedHST);
+                    model.addAttribute("orderTotalFinal", orderTotalFinal);
                     model.addAttribute("STRIPE_PUBLIC_KEY", stripePublicKey);
                 }).thenReturn("checkout");
 

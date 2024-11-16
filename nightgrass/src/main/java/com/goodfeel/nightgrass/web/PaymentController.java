@@ -1,4 +1,4 @@
-package com.goodfeel.nightgrass.rest;
+package com.goodfeel.nightgrass.web;
 
 import com.goodfeel.nightgrass.service.StripeService;
 import com.goodfeel.nightgrass.web.util.CheckoutRequest;
@@ -36,12 +36,5 @@ public class PaymentController {
         logger.debug("The amount = {}", checkoutRequest.amount);
         return stripeService.createCheckoutSession(checkoutRequest.amount, "cad", successUrl, cancelUrl)
                 .map(Session::getUrl);
-    }
-
-    @GetMapping("/submit-order") // TODO
-    public Mono<String> checkout(Model model) {
-        model.addAttribute("STRIPE_PUBLIC_KEY",
-                stripePublicKey);
-        return Mono.just("submit-order");
     }
 }

@@ -1,7 +1,9 @@
 package com.goodfeel.nightgrass.service;
 
 import com.goodfeel.nightgrass.data.User;
-import com.goodfeel.nightgrass.repo.UserRepo;
+import com.goodfeel.nightgrass.repo.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.oauth2.client.userinfo.DefaultReactiveOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -11,9 +13,11 @@ import reactor.core.publisher.Mono;
 @Service
 public class CustomReactiveOAuth2UserService extends DefaultReactiveOAuth2UserService {
 
-    private final UserRepo userRepository;
+    private final Logger logger = LoggerFactory.getLogger(CustomReactiveOAuth2UserService.class);
 
-    public CustomReactiveOAuth2UserService(UserRepo userRepository) {
+    private final UserRepository userRepository;
+
+    public CustomReactiveOAuth2UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
@@ -22,6 +26,7 @@ public class CustomReactiveOAuth2UserService extends DefaultReactiveOAuth2UserSe
         return super.loadUser(userRequest)
                 .flatMap(oAuth2User -> {
                     // Extract and persist user information
+                    logger.debug("Exact the logged-in user's information and persist it");
                     String oauthId = oAuth2User.getAttribute("id"); // Facebook user ID
                     String name = oAuth2User.getAttribute("name");
                     String email = oAuth2User.getAttribute("email");
@@ -30,13 +35,13 @@ public class CustomReactiveOAuth2UserService extends DefaultReactiveOAuth2UserSe
                             .switchIfEmpty(Mono.defer(() -> {
                                 User newUser = new User();
                                 newUser.setOauthId(oauthId);
-                                newUser.setName(name);
+                                newUser.setNickName(name);
                                 newUser.setEmail(email);
                                 return Mono.just(newUser);
                             }))
                             .flatMap(user -> {
                                 // Update existing user details if needed
-                                user.setName(name);
+                                user.setNickName(name);
                                 user.setEmail(email);
                                 return userRepository.save(user);
                             })

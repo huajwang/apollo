@@ -1,8 +1,9 @@
 CREATE TABLE IF NOT EXISTS user (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     oauth_id VARCHAR(255) UNIQUE NOT NULL,
-    name VARCHAR(255),
+    nick_name VARCHAR(255),
     email VARCHAR(255),
+    customer_name VARCHAR(50),
     phone VARCHAR(15),
     address VARCHAR(255)
 );
@@ -17,7 +18,8 @@ CREATE TABLE IF NOT EXISTS e_mall_cart (
     cart_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     total DECIMAL(10, 2) NOT NULL,
     user_id VARCHAR(255) NOT NULL,
-    introducer VARCHAR(255)
+    introducer VARCHAR(255),
+    FOREIGN KEY (user_id) REFERENCES user(id)
 );
 
 CREATE TABLE IF NOT EXISTS e_mall_cart_item (
@@ -46,7 +48,8 @@ CREATE TABLE IF NOT EXISTS e_mall_order (
     status VARCHAR(10),
     pay_no VARCHAR(20),
     pay_type VARCHAR(10),
-    remark VARCHAR(255)
+    remark VARCHAR(255),
+    FOREIGN KEY (user_id) REFERENCES user(id)
 );
 
 CREATE TABLE IF NOT EXISTS e_mall_order_item (

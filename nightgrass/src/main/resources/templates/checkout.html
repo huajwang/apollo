@@ -5,12 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Checkout</title>
   <link rel="stylesheet" th:href="@{/css/checkout.css}"/>
+  <script src="https://js.stripe.com/v3/"></script>
 </head>
 <body>
 <div class="checkout-container">
   <!-- Customer Info -->
   <div class="customer-info">
-    <p><strong>Customer:</strong> <span th:text="${user.name}"></span></p>
+    <p><strong>Customer:</strong> <span th:text="${user.customerName}"></span></p>
     <p><strong>Phone:</strong> <span th:text="${user.phone}"></span></p>
     <p><strong>Address:</strong> <span th:text="${user.address}"></span></p>
   </div>
@@ -70,8 +71,34 @@
 
   <!-- Submit Order Button -->
   <div class="submit-order">
-    <button type="button">Submit Order</button>
+    <button id="submit-order-button" type="button">Submit Order</button>
   </div>
 </div>
+
+<script th:inline="javascript">
+  const stripe = Stripe([[${STRIPE_PUBLIC_KEY}]]);
+   // Inject the Thymeleaf variable into JavaScript
+  const orderTotalFinal = /*[[${orderTotalFinal}]]*/ 0;
+
+  document.getElementById("submit-order-button").addEventListener("click", function () {
+      fetch("/create-checkout-session", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({ amount: orderTotalFinal.toString() })
+      })
+      .then(response => {
+          if (!response.ok) {
+              return response.text().then(errorText => {
+                  throw new Error('Network response was not ok: ' + errorText);
+              });
+          }
+          return response.text();
+      })
+      .then(sessionUrl => {
+          window.location = sessionUrl;
+      })
+      .catch(error => console.error('Error: ', error));
+  });
+</script>
 </body>
 </html>

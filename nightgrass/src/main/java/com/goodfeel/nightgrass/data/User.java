@@ -20,8 +20,9 @@ public class User {
     private Long id;
     @Column("oauth_id")
     private String oauthId;
-    private String name;
+    private String nickName;
     private String email;
+    private String customerName;
     private String phone;
     private String address;
 }

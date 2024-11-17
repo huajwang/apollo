@@ -9,12 +9,14 @@
 </head>
 <body>
 <div class="checkout-container">
-  <!-- Customer Info -->
+  <!-- Customer Info with Edit Option -->
   <div class="customer-info">
-    <p><strong>Customer:</strong> <span th:text="${user.customerName}"></span></p>
-    <p><strong>Phone:</strong> <span th:text="${user.phone}"></span></p>
-    <p><strong>Address:</strong> <span th:text="${user.address}"></span></p>
+    <p><strong>Customer:</strong> <span id="customerNameDisplay" th:text="${user.customerName}"></span></p>
+    <p><strong>Phone:</strong> <span id="phoneDisplay" th:text="${user.phone}"></span></p>
+    <p><strong>Address:</strong> <span id="addressDisplay" th:text="${user.address}"></span></p>
+    <button class="edit-button" onclick="openEditDialog()">&#8250;</button>
   </div>
+
 
   <!-- Dashed Line Separator -->
   <div class="dashed-line"></div>
@@ -73,6 +75,27 @@
   <div class="submit-order">
     <button id="submit-order-button" type="button">Submit Order</button>
   </div>
+
+  <!-- Customer Info Edit Modal -->
+  <div id="editDialog" class="modal">
+    <div class="modal-content">
+      <span class="close-button" onclick="closeEditDialog()">&times;</span>
+      <h2>Edit Customer Information</h2>
+      <form id="editCustomerForm">
+        <label for="customerName">Customer Name:</label>
+        <input type="text" id="customerName" name="customerName" th:value="${user.customerName}"/>
+
+        <label for="phone">Phone:</label>
+        <input type="text" id="phone" name="phone" th:value="${user.phone}"/>
+
+        <label for="address">Address:</label>
+        <input type="text" id="address" name="address" th:value="${user.address}"/>
+
+        <button type="button" onclick="submitEditForm()">Save Changes</button>
+      </form>
+    </div>
+  </div>
+
 </div>
 
 <script th:inline="javascript">
@@ -99,6 +122,51 @@
       })
       .catch(error => console.error('Error: ', error));
   });
+
+
+
+  function openEditDialog() {
+      document.getElementById("editDialog").style.display = "block";
+  }
+
+  function closeEditDialog() {
+      document.getElementById("editDialog").style.display = "none";
+  }
+
+ function submitEditForm() {
+    const customerData = {
+        customerName: document.getElementById("customerName").value,
+        phone: document.getElementById("phone").value,
+        address: document.getElementById("address").value
+    };
+
+    fetch('/update-user-info', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(customerData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Update the displayed values on the page with the new data
+        document.getElementById("customerNameDisplay").textContent = data.customerName;
+        document.getElementById("phoneDisplay").textContent = data.phone;
+        document.getElementById("addressDisplay").textContent = data.address;
+
+        // Close the modal dialog
+        closeEditDialog();
+
+
+    })
+    .catch(error => console.error('Error updating customer info:', error));
+}
+
+
+  window.onclick = function(event) {
+      const modal = document.getElementById("editDialog");
+      if (event.target === modal) {
+          closeEditDialog();
+      }
+  }
 </script>
 </body>
 </html>

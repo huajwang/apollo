@@ -10,9 +10,12 @@ import com.goodfeel.nightgrass.web.util.Utility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -80,4 +83,30 @@ public class CheckoutController {
                 }).thenReturn("checkout");
 
     }
+
+    @PostMapping("/update-user-info")
+    public Mono<ResponseEntity<UserDto>> updateCustomerInfo(@RequestBody UserDto customerInfoDto) {
+        return Utility.getCurrentUserId() // Retrieve the current user’s ID
+                .flatMap(userService::findUserById)
+                .flatMap(user -> {
+                    // Update user properties with new data from DTO
+                    user.setCustomerName(customerInfoDto.getCustomerName());
+                    user.setPhone(customerInfoDto.getPhone());
+                    user.setAddress(customerInfoDto.getAddress());
+
+                    // Save updated user information
+                    return userService.saveUser(user);
+                })
+                .map(updatedUser -> {
+                    // Convert the updated user to UserDto for response
+                    UserDto updatedUserDto = new UserDto(
+                            updatedUser.getCustomerName(),
+                            updatedUser.getPhone(),
+                            updatedUser.getAddress()
+                    );
+                    return ResponseEntity.ok(updatedUserDto);
+                })
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
 }

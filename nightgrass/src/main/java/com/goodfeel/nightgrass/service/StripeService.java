@@ -8,12 +8,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.math.BigDecimal;
+
 @Service
 public class StripeService {
 
-    public StripeService(@Value("${stripe.secret-key}") String secretKey) { Stripe.apiKey = secretKey; }
+    public StripeService(@Value("${stripe.secret-key}") String secretKey) {
+        Stripe.apiKey = secretKey;
+    }
 
-    public Mono<Session> createCheckoutSession(Double amount, String currency, String successUrl, String cancelUrl) {
+    public Mono<Session> createCheckoutSession(BigDecimal amount, String currency, String successUrl, String cancelUrl) {
         return Mono.fromCallable(() -> {
             SessionCreateParams params = SessionCreateParams.builder()
                     .addPaymentMethodType(PaymentMethodType.CARD)
@@ -26,7 +30,7 @@ public class StripeService {
                                     .setPriceData(
                                             SessionCreateParams.LineItem.PriceData.builder()
                                                     .setCurrency(currency)
-                                                    .setUnitAmount((long)(amount * 100)) // amount in cents
+                                                    .setUnitAmount(amount.multiply(BigDecimal.valueOf(100)).longValueExact()) // amount in cents
                                                     .setProductData(
                                                             SessionCreateParams.LineItem.PriceData.ProductData.builder()
                                                                     .setName("E-commerce Product")

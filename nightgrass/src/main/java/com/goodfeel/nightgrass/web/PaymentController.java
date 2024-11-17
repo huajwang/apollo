@@ -1,6 +1,7 @@
 package com.goodfeel.nightgrass.web;
 
 import com.goodfeel.nightgrass.service.StripeService;
+import com.goodfeel.nightgrass.serviceImpl.OrderService;
 import com.goodfeel.nightgrass.web.util.CheckoutRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -20,9 +21,11 @@ public class PaymentController {
     @Value("${STRIPE_PUBLIC_KEY}")
     private String stripePublicKey;
 
+    private final OrderService orderService;
     private final StripeService stripeService;
 
-    public PaymentController(StripeService stripeService) {
+    public PaymentController(OrderService orderService, StripeService stripeService) {
+        this.orderService = orderService;
         this.stripeService = stripeService;
     }
 
@@ -32,7 +35,12 @@ public class PaymentController {
         String cancelUrl = "http://localhost:8080/cancel";
 
         logger.debug("The amount = {}", checkoutRequest.amount);
-        return stripeService.createCheckoutSession(checkoutRequest.amount, "cad", successUrl, cancelUrl)
+        return orderService.findOrderById(checkoutRequest.getOrderId())
+                .flatMap(order -> {
+                    order.setFinalTotal(checkoutRequest.getAmount());
+                    return orderService.updateOrder(order);
+                })
+                .then(stripeService.createCheckoutSession(checkoutRequest.amount, "cad", successUrl, cancelUrl))
                 .map(Session::getUrl);
     }
 }

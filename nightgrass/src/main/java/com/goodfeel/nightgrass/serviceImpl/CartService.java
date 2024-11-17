@@ -35,13 +35,15 @@ public class CartService implements ICartService {
     private final ProductRepository productRepository;
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
+    private final UserRepository userRepository;
 
-    public CartService(CartRepository cartRepository, CartItemRepository cartItemRepository, ProductRepository productRepository, OrderRepository orderRepository, OrderItemRepository orderItemRepository) {
+    public CartService(CartRepository cartRepository, CartItemRepository cartItemRepository, ProductRepository productRepository, OrderRepository orderRepository, OrderItemRepository orderItemRepository, UserRepository userRepository) {
         this.cartRepository = cartRepository;
         this.cartItemRepository = cartItemRepository;
         this.productRepository = productRepository;
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -252,26 +254,35 @@ public class CartService implements ICartService {
                 .map(item -> item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        return totalMono.flatMap(total -> {
-            // Create the order
-            Order order = new Order();
-            order.setOrderNo(generateOrderNo());
-            order.setUserId(cart.getUserId());
-            order.setCreatedAt(LocalDateTime.now());
-            order.setIntroducer(cart.getIntroducer());
-            order.setTotal(total);
-            logger.debug("Creating order for user {}, orderNo = {}, total = {}, introducer = {}",
-                    order.getUserId(), order.getOrderNo(), order.getTotal(), order.getIntroducer());
+        return userRepository.findByOauthId(cart.getUserId())// TODO - save userId or OauthId in cart/order table?
+                .zipWith(totalMono, (user, total) -> {
+                    // Create the order
+                    Order order = new Order();
+                    order.setOrderNo(generateOrderNo());
+                    order.setUserId(cart.getUserId());
+                    order.setCreatedAt(LocalDateTime.now());
+                    order.setIntroducer(cart.getIntroducer());
+                    order.setTotal(total);
 
-            // Save the order and create order items in a reactive chain
-            return orderRepository.save(order)
-                    .flatMap(savedOrder ->
-                            cartItemDtoFlux
-                                    .flatMap(cartItemDto -> createOrderItem(savedOrder, cartItemDto))
-                                    .then(Mono.just(savedOrder))
-                    );
-        });
+                    // Copy user details to order
+                    order.setContactName(user.getCustomerName());
+                    order.setContactPhone(user.getPhone());
+                    order.setDeliveryAddress(user.getAddress());
 
+                    logger.debug("Creating order for user {}, orderNo = {}, total = {}, introducer = {}",
+                            order.getUserId(), order.getOrderNo(), order.getTotal(), order.getIntroducer());
+
+                    return order;
+                })
+                .flatMap(order ->
+                        // Save the order and create order items in a reactive chain
+                        orderRepository.save(order)
+                                .flatMap(savedOrder ->
+                                        cartItemDtoFlux
+                                                .flatMap(cartItemDto -> createOrderItem(savedOrder, cartItemDto))
+                                                .then(Mono.just(savedOrder))
+                                )
+                );
     }
 
     private Mono<OrderItem> createOrderItem(Order order, CartItemDto cartItemDto) {

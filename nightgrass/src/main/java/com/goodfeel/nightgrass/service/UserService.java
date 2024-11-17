@@ -27,7 +27,7 @@ public class UserService {
         });
     }
 
-    public Mono<User> saveUser(UserDto userDto) {
+    public Mono<User> updateUserInfo(UserDto userDto) {
         return Utility.getCurrentUserId().flatMap(userRepository::findByOauthId).flatMap(user -> {
             user.setCustomerName(userDto.getCustomerName());
             user.setPhone(userDto.getPhone());

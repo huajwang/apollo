@@ -47,6 +47,7 @@ public class OrderService implements IOrderService {
     private OrderItemDto mapToOrderItemDto(OrderItem orderItem) {
         OrderItemDto orderItemDto = new OrderItemDto();
         orderItemDto.setProductName(orderItem.getProductName());
+        orderItemDto.setImageUrl(orderItem.getImageUrl());
         orderItemDto.setQuantity(orderItem.getQuantity());
         orderItemDto.setProperties(orderItem.getProperties());
         orderItemDto.setUnitPrice(orderItem.getUnitPrice());

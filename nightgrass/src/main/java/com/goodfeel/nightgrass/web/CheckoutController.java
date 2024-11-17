@@ -1,6 +1,5 @@
 package com.goodfeel.nightgrass.web;
 
-import com.goodfeel.nightgrass.data.User;
 import com.goodfeel.nightgrass.dto.OrderDto;
 import com.goodfeel.nightgrass.dto.OrderItemDto;
 import com.goodfeel.nightgrass.dto.UserDto;
@@ -17,7 +16,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
@@ -95,7 +93,7 @@ public class CheckoutController {
                     user.setAddress(customerInfoDto.getAddress());
 
                     // Save updated user information
-                    return userService.saveUser(user);
+                    return userService.updateUserInfo(user);
                 })
                 .map(updatedUser -> {
                     // Convert the updated user to UserDto for response

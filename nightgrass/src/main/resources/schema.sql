@@ -64,6 +64,7 @@ CREATE TABLE IF NOT EXISTS e_mall_order_item (
     order_item_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     order_id BIGINT REFERENCES e_mall_order(order_id),
     product_name VARCHAR(100) NOT NULL,
+    image_url VARCHAR(100) NOT NULL,
     quantity INT NOT NULL,
     properties VARCHAR(255),
     unit_price DECIMAL(10, 2) NOT NULL,  -- price at the time of order

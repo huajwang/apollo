@@ -41,7 +41,6 @@ public class CartController {
         Flux<CartItemDto> cartItems = cartService.getCartItems();
         model.addAttribute("cartItems", cartItems);
         model.addAttribute("cartTotal", cartService.getTotalPrice());
-        model.addAttribute("STRIPE_PUBLIC_KEY", stripePublicKey); // TODO NOT NEEDED HERE?
         return Mono.just("shopping-cart"); // Thymeleaf template for viewing the cart
     }
 

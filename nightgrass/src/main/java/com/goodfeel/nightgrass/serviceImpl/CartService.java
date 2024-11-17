@@ -230,6 +230,7 @@ public class CartService implements ICartService {
                     cartItemDto.setItemId(cartItem.getItemId());
                     cartItemDto.setProductId(cartItem.getProductId());
                     cartItemDto.setProductName(product.getProductName());
+                    cartItemDto.setImageUrl(product.getImageUrl());
                     cartItemDto.setQuantity(cartItem.getQuantity());
                     cartItemDto.setProperties(cartItem.getProperties());
                     cartItemDto.setPrice(product.getPrice()); // Price is fetched from Product
@@ -267,6 +268,7 @@ public class CartService implements ICartService {
         OrderItem orderItem = new OrderItem();
         orderItem.setOrderId(order.getOrderId());
         orderItem.setProductName(cartItemDto.getProductName());
+        orderItem.setImageUrl(cartItemDto.getImageUrl());
         orderItem.setQuantity(cartItemDto.getQuantity());
         orderItem.setProperties(cartItemDto.getProperties());
         orderItem.setUnitPrice(cartItemDto.getPrice());

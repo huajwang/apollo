@@ -3,8 +3,6 @@ package com.goodfeel.nightgrass.web;
 import com.goodfeel.nightgrass.service.StripeService;
 import com.goodfeel.nightgrass.web.util.CheckoutRequest;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;

@@ -26,6 +26,7 @@
     <h3>Order Items</h3>
     <ul>
       <li th:each="item : ${orderItems}">
+        <img th:src="${item.imageUrl}" alt="Product Image" style="width: 50px; height: 50px; margin-right: 10px;">
         <span th:text="${item.productName}"></span> -
         <span th:text="${item.unitPrice}"></span> x
         <span th:text="${item.quantity}"></span>

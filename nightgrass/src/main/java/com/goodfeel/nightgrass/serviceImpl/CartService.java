@@ -52,7 +52,7 @@ public class CartService implements ICartService {
         }
         return cartRepository.findByUserId(userId)
                 .switchIfEmpty(
-                    cartRepository.save(new Cart(null, BigDecimal.ZERO, userId, ""))
+                        cartRepository.save(new Cart(null, BigDecimal.ZERO, userId, ""))
                 );
     }
 
@@ -152,6 +152,7 @@ public class CartService implements ICartService {
      * 1. A product is added to the shopping cart;
      * 2. quantity is changed;
      * 3. cart item is deleted from the cart;
+     *
      * @param cartId
      * @return
      */
@@ -171,7 +172,8 @@ public class CartService implements ICartService {
 
     /**
      * This function is used to update the cart total when user select/deselect the item by (un)check the checkbox
-     * @param itemId - Cart item ID
+     *
+     * @param itemId     - Cart item ID
      * @param isSelected Is the cart item selected or not
      * @return
      */
@@ -209,17 +211,23 @@ public class CartService implements ICartService {
 
     }
 
+    /**
+     * When something is wrong when doing checkout the shopping cart, it needs to perform DB rollback.
+     *
+     * @param userId
+     * @return
+     */
     @Transactional
-    public Mono<Order> checkout(String userId) {
+    public Mono<Order> createOrderAndCleanupShoppingCart(String userId) {
         return cartRepository.findByUserId(userId)
-                .flatMap(cart ->
-                        cartItemRepository.findByCartId(cart.getCartId())
-                                .filter(CartItem::getIsSelected)
-                                .flatMap(this::populateCartItemWithProductInfo)
-                                .collectList()
-                                .flatMap(cartItemDtos -> createOrder(cart, cartItemDtos))
-                                .flatMap(order -> clearCartItemsAndTotal(cart).thenReturn(order))
-                );
+                .flatMap(cart -> {
+                    Flux<CartItemDto> cartItemDtoFlux = cartItemRepository.findByCartId(cart.getCartId())
+                            .filter(CartItem::getIsSelected)
+                            .flatMap(this::populateCartItemWithProductInfo);
+
+                    return createOrder(cart, cartItemDtoFlux)
+                            .flatMap(order -> clearCartItemsAndTotal(cart).thenReturn(order));
+                });
     }
 
 
@@ -238,29 +246,32 @@ public class CartService implements ICartService {
                 });
     }
 
-    private Mono<Order> createOrder(Cart cart, List<CartItemDto> cartItemDtos) {
-        // Calculate total from selected cart items TODO is this reactive way?
-        BigDecimal total = cartItemDtos.stream()
+    private Mono<Order> createOrder(Cart cart, Flux<CartItemDto> cartItemDtoFlux) {
+        // Calculate total reactively from Flux<CartItemDto>
+        Mono<BigDecimal> totalMono = cartItemDtoFlux
                 .map(item -> item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        // Create the order
-        Order order = new Order();
-        order.setOrderNo(generateOrderNo());
-        order.setUserId(cart.getUserId());
-        order.setCreatedAt(LocalDateTime.now());
-        order.setIntroducer(cart.getIntroducer());
-        order.setTotal(total);
-        logger.debug("Creating order for user {}, orderNo = {}, total = {}, introducer = {}",
-                order.getUserId(), order.getOrderNo(), order.getTotal(), order.getIntroducer());
-        // Save the order and create order items in a reactive chain
-        return orderRepository.save(order)
-                .flatMap(savedOrder ->
-                        Flux.fromIterable(cartItemDtos)
-                                .flatMap(cartItemDto -> createOrderItem(savedOrder, cartItemDto))
-                                .collectList()
-                                .thenReturn(savedOrder)
-                );
+        return totalMono.flatMap(total -> {
+            // Create the order
+            Order order = new Order();
+            order.setOrderNo(generateOrderNo());
+            order.setUserId(cart.getUserId());
+            order.setCreatedAt(LocalDateTime.now());
+            order.setIntroducer(cart.getIntroducer());
+            order.setTotal(total);
+            logger.debug("Creating order for user {}, orderNo = {}, total = {}, introducer = {}",
+                    order.getUserId(), order.getOrderNo(), order.getTotal(), order.getIntroducer());
+
+            // Save the order and create order items in a reactive chain
+            return orderRepository.save(order)
+                    .flatMap(savedOrder ->
+                            cartItemDtoFlux
+                                    .flatMap(cartItemDto -> createOrderItem(savedOrder, cartItemDto))
+                                    .then(Mono.just(savedOrder))
+                    );
+        });
+
     }
 
     private Mono<OrderItem> createOrderItem(Order order, CartItemDto cartItemDto) {
@@ -280,6 +291,7 @@ public class CartService implements ICartService {
     /**
      * After user press Checkout button, all selected cart items are all deleted. The rest of cart items, if there is
      * any, are 'unselected'. So, just write cart total as zero.
+     *
      * @param cart
      * @return
      */

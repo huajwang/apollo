@@ -77,11 +77,16 @@ public class CartController {
                 .thenReturn(ResponseEntity.ok(response));
     }
 
+    /**
+     * When customer press Checkout button on shopping cart page, front end javascript post a request
+     * to create order, insert order items and clean up shopping cart.
+     * @return
+     */
     @PostMapping("/checkout")
     public Mono<ResponseEntity<Map<String, Long>>> checkout() {
         return Utility.getCurrentUserId().flatMap( userId ->
 
-                cartService.checkout(userId)
+                cartService.createOrderAndCleanupShoppingCart(userId)
                         .map(order -> {
                             Map<String, Long> response = new HashMap<>();
                             response.put("orderId", order.getOrderId());

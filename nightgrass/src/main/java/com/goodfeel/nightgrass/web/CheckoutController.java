@@ -1,5 +1,6 @@
 package com.goodfeel.nightgrass.web;
 
+import com.goodfeel.nightgrass.dto.CustomerAndOrderInfoDto;
 import com.goodfeel.nightgrass.dto.OrderDto;
 import com.goodfeel.nightgrass.dto.OrderItemDto;
 import com.goodfeel.nightgrass.dto.UserDto;
@@ -83,7 +84,7 @@ public class CheckoutController {
     }
 
     @PostMapping("/update-user-info")
-    public Mono<ResponseEntity<UserDto>> updateCustomerInfo(@RequestBody UserDto customerInfoDto) {
+    public Mono<ResponseEntity<UserDto>> updateCustomerInfo(@RequestBody CustomerAndOrderInfoDto customerInfoDto) {
         return Utility.getCurrentUserId() // Retrieve the current user’s ID
                 .flatMap(userService::findUserById)
                 .flatMap(user -> {
@@ -94,6 +95,28 @@ public class CheckoutController {
 
                     // Save updated user information
                     return userService.updateUserInfo(user);
+                })
+
+                .flatMap(updatedUser -> {
+                    // Check if an orderId was provided in the request
+                    if (customerInfoDto.getOrderId() != null) {
+                        // Update the specific order with the new delivery and contact info
+                        return orderService.findOrderById(customerInfoDto.getOrderId())
+                                .flatMap(order -> {
+                                    // Update order’s contact information
+                                    order.setContactName(updatedUser.getCustomerName());
+                                    order.setContactPhone(updatedUser.getPhone());
+                                    order.setDeliveryAddress(updatedUser.getAddress());
+
+                                    // Save the updated order
+                                    return orderService.updateOrder(order);
+                                })
+                                .then(Mono.just(updatedUser)); // Return user info after updating the order
+                    } else {
+                        // No orderId provided, so just return the updated user info
+                        logger.error("No orderId is passed from checkout.html template");
+                        return Mono.just(updatedUser);
+                    }
                 })
                 .map(updatedUser -> {
                     // Convert the updated user to UserDto for response

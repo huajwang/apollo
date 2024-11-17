@@ -44,6 +44,17 @@ public class OrderService implements IOrderService {
                 .map(this::mapToOrderItemDto);
     }
 
+    @Override
+    public Mono<Order> findOrderById(Long orderId) {
+        return orderRepository.findById(orderId);
+
+    }
+
+    @Override
+    public Mono<Order> updateOrder(Order order) {
+        return orderRepository.save(order);
+    }
+
     private OrderItemDto mapToOrderItemDto(OrderItem orderItem) {
         OrderItemDto orderItemDto = new OrderItemDto();
         orderItemDto.setProductName(orderItem.getProductName());

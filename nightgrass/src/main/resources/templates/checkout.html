@@ -103,6 +103,7 @@
   const stripe = Stripe([[${STRIPE_PUBLIC_KEY}]]);
    // Inject the Thymeleaf variable into JavaScript
   const orderTotalFinal = /*[[${orderTotalFinal}]]*/ 0;
+  const orderId = /*[[${order.orderId}]]*/ 0; // Set the orderId from the order object
 
   document.getElementById("submit-order-button").addEventListener("click", function () {
       fetch("/create-checkout-session", {
@@ -138,7 +139,8 @@
     const customerData = {
         customerName: document.getElementById("customerName").value,
         phone: document.getElementById("phone").value,
-        address: document.getElementById("address").value
+        address: document.getElementById("address").value,
+        orderId: orderId
     };
 
     fetch('/update-user-info', {
@@ -152,6 +154,7 @@
         document.getElementById("customerNameDisplay").textContent = data.customerName;
         document.getElementById("phoneDisplay").textContent = data.phone;
         document.getElementById("addressDisplay").textContent = data.address;
+
 
         // Close the modal dialog
         closeEditDialog();

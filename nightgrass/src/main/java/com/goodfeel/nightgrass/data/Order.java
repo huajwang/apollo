@@ -21,7 +21,11 @@ public class Order {
     private String orderNo;
     private String userId;
     private String deliveryAddress;
+    private String contactName;
+    private String contactPhone;
     private BigDecimal total;
+    private BigDecimal hst;
+    private BigDecimal finalTotal;
     private String status;
     private LocalDateTime createdAt;
     private String introducer;

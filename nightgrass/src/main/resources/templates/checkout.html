@@ -106,6 +106,18 @@
   const orderId = /*[[${order.orderId}]]*/ 0; // Set the orderId from the order object
 
   document.getElementById("submit-order-button").addEventListener("click", function () {
+
+      const customerName = document.getElementById("customerNameDisplay").textContent.trim();
+      const address = document.getElementById("addressDisplay").textContent.trim();
+
+      // Check if customer name and address are provided
+      if (!customerName || !address) {
+          // Open edit dialog if customer information is missing
+          openEditDialog();
+          alert("Please enter your name and address to continue with the order.");
+          return; // Stop further execution
+      }
+
       fetch("/create-checkout-session", {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },

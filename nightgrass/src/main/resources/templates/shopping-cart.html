@@ -157,6 +157,35 @@
             margin-top: 10px;
         }
     }
+
+
+    /* Style for the empty cart message */
+    .empty-cart {
+        text-align: center;
+        margin-top: 50px;
+        color: #555;
+    }
+
+    .empty-cart img {
+        width: 150px;
+        height: 150px;
+        margin-bottom: 20px;
+        opacity: 0.7;
+    }
+
+    .empty-cart a {
+        display: inline-block;
+        margin-top: 10px;
+        text-decoration: none;
+        font-size: 1.2em;
+        color: #007bff;
+        transition: color 0.3s ease;
+    }
+
+    .empty-cart a:hover {
+        color: #0056b3;
+    }
+
   </style>
 
   <script>
@@ -237,7 +266,18 @@
             document.getElementById("cartTotal").textContent = `Total: $${data.toFixed(2)}`;
         })
         .catch(error => console.error('Error fetching cart total:', error));
-}
+    }
+
+
+    function updateCheckoutButtonState() {
+        const checkoutButton = document.querySelector(".checkout-btn");
+        const cartItems = document.querySelectorAll(".cart-item");
+
+        // Disable the button if there are no items in the cart
+        checkoutButton.disabled = cartItems.length === 0;
+    }
+
+    document.addEventListener("DOMContentLoaded", updateCheckoutButtonState);
 
   </script>
 
@@ -246,7 +286,17 @@
 
 <div class="cart-container">
   <h1>Shopping Cart</h1>
-  <div th:each="item : ${cartItems}" class="cart-item">
+
+  <!-- Check if the cart is empty -->
+  <div th:if="${#lists.isEmpty(cartItems)}" class="empty-cart">
+    <img src="/images/empty-cart.png" alt="Empty Cart">
+    <p>Your cart is empty.</p>
+    <a href="/product/all">Go Shopping</a>
+  </div>
+
+
+
+  <div th:if="${!#lists.isEmpty(cartItems)}" th:each="item : ${cartItems}" class="cart-item">
 
     <input type="checkbox" th:id="'selected_' + ${item.itemId}" th:name="'selected_' + ${item.itemId}" th:value="${item.itemId}"
            th:attr="onchange=|handleCheckboxChange(${item.itemId}, this.checked)|"
@@ -283,9 +333,9 @@
   </div>
 
   <!-- Cart total and checkout section -->
-  <div class="cart-footer">
+  <div class="cart-footer" th:if="${!#lists.isEmpty(cartItems)}">
     <div id="cartTotal" class="cart-total">Total: $<span th:text="${cartTotal}">0.00</span></div>
-    <button class="checkout-btn" onclick="handleCheckout()">Checkout</button>
+    <button class="checkout-btn" onclick="handleCheckout()" th:disabled="${#lists.isEmpty(cartItems)}">Checkout</button>
   </div>
 
 </div>

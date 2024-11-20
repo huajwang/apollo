@@ -74,3 +74,19 @@ CREATE TABLE IF NOT EXISTS e_mall_order_item (
     unit_price DECIMAL(10, 2) NOT NULL,  -- price at the time of order
     FOREIGN KEY (order_id) REFERENCES e_mall_order(order_id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS referral_links (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    sharer_id BIGINT NOT NULL,  -- ID of the sharer (user ID)
+    referral_code VARCHAR(255) UNIQUE NOT NULL,  -- Unique referral code
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS referral_rewards (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    sharer_id BIGINT NOT NULL,  -- ID of the sharer (user ID)
+    order_id BIGINT NOT NULL,  -- Associated order ID
+    reward_amount DECIMAL(10, 2) NOT NULL,  -- 10% reward amount
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+

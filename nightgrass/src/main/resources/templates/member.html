@@ -62,6 +62,25 @@
             <button class="member-benefits">会员权益</button>
         </div>
     </section>
+
+    <h2>Your Rewards</h2>
+    <table>
+        <tr>
+            <th>Order ID</th>
+            <th>Reward Amount</th>
+            <th>Date</th>
+        </tr>
+        <th:block th:each="reward : ${rewards}">
+            <tr>
+                <td th:text="${reward.orderId}"></td>
+                <td th:text="${reward.rewardAmount}"></td>
+                <td th:text="${reward.createdAt}"></td>
+            </tr>
+        </th:block>
+    </table>
+
+
+
     <section>
         <ul class="options">
             <li><i class="icon">&#9733;</i> 会员等级规则</li>

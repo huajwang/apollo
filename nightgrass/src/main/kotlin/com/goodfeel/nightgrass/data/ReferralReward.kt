@@ -5,7 +5,7 @@ import org.springframework.data.relational.core.mapping.Table
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
-@Table("referral_rewards")
+@Table("e_mall_referral_rewards")
 data class ReferralReward(
     @Id
     val id: Long? = null, // Nullable for auto-generated ID

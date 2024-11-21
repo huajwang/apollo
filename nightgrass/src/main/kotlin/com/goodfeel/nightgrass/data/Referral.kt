@@ -4,8 +4,8 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalDateTime
 
-@Table("referral_links")
-data class ReferralLink(
+@Table("e_mall_referral")
+data class Referral(
     @Id
     val id: Long? = null, // Nullable for auto-generated ID
 

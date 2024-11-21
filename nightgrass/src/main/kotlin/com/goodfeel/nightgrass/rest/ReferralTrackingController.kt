@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
 import java.net.URI
+import org.springframework.http.HttpStatus
 
 @RestController
 class ReferralTrackingController(private val referralTrackingService: ReferralTrackingService) {
@@ -18,7 +19,7 @@ class ReferralTrackingController(private val referralTrackingService: ReferralTr
     ): Mono<Void> {
         return referralTrackingService.trackReferral(referralCode, exchange)
             .then(Mono.defer {
-                exchange.response.statusCode = org.springframework.http.HttpStatus.FOUND // HTTP 302
+                exchange.response.statusCode = HttpStatus.FOUND // HTTP 302
                 exchange.response.headers.location = URI.create("/") // Redirect to the index page
                 Mono.empty()
             })

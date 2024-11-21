@@ -1,9 +1,11 @@
 package com.goodfeel.nightgrass.serviceImpl
 
-import com.goodfeel.nightgrass.data.ReferralLink
+import com.goodfeel.nightgrass.data.Referral
 import com.goodfeel.nightgrass.data.ReferralReward
 import com.goodfeel.nightgrass.repo.ReferralRepository
 import com.goodfeel.nightgrass.repo.ReferralRewardRepository
+import com.goodfeel.nightgrass.util.Constant
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 import reactor.core.publisher.Flux
@@ -15,17 +17,19 @@ class ReferralService(
     private val referralRepository: ReferralRepository,
     private val referralRewardRepository: ReferralRewardRepository
 ) {
+    private val logger = LoggerFactory.getLogger(ReferralService::class.java)
+
     fun getReferralLinkForUser(userId: Long): Mono<String> {
         return referralRepository.findBySharerId(userId)
             .switchIfEmpty(
                 referralRepository.save(
-                    ReferralLink(
+                    Referral(
                         sharerId = userId,
                         referralCode = UUID.randomUUID().toString()
                     )
                 )
-            )
-            .map { "https://localhost:8443/referral/${it.referralCode}" }
+            ).doOnNext { logger.debug("Saved referral from user: ${it.sharerId}") }
+            .map { "${Constant.baseUrl}/referral/${it.referralCode}" }
     }
 
     fun addReward(sharerId: Long, orderId: Long, orderTotal: BigDecimal): Mono<ReferralReward> {

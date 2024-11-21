@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Checkout</title>
   <link rel="stylesheet" th:href="@{/css/checkout.css}"/>
+  <link rel="stylesheet" th:href="@{/css/bottom_nav.css}">
   <script src="https://js.stripe.com/v3/"></script>
 </head>
 <body>
@@ -187,5 +188,7 @@
       }
   }
 </script>
+
+  <div th:replace="nav :: bottom-nav"></div>
 </body>
 </html>

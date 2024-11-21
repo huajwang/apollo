@@ -1,8 +1,10 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
+  <meta charset="UTF-8">
   <title>Shopping Cart</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" th:href="@{/css/bottom_nav.css}">
   <style>
     /* Basic Reset */
     * {
@@ -340,5 +342,7 @@
 
 </div>
 
+
+  <div th:replace="nav :: bottom-nav"></div>
 </body>
 </html>

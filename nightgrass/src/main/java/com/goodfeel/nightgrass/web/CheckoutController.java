@@ -7,12 +7,12 @@ import com.goodfeel.nightgrass.dto.UserDto;
 import com.goodfeel.nightgrass.service.IOrderService;
 import com.goodfeel.nightgrass.service.UserService;
 import com.goodfeel.nightgrass.serviceImpl.ReferralTrackingService;
+import com.goodfeel.nightgrass.util.ReferralRewardStatus;
 import com.goodfeel.nightgrass.web.util.Utility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -93,7 +93,10 @@ public class CheckoutController {
                                     BigDecimal reward = originalTotal.multiply(BigDecimal.valueOf(0.10))
                                             .setScale(2, RoundingMode.HALF_UP);
                                     // Persist or process the reward
-                                    return referralTrackingService.rewardSharer(sharerId, reward, order.getOrderId());
+                                    return referralTrackingService
+                                            .rewardSharer(
+                                                    sharerId, reward, order.getOrderId(),
+                                                    ReferralRewardStatus.PENDING);
                                 }
                                 return Mono.empty();
                             }).thenReturn("checkout");

@@ -2,6 +2,7 @@ package com.goodfeel.nightgrass.web;
 
 import com.goodfeel.nightgrass.service.StripeService;
 import com.goodfeel.nightgrass.serviceImpl.OrderService;
+import com.goodfeel.nightgrass.util.OrderStatus;
 import com.goodfeel.nightgrass.web.util.CheckoutRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -38,6 +39,7 @@ public class PaymentController {
         return orderService.findOrderById(checkoutRequest.getOrderId())
                 .flatMap(order -> {
                     order.setFinalTotal(checkoutRequest.getAmount());
+                    order.setOrderStatus(OrderStatus.SUBMITTED);
                     return orderService.updateOrder(order);
                 })
                 .then(stripeService.createCheckoutSession(checkoutRequest.amount, "cad", successUrl, cancelUrl))

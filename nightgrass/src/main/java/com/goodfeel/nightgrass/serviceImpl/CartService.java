@@ -7,6 +7,7 @@ import com.goodfeel.nightgrass.data.OrderItem;
 import com.goodfeel.nightgrass.dto.CartItemDto;
 import com.goodfeel.nightgrass.repo.*;
 import com.goodfeel.nightgrass.service.ICartService;
+import com.goodfeel.nightgrass.util.OrderStatus;
 import com.goodfeel.nightgrass.web.util.Utility;
 import lombok.Getter;
 import org.slf4j.Logger;
@@ -54,7 +55,7 @@ public class CartService implements ICartService {
         }
         return cartRepository.findByUserId(userId)
                 .switchIfEmpty(
-                        cartRepository.save(new Cart(null, BigDecimal.ZERO, userId, ""))
+                        cartRepository.save(new Cart(null, BigDecimal.ZERO, userId))
                 );
     }
 
@@ -261,7 +262,7 @@ public class CartService implements ICartService {
                     order.setOrderNo(generateOrderNo());
                     order.setUserId(cart.getUserId());
                     order.setCreatedAt(LocalDateTime.now());
-                    order.setIntroducer(cart.getIntroducer());
+                    order.setOrderStatus(OrderStatus.CHECKOUT);
                     order.setTotal(total);
 
                     // Copy user details to order
@@ -269,8 +270,8 @@ public class CartService implements ICartService {
                     order.setContactPhone(user.getPhone());
                     order.setDeliveryAddress(user.getAddress());
 
-                    logger.debug("Creating order for user {}, orderNo = {}, total = {}, introducer = {}",
-                            order.getUserId(), order.getOrderNo(), order.getTotal(), order.getIntroducer());
+                    logger.debug("Creating order for user {}, orderNo = {}, total = {}",
+                            order.getUserId(), order.getOrderNo(), order.getTotal());
 
                     return order;
                 })

@@ -27,8 +27,7 @@ CREATE TABLE IF NOT EXISTS e_mall_product_photo (
 CREATE TABLE IF NOT EXISTS e_mall_cart (
     cart_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     total DECIMAL(10, 2) NOT NULL,
-    user_id VARCHAR(255) NOT NULL,
-    introducer VARCHAR(255)
+    user_id VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS e_mall_cart_item (
@@ -54,11 +53,10 @@ CREATE TABLE IF NOT EXISTS e_mall_order (
     contact_name VARCHAR(50),
     contact_phone VARCHAR(15),
     created_at TIMESTAMP NOT NULL,
-    introducer VARCHAR(255),
+    order_status ENUM('CHECKOUT', 'SUBMITTED', 'PROCESSING', 'SHIPPING', 'CANCELED', 'COMPLETED') NOT NULL,
     updated_date TIMESTAMP,
     logistics_no VARCHAR(30),
     delivery_date TIMESTAMP,
-    status VARCHAR(10),
     pay_no VARCHAR(20),
     pay_type VARCHAR(10),
     remark VARCHAR(255)
@@ -89,7 +87,7 @@ CREATE TABLE IF NOT EXISTS e_mall_referral_rewards (
     order_id BIGINT NOT NULL,  -- Associated order ID
     reward_amount DECIMAL(10, 2) NOT NULL,  -- reward amount
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    referral_reward_status ENUM('PENDING', 'APPROVED', 'REJECTED', 'EXPIRED', 'CANCELED', 'CLAIMED') NOT NULL,
     FOREIGN KEY (order_id) REFERENCES e_mall_order(order_id) ON DELETE CASCADE,
     FOREIGN KEY (sharer_id) REFERENCES e_mall_user(oauth_id)
 );
-

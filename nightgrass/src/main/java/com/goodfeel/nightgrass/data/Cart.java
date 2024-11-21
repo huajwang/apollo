@@ -17,5 +17,4 @@ public class Cart {
     private Long cartId;
     private BigDecimal total;
     private String userId;
-    private String introducer;
 }

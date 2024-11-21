@@ -17,7 +17,6 @@ public class OrderDto {
     private String deliveryAddress;
     private BigDecimal orderTotal;
     private Instant createdAt;
-    private String introducer;
     private LocalDateTime orderProcessDate;
     private String logisticsNo;
     private LocalDateTime deliveryDate;

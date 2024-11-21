@@ -32,17 +32,6 @@ class ReferralService(
             .map { "${Constant.baseUrl}/referral/${it.referralCode}" }
     }
 
-    fun addReward(sharerId: String, orderId: Long, orderTotal: BigDecimal): Mono<ReferralReward> {
-        val rewardAmount = orderTotal.multiply(BigDecimal.valueOf(0.1))
-        return referralRewardRepository.save(
-            ReferralReward(
-                sharerId = sharerId,
-                orderId = orderId,
-                rewardAmount = rewardAmount
-            )
-        )
-    }
-
     fun getRewardsForSharer(sharerId: String): Flux<ReferralReward> {
         return referralRewardRepository.findBySharerId(sharerId)
     }

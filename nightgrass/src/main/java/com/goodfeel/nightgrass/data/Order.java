@@ -1,5 +1,6 @@
 package com.goodfeel.nightgrass.data;
 
+import com.goodfeel.nightgrass.util.OrderStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,9 +27,8 @@ public class Order {
     private BigDecimal total;
     private BigDecimal hst;
     private BigDecimal finalTotal;
-    private String status;
     private LocalDateTime createdAt;
-    private String introducer;
+    private OrderStatus orderStatus;
     private LocalDateTime updatedDate;
     private String logisticsNo;
     private LocalDateTime deliveryDate;

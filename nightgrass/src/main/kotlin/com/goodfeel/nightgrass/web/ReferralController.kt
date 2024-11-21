@@ -15,7 +15,7 @@ class ReferralController(private val referralService: ReferralService) {
 
     @GetMapping("/referral/link")
     fun getReferralLink(principal: Principal, model: Model): Mono<String> {
-        val userId = principal.name.toLong()  // Convert username to user ID
+        val userId = principal.name  // Convert username to user ID
         logger.debug("Get referral link for userId: $userId")
         val referralLink = referralService.getReferralLinkForUser(userId)
 

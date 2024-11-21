@@ -77,17 +77,19 @@ CREATE TABLE IF NOT EXISTS e_mall_order_item (
 
 CREATE TABLE IF NOT EXISTS e_mall_referral (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    sharer_id BIGINT NOT NULL,  -- ID of the sharer (user ID)
+    sharer_id VARCHAR(255) NOT NULL,  -- ID of the sharer (user ID)
     referral_code VARCHAR(255) UNIQUE NOT NULL,  -- Unique referral code
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (sharer_id) REFERENCES e_mall_user(oauth_id)
 );
 
 CREATE TABLE IF NOT EXISTS e_mall_referral_rewards (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    sharer_id BIGINT NOT NULL,  -- ID of the sharer (user ID)
+    sharer_id VARCHAR(255) NOT NULL,  -- ID of the sharer (user ID)
     order_id BIGINT NOT NULL,  -- Associated order ID
     reward_amount DECIMAL(10, 2) NOT NULL,  -- reward amount
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (order_id) REFERENCES e_mall_order(order_id) ON DELETE CASCADE
+    FOREIGN KEY (order_id) REFERENCES e_mall_order(order_id) ON DELETE CASCADE,
+    FOREIGN KEY (sharer_id) REFERENCES e_mall_user(oauth_id)
 );
 

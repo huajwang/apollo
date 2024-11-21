@@ -9,7 +9,7 @@ data class Referral(
     @Id
     val id: Long? = null, // Nullable for auto-generated ID
 
-    val sharerId: Long, // User ID of the sharer
+    val sharerId: String, // User ID of the sharer
 
     val referralCode: String, // Unique referral code
 

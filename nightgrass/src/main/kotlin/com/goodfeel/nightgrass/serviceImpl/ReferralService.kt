@@ -19,7 +19,7 @@ class ReferralService(
 ) {
     private val logger = LoggerFactory.getLogger(ReferralService::class.java)
 
-    fun getReferralLinkForUser(userId: Long): Mono<String> {
+    fun getReferralLinkForUser(userId: String): Mono<String> {
         return referralRepository.findBySharerId(userId)
             .switchIfEmpty(
                 referralRepository.save(
@@ -32,7 +32,7 @@ class ReferralService(
             .map { "${Constant.baseUrl}/referral/${it.referralCode}" }
     }
 
-    fun addReward(sharerId: Long, orderId: Long, orderTotal: BigDecimal): Mono<ReferralReward> {
+    fun addReward(sharerId: String, orderId: Long, orderTotal: BigDecimal): Mono<ReferralReward> {
         val rewardAmount = orderTotal.multiply(BigDecimal.valueOf(0.1))
         return referralRewardRepository.save(
             ReferralReward(
@@ -43,7 +43,7 @@ class ReferralService(
         )
     }
 
-    fun getRewardsForSharer(sharerId: Long): Flux<ReferralReward> {
+    fun getRewardsForSharer(sharerId: String): Flux<ReferralReward> {
         return referralRewardRepository.findBySharerId(sharerId)
     }
 }

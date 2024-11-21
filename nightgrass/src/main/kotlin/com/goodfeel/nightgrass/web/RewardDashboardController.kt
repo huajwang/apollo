@@ -10,18 +10,11 @@ import java.security.Principal
 @Controller
 class RewardDashboardController(private val rewardRepository: ReferralRewardRepository) {
 
-//    @GetMapping("/member")
-//    fun member(model: Model): Mono<String> {
-//        return Mono.just("member")
-//    }
-
-//    @GetMapping("/dashboard/rewards")
     @GetMapping("/member")
     fun getRewards(principal: Principal, model: Model): Mono<String> {
-        val userId = principal.name.toLong()
+        val userId = principal.name
         val rewards = rewardRepository.findBySharerId(userId)
         model.addAttribute("rewards", rewards)
-        //return "rewards-dashboard"
         return Mono.just("/member")
     }
 }

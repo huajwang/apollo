@@ -6,17 +6,20 @@ import com.goodfeel.nightgrass.dto.OrderItemDto;
 import com.goodfeel.nightgrass.dto.UserDto;
 import com.goodfeel.nightgrass.service.IOrderService;
 import com.goodfeel.nightgrass.service.UserService;
+import com.goodfeel.nightgrass.serviceImpl.ReferralTrackingService;
 import com.goodfeel.nightgrass.web.util.Utility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
@@ -33,14 +36,16 @@ public class CheckoutController {
 
     private final IOrderService orderService;
     private final UserService userService;
+    private final ReferralTrackingService referralTrackingService;
 
-    public CheckoutController(IOrderService orderService, UserService userService) {
+    public CheckoutController(IOrderService orderService, UserService userService, ReferralTrackingService referralTrackingService) {
         this.orderService = orderService;
         this.userService = userService;
+        this.referralTrackingService = referralTrackingService;
     }
 
     @GetMapping("/checkout")
-    public Mono<String> showCheckoutPage(@RequestParam Long orderId, Model model) {
+    public Mono<String> processOrder(@RequestParam Long orderId, Model model, ServerWebExchange exchange) {
 
         logger.debug("The orderId = {}", orderId);
 
@@ -49,7 +54,7 @@ public class CheckoutController {
         Mono<OrderDto> orderMono = orderService.getOrderById(orderId);
 
         return Mono.zip(userMono, orderItemsMono, orderMono)
-                .doOnNext( tuple -> {
+                .flatMap( tuple -> {
                     UserDto user = tuple.getT1();
                     List<OrderItemDto> orderItems = tuple.getT2();
                     OrderDto order = tuple.getT3();
@@ -79,7 +84,21 @@ public class CheckoutController {
                     model.addAttribute("estimatedHST", estimatedHST);
                     model.addAttribute("orderTotalFinal", orderTotalFinal);
                     model.addAttribute("STRIPE_PUBLIC_KEY", stripePublicKey);
-                }).thenReturn("checkout");
+
+                    // Retrieve sharerId from WebSession and calculate reward
+                    return exchange.getSession()
+                            .flatMap(session -> {
+                                String sharerId = session.getAttribute("sharerId");
+                                if (sharerId != null) {
+                                    BigDecimal reward = originalTotal.multiply(BigDecimal.valueOf(0.10))
+                                            .setScale(2, RoundingMode.HALF_UP);
+                                    // Persist or process the reward
+                                    return referralTrackingService.rewardSharer(sharerId, reward, order.getOrderId());
+                                }
+                                return Mono.empty();
+                            }).thenReturn("checkout");
+
+                });
 
     }
 

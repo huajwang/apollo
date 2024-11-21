@@ -7,5 +7,5 @@ import reactor.core.publisher.Mono
 interface ReferralRepository : ReactiveCrudRepository<Referral, Long> {
     fun findByReferralCode(referralCode: String): Mono<Referral>
 
-    fun findBySharerId(sharerId: Long): Mono<Referral>
+    fun findBySharerId(sharerId: String): Mono<Referral>
 }

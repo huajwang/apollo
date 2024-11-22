@@ -191,6 +191,47 @@
     color: #666;
 }
 
+
+/* Rewards Section Styling */
+.rewards-section {
+    background-color: #f9f9f9;
+    padding: 1.5rem;
+    margin-top: 1rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Rewards List Styling */
+.rewards-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.reward-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.reward-item span {
+    margin-right: 1.5rem;
+    color: #555;
+    font-size: 0.9rem;
+}
+
+.reward-item span strong {
+    color: #333;
+    font-weight: bold;
+}
+
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .container {

@@ -63,22 +63,21 @@
         </div>
     </section>
 
-    <h2>Your Rewards</h2>
-    <table>
-        <tr>
-            <th>Order ID</th>
-            <th>Reward Amount</th>
-            <th>Date</th>
-        </tr>
-        <th:block th:each="reward : ${rewards}">
-            <tr>
-                <td th:text="${reward.orderId}"></td>
-                <td th:text="${reward.rewardAmount}"></td>
-                <td th:text="${reward.createdAt}"></td>
-            </tr>
-        </th:block>
-    </table>
-
+    <!-- Rewards Section -->
+    <section class="rewards-section">
+        <div class="rewards-total">
+            <p><strong>Rewards Total: </strong> <span th:text="'$' + ${rewardsTotal}"></span></p>
+        </div>
+        <ul class="rewards-list">
+            <th:block th:each="reward : ${rewards}">
+                <li class="reward-item">
+                    <span><strong>Order ID:</strong> <span th:text="${reward.orderId}"></span></span>
+                    <span><strong>Reward Amount:</strong> <span th:text="'$' + ${reward.rewardAmount}"></span></span>
+                    <span><strong>Reward Date:</strong> <span th:text="${reward.createdAt}"></span></span>
+                </li>
+            </th:block>
+        </ul>
+    </section>
 
 
     <section>

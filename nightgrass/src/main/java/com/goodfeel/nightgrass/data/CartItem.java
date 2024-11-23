@@ -7,7 +7,7 @@ import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
-import java.math.BigDecimal;
+import java.util.Map;
 
 /**
  * Stores individual cart items, linked to the e_mall_cart by cart_id
@@ -23,6 +23,6 @@ public class CartItem {
     private Long cartId;
     private Long productId;
     private Integer quantity;
-    private String properties;
+    private Map<String, String> properties;
     private Boolean isSelected;
 }

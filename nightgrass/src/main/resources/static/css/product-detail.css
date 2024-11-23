@@ -9,6 +9,8 @@ body {
     font-family: Arial, sans-serif;
 }
 
+
+
 /* Container for the entire product detail page */
 .product-detail-container {
     max-width: 600px;
@@ -16,20 +18,75 @@ body {
     padding: 20px;
 }
 
-/* Carousel styling */
+/* Carousel container */
 .carousel {
-    display: flex;
-    overflow: hidden;
-    width: 100%;
-    height: 300px;
-    margin-bottom: 20px;
-    position: relative;
+  position: relative;
+  overflow: hidden; /* Hides overflowing images */
+  width: 100%; /* Full width of the container */
+  height: 300px; /* Fixed height for the carousel */
+  margin-bottom: 20px;
 }
 
-.carousel img {
-    width: 100%;
-    transition: transform 0.5s ease;
+/* Track for slides */
+.carousel-track {
+  display: flex; /* Align slides side by side */
+  transition: transform 0.5s ease; /* Smooth sliding effect */
+  width: auto; /* Dynamically adjusted by JavaScript */
 }
+
+/* Individual slides */
+.carousel-slide {
+  flex: 0 0 100%; /* Each slide takes up the full width of the carousel */
+  height: 100%; /* Matches the height of the carousel container */
+  display: flex; /* Ensures content inside is centered */
+  align-items: center; /* Center the image vertically */
+  justify-content: center; /* Center the image horizontally */
+}
+
+
+
+
+.carousel-slide img {
+  max-width: 100%; /* Prevent images from overflowing */
+  max-height: 100%; /* Maintain aspect ratio */
+  object-fit: contain; /* Ensure the whole image is visible */
+  display: block; /* Avoid inline issues */
+}
+
+
+
+
+/* Navigation buttons */
+.carousel-button {
+  position: absolute;
+  top: 50%; /* Vertically center the buttons */
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  color: white;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  z-index: 10; /* Ensure buttons are above the slides */
+}
+
+.carousel-button.prev {
+  left: 10px; /* Position the "previous" button on the left */
+}
+
+.carousel-button.next {
+  right: 10px; /* Position the "next" button on the right */
+}
+
+.carousel-button:hover {
+  background: rgba(0, 0, 0, 0.8); /* Darker background on hover */
+}
+
+
+
+
+
+
+
 
 
 

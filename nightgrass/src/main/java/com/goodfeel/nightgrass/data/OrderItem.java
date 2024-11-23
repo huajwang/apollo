@@ -8,6 +8,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.math.BigDecimal;
+import java.util.Map;
 
 @Table("e_mall_order_item")
 @Getter
@@ -22,6 +23,6 @@ public class OrderItem {
     private String productName;
     private String imageUrl;
     private Integer quantity;
-    private String properties;
+    private Map<String, String> properties;
     private BigDecimal unitPrice;
 }

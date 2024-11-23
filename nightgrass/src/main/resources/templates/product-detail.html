@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Product Detail</title>
-  <link rel="stylesheet" href="/css/product_detail.css" th:href="@{/css/product_detail.css}">
+  <link rel="stylesheet" href="/css/product-detail.css" th:href="@{/css/product-detail.css}">
   <link rel="stylesheet" th:href="@{/css/bottom_nav.css}">
   <link rel="stylesheet" th:href="@{/css/cart.css}">
 </head>
@@ -12,10 +12,18 @@
 <div class="product-detail-container">
   <!-- Carousel Section -->
   <div class="carousel">
-    <div th:each="productPhoto : ${productPhotos}">
-      <img th:src="${productPhoto.photoUrl}" alt="Product Photo">
+    <div class="carousel-track">
+      <div th:each="productPhoto : ${productPhotos}" class="carousel-slide">
+        <img th:src="${productPhoto.photoUrl}" alt="Product Photo">
+      </div>
     </div>
+    <!-- Navigation buttons -->
+    <button class="carousel-button prev" id="prevBtn">❮</button>
+    <button class="carousel-button next" id="nextBtn">❯</button>
   </div>
+
+
+
 
   <!-- Video Icons Section -->
   <div class="video-icons">
@@ -123,6 +131,43 @@
       if (event.target === modal) {
         modal.style.display = "none";
         videoPlayer.pause();
+      }
+    });
+  });
+
+
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const track = document.querySelector(".carousel-track");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const slides = Array.from(track.children); // Carousel slides
+    const slideWidth = slides[0].getBoundingClientRect().width; // Width of one slide
+    let currentSlide = 0;
+
+    // Position slides side by side
+    slides.forEach((slide, index) => {
+      slide.style.left = `${slideWidth * index}px`;
+    });
+
+    // Function to move the carousel track
+    const moveToSlide = (currentSlideIndex) => {
+      track.style.transform = `translateX(-${currentSlideIndex * slideWidth}px)`;
+    };
+
+    // Click event for next button
+    nextBtn.addEventListener("click", () => {
+      if (currentSlide < slides.length - 1) {
+        currentSlide++;
+        moveToSlide(currentSlide);
+      }
+    });
+
+    // Click event for previous button
+    prevBtn.addEventListener("click", () => {
+      if (currentSlide > 0) {
+        currentSlide--;
+        moveToSlide(currentSlide);
       }
     });
   });

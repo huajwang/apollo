@@ -6,6 +6,13 @@ CREATE TABLE IF NOT EXISTS e_mall_product (
     price DECIMAL(10, 2) NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS e_mall_product_property (
+    property_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    product_id BIGINT NOT NULL,
+    property_name VARCHAR(255) NOT NULL,
+    property_value VARCHAR(255) NOT NULL,
+    FOREIGN KEY (product_id) REFERENCES e_mall_product(product_id)
+);
 
 CREATE TABLE IF NOT EXISTS e_mall_user (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -35,7 +42,7 @@ CREATE TABLE IF NOT EXISTS e_mall_cart_item (
     cart_id BIGINT REFERENCES e_mall_cart(cart_id),
     product_id BIGINT NOT NULL,
     quantity INT NOT NULL,
-    properties VARCHAR(255),
+    properties JSON,  -- JSON type for storing properties
     is_selected TINYINT(1) DEFAULT 0,  -- 0 = false, 1 = true
     FOREIGN KEY (cart_id) REFERENCES e_mall_cart(cart_id) ON DELETE CASCADE,
     FOREIGN KEY (product_id) REFERENCES e_mall_product(product_id) ON DELETE CASCADE
@@ -68,7 +75,7 @@ CREATE TABLE IF NOT EXISTS e_mall_order_item (
     product_name VARCHAR(100) NOT NULL,
     image_url VARCHAR(100) NOT NULL,
     quantity INT NOT NULL,
-    properties VARCHAR(255),
+    properties JSON,
     unit_price DECIMAL(10, 2) NOT NULL,  -- price at the time of order
     FOREIGN KEY (order_id) REFERENCES e_mall_order(order_id) ON DELETE CASCADE
 );

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video Gallery</title>
+</head>
+<body>
+<div class="container">
+  <h2>Video Gallery</h2>
+  <div>
+    <th:block th:if="${videos.isEmpty()}">
+      <p>No videos available at this time.</p>
+    </th:block>
+    <th:block th:each="video : ${videos}">
+      <div>
+        <h3 th:text="${video.name}"></h3>
+        <video controls>
+          <source th:src="@{/videos/{filename}(filename=${video.name})}" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>
+      </div>
+    </th:block>
+  </div>
+</div>
+</body>
+</html>

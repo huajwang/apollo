@@ -31,6 +31,58 @@ body {
     transition: transform 0.5s ease;
 }
 
+
+
+
+.video-icons {
+  display: flex;
+  justify-content: center;
+  gap: 10px; /* Space between icons */
+  margin-top: 20px;
+}
+
+.video-icon-image {
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.video-icon-image:hover {
+  transform: scale(1.1); /* Slight zoom on hover */
+}
+
+.modal {
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+.modal-content {
+  position: relative;
+  margin: auto;
+  padding: 20px;
+  width: 80%;
+  max-width: 600px;
+}
+
+.close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+
+
+
+
 /* Product Options styling */
 .product-options {
     margin-bottom: 20px;

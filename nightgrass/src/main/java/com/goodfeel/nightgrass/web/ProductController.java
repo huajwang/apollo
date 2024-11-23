@@ -1,6 +1,7 @@
 package com.goodfeel.nightgrass.web;
 
 import com.goodfeel.nightgrass.dto.ProductDto;
+import com.goodfeel.nightgrass.dto.ProductVideo;
 import com.goodfeel.nightgrass.serviceImpl.CartService;
 import com.goodfeel.nightgrass.serviceImpl.ProductPhotoService;
 import com.goodfeel.nightgrass.serviceImpl.ProductService;
@@ -11,6 +12,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Controller
 @RequestMapping(path = "/product")
@@ -37,9 +41,14 @@ public class ProductController {
 
     @GetMapping("/detail")
     public String index(@RequestParam("id") Long productId, Model model) {
+        List<ProductVideo> productVideos = new ArrayList<>();
+        productVideos.add(new ProductVideo("e88.mp4"));
+        productVideos.add(new ProductVideo("E99K3-china.mp4"));
+        productVideos.add(new ProductVideo("E99K3-eng.mp4"));
         model.addAttribute("cartItemCount", cartService.getCartItemCount());
         model.addAttribute("product", productService.getProductById(productId));
         model.addAttribute("productPhotos", productPhotoService.findProductImg(productId));
+        model.addAttribute("productVideos",productVideos);
         return "product_detail";
     }
 }

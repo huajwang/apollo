@@ -15,9 +15,9 @@ public class SecurityConfig {
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         http
                 .authorizeExchange(exchange -> exchange
-                        .pathMatchers("/", "/product/**",
+                        .pathMatchers("/", "/product/**", "/videos/**",
                                 "/login**", "/error",
-                                "/images/**", "/css/**", "/webjars/**").permitAll()
+                                "/images/**", "/css/**", "/icons/**", "/webjars/**").permitAll()
                         .anyExchange().authenticated()
                 )
                 .oauth2Login(Customizer.withDefaults())

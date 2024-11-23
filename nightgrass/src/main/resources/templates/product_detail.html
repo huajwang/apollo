@@ -11,9 +11,36 @@
 <body>
 <div class="product-detail-container">
   <!-- Carousel Section -->
-  <div th:each="productPhoto : ${productPhotos}" class="carousel">
-    <img th:src="${productPhoto.photoUrl}">
+  <div class="carousel">
+    <div th:each="productPhoto : ${productPhotos}">
+      <img th:src="${productPhoto.photoUrl}" alt="Product Photo">
+    </div>
   </div>
+
+  <!-- Video Icons Section -->
+  <div class="video-icons">
+    <div th:each="video : ${productVideos}" class="video-icon">
+      <a th:href="@{/videos/{filename}(filename=${video.fileName})}" target="_blank">
+        <img src="/icons/video-icon.png" alt="Play Video" class="video-icon-image">
+      </a>
+    </div>
+  </div>
+
+  <!-- Optional Video Modal -->
+  <div id="videoModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <span id="closeModal" class="close">&times;</span>
+      <video id="videoPlayer" controls>
+        <source id="videoSource" src="" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+    </div>
+  </div>
+
+
+
+
+
 
   <!-- Product Options Section -->
   <div class="product-options">
@@ -68,6 +95,39 @@
           window.location.reload();
       }
   });
+
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const videoLinks = document.querySelectorAll(".video-icon a");
+    const modal = document.getElementById("videoModal");
+    const closeModal = document.getElementById("closeModal");
+    const videoPlayer = document.getElementById("videoPlayer");
+    const videoSource = document.getElementById("videoSource");
+
+    videoLinks.forEach(link => {
+      link.addEventListener("click", function (event) {
+        event.preventDefault();
+        const videoUrl = link.getAttribute("href");
+        videoSource.src = videoUrl;
+        videoPlayer.load();
+        modal.style.display = "block";
+      });
+    });
+
+    closeModal.addEventListener("click", function () {
+      modal.style.display = "none";
+      videoPlayer.pause();
+    });
+
+    window.addEventListener("click", function (event) {
+      if (event.target === modal) {
+        modal.style.display = "none";
+        videoPlayer.pause();
+      }
+    });
+  });
+
+
 </script>
 </body>
 </html>

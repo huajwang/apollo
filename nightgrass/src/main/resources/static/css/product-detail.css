@@ -136,11 +136,7 @@ body {
   cursor: pointer;
 }
 
-
-
-
-
-/* Product Options styling */
+/* Product Options Styling */
 .product-options {
     margin-bottom: 20px;
 }
@@ -154,17 +150,33 @@ body {
     margin-bottom: 8px;
 }
 
-.option-button {
-    padding: 10px 15px;
-    margin: 5px;
-    border: 1px solid #ddd;
-    background-color: #f9f9f9;
-    cursor: pointer;
-    transition: background-color 0.3s;
+.option-buttons {
+    display: flex; /* Align buttons horizontally */
+    gap: 10px; /* Spacing between buttons */
+    margin-top: 10px;
 }
 
+/* Option Button Styling */
+.option-button {
+    padding: 10px 15px; /* Consistent padding */
+    margin: 5px; /* Margin around buttons */
+    border: 1px solid #ccc; /* Consistent border color */
+    background-color: #f8f8f9; /* Neutral background color */
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+/* Hover State for Option Buttons */
 .option-button:hover {
     background-color: #e0e0e0;
+}
+
+/* Selected Button Style */
+.option-button.selected {
+    background-color: #007bff; /* Highlight for selected */
+    color: white; /* White text for contrast */
+    border-color: #0056b3; /* Darker border */
 }
 
 /* User Comments styling */

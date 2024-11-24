@@ -50,18 +50,18 @@
     <div th:each="property : ${productProperties}">
       <div class="option-group">
         <h3 th:text="'Select ' + ${property.propertyName} + ':'"></h3>
-        <div th:each="value : ${property.propertyValue.split(',')}">
+        <div class="option-buttons">
           <button type="button"
                   class="option-button"
                   th:data-property="${property.propertyName}"
                   th:data-value="${value}"
+                  th:each="value : ${property.propertyValue.split(',')}"
                   th:text="${value}">
           </button>
         </div>
       </div>
     </div>
   </div>
-
 
   <!-- User Comments Section -->
   <div class="user-comments">
@@ -87,14 +87,6 @@
     </form>
     <button class="buy-now">Buy Now</button>
   </div>
-
-
-
-
-
-
-
-
 
 </div>
 
@@ -181,15 +173,30 @@
     });
   });
 
+document.addEventListener("DOMContentLoaded", function () {
+  // Add click event listeners to all option buttons
   document.querySelectorAll(".option-button").forEach(button => {
-    button.addEventListener("click", () => {
-        const property = button.dataset.property;
-        const value = button.dataset.value;
+    button.addEventListener("click", function () {
+      const property = button.dataset.property;
+      const value = button.dataset.value;
 
-        // Update the corresponding hidden input
-        document.getElementById(`selected-${property}`).value = value;
+      // Remove 'selected' class from all buttons in the same group
+      document.querySelectorAll(`.option-button[data-property="${property}"]`).forEach(btn => {
+        btn.classList.remove("selected");
+      });
+
+      // Add 'selected' class to the clicked button
+      button.classList.add("selected");
+
+      // Update the hidden input for the selected property
+      const hiddenInput = document.getElementById(`selected-${property}`);
+      if (hiddenInput) {
+        hiddenInput.value = value;
+      }
     });
+  });
 });
+
 
 
 

@@ -45,27 +45,23 @@
     </div>
   </div>
 
-
-
-
-
-
   <!-- Product Options Section -->
   <div class="product-options">
-    <div class="option-group">
-      <h3>Select Color:</h3>
-      <button class="option-button">Red</button>
-      <button class="option-button">Blue</button>
-      <button class="option-button">Green</button>
-    </div>
-    <div class="option-group">
-      <h3>Select Size:</h3>
-      <button class="option-button">S</button>
-      <button class="option-button">M</button>
-      <button class="option-button">L</button>
-      <button class="option-button">XL</button>
+    <div th:each="property : ${productProperties}">
+      <div class="option-group">
+        <h3 th:text="'Select ' + ${property.propertyName} + ':'"></h3>
+        <div th:each="value : ${property.propertyValue.split(',')}">
+          <button type="button"
+                  class="option-button"
+                  th:data-property="${property.propertyName}"
+                  th:data-value="${value}"
+                  th:text="${value}">
+          </button>
+        </div>
+      </div>
     </div>
   </div>
+
 
   <!-- User Comments Section -->
   <div class="user-comments">
@@ -80,13 +76,26 @@
 
   <!-- Action Buttons Section -->
   <div class="action-buttons">
-    <form th:action="@{/cart/add}" method="post">
+    <form th:action="@{/cart/add}" method="post" id="add-to-cart-form">
       <input type="hidden" name="productId" th:value="${product.productId}">
+      <!-- Dynamic properties -->
+      <input type="hidden" th:each="property : ${productProperties}"
+             th:id="'selected-' + ${property.propertyName}"
+             th:name="'properties[' + ${property.propertyName} + ']'"
+             value="">
       <button type="submit" class="add-to-cart">Add to Cart</button>
     </form>
-
     <button class="buy-now">Buy Now</button>
   </div>
+
+
+
+
+
+
+
+
+
 </div>
 
 <!-- Include the bottom navigation bar -->
@@ -171,6 +180,17 @@
       }
     });
   });
+
+  document.querySelectorAll(".option-button").forEach(button => {
+    button.addEventListener("click", () => {
+        const property = button.dataset.property;
+        const value = button.dataset.value;
+
+        // Update the corresponding hidden input
+        document.getElementById(`selected-${property}`).value = value;
+    });
+});
+
 
 
 </script>

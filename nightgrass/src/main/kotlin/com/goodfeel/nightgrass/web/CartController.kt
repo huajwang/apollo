@@ -3,7 +3,7 @@ package com.goodfeel.nightgrass.web
 import com.goodfeel.nightgrass.data.Order
 import com.goodfeel.nightgrass.serviceImpl.CartService
 import com.goodfeel.nightgrass.web.util.CartItemUpdateRequest
-import com.goodfeel.nightgrass.web.util.CartRequest
+import com.goodfeel.nightgrass.web.util.AddCartRequest
 import com.goodfeel.nightgrass.web.util.Utility
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -41,17 +41,15 @@ class CartController(private val cartService: CartService) {
     }
 
     @PostMapping("/add")
-    fun addToCart(@ModelAttribute cartRequest: CartRequest): Mono<String> {
-        return cartRequest.productId?.let { productId ->
-            cartService.addProductToCart(productId)
-                .thenReturn("redirect:/product/detail?id=$productId")
-        } ?: Mono.just("redirect:/error")
-
+    fun addToCart(@ModelAttribute addCartRequest: AddCartRequest): Mono<String> {
+        logger.debug("Adding product ${addCartRequest.productId} with properties: ${addCartRequest.itemId}")
+        return cartService.addProductToCart(addCartRequest)
+            .thenReturn("redirect:/product/detail?id=${addCartRequest.productId}")
     }
 
     @PostMapping("/remove")
-    fun removeFromCart(@ModelAttribute cartRequest: CartRequest, model: Model): Mono<String> {
-        return cartRequest.itemId?.let { itemId ->
+    fun removeFromCart(@ModelAttribute addCartRequest: AddCartRequest, model: Model): Mono<String> {
+        return addCartRequest.itemId?.let { itemId ->
             cartService.removeCartItemFromCart(itemId)
                 .doOnSuccess {
                     model.addAttribute("message", "Item removed from the cart successfully!")

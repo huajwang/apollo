@@ -5,6 +5,7 @@ import com.goodfeel.nightgrass.dto.CartItemDto
 import com.goodfeel.nightgrass.repo.*
 import com.goodfeel.nightgrass.service.ICartService
 import com.goodfeel.nightgrass.util.OrderStatus
+import com.goodfeel.nightgrass.web.util.AddCartRequest
 import com.goodfeel.nightgrass.web.util.Utility
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -44,12 +45,12 @@ open class CartService(
             )
     }
 
-    override fun addProductToCart(productId: Long): Mono<Cart> {
+    override fun addProductToCart(addCartRequest: AddCartRequest): Mono<Cart> {
         return Utility.currentUserId
             .flatMap { userId: String -> this.getCartForUser(userId) }
             .flatMap { cart: Cart ->
                 cartItemRepository.findByCartId(cart.cartId!!)
-                    .filter { item -> item.productId == productId }
+                    .filter { item -> item.productId == addCartRequest.productId }
                     .next() // Take the first matching item, if any
                     .flatMap { existingItem: CartItem ->
                         // If product exists, increment quantity and save
@@ -57,17 +58,16 @@ open class CartService(
                         cartItemRepository.save(existingItem).thenReturn(cart)
                     }
                     .switchIfEmpty( // If product does not exist in cart, add as new CartItem
-                        productRepository.findById(productId)
+                        productRepository.findById(addCartRequest.productId)
                             .flatMap { product: Product ->
-                                val propertiesMap = mapOf("color" to "blue", "size" to "large")
                                 val newItem = CartItem(
                                     itemId = null,
                                     cartId =  cart.cartId,
-                                    productId = productId,
+                                    productId = addCartRequest.productId,
                                     quantity =  1,
                                     isSelected = true
                                 )
-                                newItem.setPropertiesFromMap(map = propertiesMap)
+                                newItem.setPropertiesFromMap(map = addCartRequest.properties)
                                 cartItemRepository.save(newItem)
                                     .thenReturn(cart)
                             }

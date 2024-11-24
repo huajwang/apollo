@@ -148,7 +148,7 @@ open class CartService(
             }
     }
 
-    fun updateQuantity(itemId: Long, quantity: Int): Mono<CartItem> {
+    open fun updateQuantity(itemId: Long, quantity: Int): Mono<CartItem> {
         return cartItemRepository.findById(itemId)
             .flatMap { cartItem: CartItem ->
                 cartItem.quantity = quantity
@@ -194,7 +194,7 @@ open class CartService(
      * @param isSelected Is the cart item selected or not
      * @return
      */
-    fun updateCartTotal(itemId: Long, isSelected: Boolean): Mono<Void> {
+    open fun updateCartTotal(itemId: Long, isSelected: Boolean): Mono<Void> {
         return cartItemRepository.findById(itemId)
             .flatMap { cartItem: CartItem ->
                 cartItem.isSelected = isSelected

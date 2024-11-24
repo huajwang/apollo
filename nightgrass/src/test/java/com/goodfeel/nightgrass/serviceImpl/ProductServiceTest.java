@@ -29,7 +29,7 @@ public class ProductServiceTest {
     }
 
     @Test
-    public void getAllProducts_shouldReturnAllProducts() {
+    public void allProducts() {
         // Arrange
         Product product1 = new Product(1L, "Product 1", "Description 1",
                 "image1.jpg", BigDecimal.valueOf(100.00));
@@ -37,7 +37,7 @@ public class ProductServiceTest {
                 "image2.jpg", BigDecimal.valueOf(200.00));
         when(productRepository.findAll()).thenReturn(Flux.just(product1, product2));
 
-        StepVerifier.create(productService.getAllProducts())
+        StepVerifier.create(productService.allProducts())
                 .expectNextMatches(productDto -> productDto.getProductName().equals("Product 1"))
                 .expectNextMatches(productDto -> productDto.getProductName().equals("Product 2"))
                 .verifyComplete();

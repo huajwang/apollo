@@ -48,10 +48,15 @@ class CheckoutController(
                 oauthId!!
             )
         }
-        val orderItemsMono = orderService.getOrderItemsByOrderId(orderId).collectList()
+        val orderItemDtosMono = orderService.getOrderItemsByOrderId(orderId)
+            .map {
+                it.processProperties()
+                it
+            }
+            .collectList()
         val orderMono = orderService.getOrderById(orderId)
 
-        return Mono.zip<UserDto, List<OrderItemDto>, OrderDto>(userMono, orderItemsMono, orderMono)
+        return Mono.zip<UserDto, List<OrderItemDto>, OrderDto>(userMono, orderItemDtosMono, orderMono)
             .flatMap { tuple: Tuple3<UserDto, List<OrderItemDto>, OrderDto> ->
                 val user = tuple.t1
                 val orderItems = tuple.t2

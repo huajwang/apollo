@@ -27,10 +27,14 @@ class CartController(private val cartService: CartService) {
     // View cart contents
     @GetMapping
     fun viewCart(model: Model): Mono<String> {
-        val cartItemsFlux = cartService.getCartItems()
+        val cartItemDtosFlux = cartService.getCartItems()
+            .map {
+                it.processProperties()
+                it
+            }
         val totalPriceMono = cartService.getTotalPrice()
 
-        return Mono.zip(cartItemsFlux.collectList(), totalPriceMono)
+        return Mono.zip(cartItemDtosFlux.collectList(), totalPriceMono)
             .map { tuple ->
                 val cartItems = tuple.t1
                 val cartTotal = tuple.t2

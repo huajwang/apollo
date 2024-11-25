@@ -31,6 +31,12 @@
         <span th:text="${item.productName}"></span> -
         <span th:text="${item.unitPrice}"></span> x
         <span th:text="${item.quantity}"></span>
+        <br>
+        <ul>
+          <li th:each="entry : ${item.formattedProperties}">
+            <strong th:text="${entry.key}"></strong>: <span th:text="${entry.value}"></span>
+          </li>
+        </ul>
       </li>
     </ul>
   </div>

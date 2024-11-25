@@ -313,6 +313,12 @@
       <span class="item-name" th:text="${item.productName}">Item Name</span>
       <span class="item-description" th:text="${item.description}">Item description goes here...</span>
 
+      <ul>
+        <li th:each="entry : ${item.formattedProperties}">
+          <strong th:text="${entry.key}"></strong>: <span th:text="${entry.value}"></span>
+        </li>
+      </ul>
+      
       <!-- Price display -->
       <span class="item-price" th:text="${item.formattedPrice}">Price: $0.00</span>
 

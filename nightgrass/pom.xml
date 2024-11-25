@@ -27,7 +27,6 @@
 		<url/>
 	</scm>
 	<properties>
-		<java.version>20</java.version>
 		<kotlin.version>1.9.10</kotlin.version>
 		<kotlin.coroutines.version>1.7.3</kotlin.coroutines.version>
 	</properties>
@@ -72,12 +71,6 @@
 			<groupId>io.asyncer</groupId>
 			<artifactId>r2dbc-mysql</artifactId>
 			<scope>runtime</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -132,18 +125,6 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin>
-
-			<!-- Maven Compiler Plugin -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.11.0</version>
-				<configuration>
-					<source>${java.version}</source>
-					<target>${java.version}</target>
-					<release>${java.version}</release>
-				</configuration>
 			</plugin>
 
 			<!-- Spring Boot Maven Plugin -->

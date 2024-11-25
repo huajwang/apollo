@@ -55,8 +55,9 @@
                   class="option-button"
                   th:data-property="${property.propertyName}"
                   th:data-value="${value}"
-                  th:each="value : ${property.propertyValue.split(',')}"
-                  th:text="${value}">
+                  th:each="value, iterStat : ${property.propertyValue.split(',')}"
+                  th:text="${value}"
+                  th:classappend="${iterStat.index == 0 ? 'selected' : ''}">
           </button>
         </div>
       </div>
@@ -79,10 +80,12 @@
     <form th:action="@{/cart/add}" method="post" id="add-to-cart-form">
       <input type="hidden" name="productId" th:value="${product.productId}">
       <!-- Dynamic properties -->
-      <input type="hidden" th:each="property : ${productProperties}"
+      <input type="hidden"
+             th:each="property : ${productProperties}"
              th:id="'selected-' + ${property.propertyName}"
              th:name="'properties[' + ${property.propertyName} + ']'"
-             value="">
+             th:value="${property.propertyValue.split(',')[0]}">
+
       <button type="submit" class="add-to-cart">Add to Cart</button>
     </form>
     <button class="buy-now">Buy Now</button>

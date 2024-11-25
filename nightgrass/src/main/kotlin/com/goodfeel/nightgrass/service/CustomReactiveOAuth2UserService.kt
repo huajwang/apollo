@@ -16,21 +16,35 @@ class CustomReactiveOAuth2UserService(private val userRepository: UserRepository
 
     override fun loadUser(userRequest: OAuth2UserRequest): Mono<OAuth2User> {
         return super.loadUser(userRequest)
+            .doOnSubscribe { logger.debug("Reactive pipeline subscribed!") }
             .flatMap { oAuth2User: OAuth2User ->
-                // Extract and persist user information
-                logger.debug("Exact the logged-in user's information and persist it")
-                val oauthId = oAuth2User.getAttribute<String>("id") // Facebook user ID
-                val name = oAuth2User.getAttribute<String>("name")
-                val email = oAuth2User.getAttribute<String>("email")
+
+                val registrationId = userRequest.clientRegistration.registrationId
+                logger.info("Processing OAuth2 login for provider: $registrationId")
+                val oauthId = when (registrationId) {
+                    "google" -> oAuth2User.getAttribute<String>("sub")
+                    "facebook" -> oAuth2User.getAttribute<String>("id")
+                    "wechat" -> oAuth2User.getAttribute<String>("openid")
+                    else -> throw IllegalArgumentException("Unsupported OAuth2 provider: $registrationId")
+                } ?: throw RuntimeException("OAuth ID is null for provider: $registrationId")
+
+                // Extract additional attributes (if any)
+                val name = when (registrationId) {
+                    "google", "facebook" -> oAuth2User.getAttribute<String>("name")
+                    "wechat" -> oAuth2User.getAttribute<String>("nickname")
+                    else -> null
+                }
+                val email = oAuth2User.getAttribute<String>("email") // Email may not be available for WeChat
+                logger.info("Exact the logged-in user's information and persist it. oauthId: $oauthId," +
+                        " name: $name, email: $email")
+
                 userRepository.findByOauthId(oauthId)
                     .switchIfEmpty(Mono.defer {
-                        val newUser = oauthId?.let {
-                            User(
-                                oauthId = it,
-                                nickName = name,
-                                email = email
-                            )
-                        } ?: throw RuntimeException("oauthId is null") // TODO
+                        val newUser = User(
+                            oauthId = oauthId,
+                            nickName = name,
+                            email = email
+                        )
                         Mono.just(newUser)
                     })
                     .flatMap { user: User ->

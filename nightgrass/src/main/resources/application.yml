@@ -9,15 +9,22 @@ spring:
       client:
         registration:
           google:
-            client-id: YOUR_GOOGLE_CLIENT_ID
-            client-secret: YOUR_GOOGLE_CLIENT_SECRET
-            scope: profile, email
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope: openid, profile, email
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
           facebook:
             client-id: ${FACEBOOK_CLIENT_ID}
             client-secret: ${FACEBOOK_CLIENT_SECRET}
             scope: public_profile, email
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+          wechat:
+            client-id: ${WECHAT_CLIENT_ID}
+            client-secret: ${WECHAT_CLIENT_SECRET}
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope: snsapi_userinfo
+            client-name: WeChat
         provider:
           google:
             authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
@@ -29,6 +36,11 @@ spring:
             token-uri: https://graph.facebook.com/v10.0/oauth/access_token
             user-info-uri: https://graph.facebook.com/me?fields=id,name,email
             user-name-attribute: id
+          wechat:
+            authorization-uri: https://open.weixin.qq.com/connect/oauth2/authorize
+            token-uri: https://api.weixin.qq.com/sns/oauth2/access_token
+            user-info-uri: https://api.weixin.qq.com/sns/userinfo
+            user-name-attribute: openid
 
   r2dbc:
     url: r2dbc:mysql://localhost:3306/emall
@@ -51,6 +63,10 @@ logging:
     org.springframework.r2dbc: DEBUG
     io.r2dbc.spi: DEBUG
     org.springframework.web: DEBUG
+    org:
+      springframework:
+        security:
+          oauth2: DEBUG
     com.goodfeel.nightgrass: DEBUG
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n"

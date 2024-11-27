@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS e_mall_order (
     contact_name VARCHAR(50),
     contact_phone VARCHAR(15),
     created_at TIMESTAMP NOT NULL,
-    order_status ENUM('CHECKOUT', 'SUBMITTED', 'PROCESSING', 'SHIPPING', 'CANCELED', 'COMPLETED') NOT NULL,
+    order_status ENUM('PENDING', 'PROCESSING', 'SHIPPING', 'CANCELED', 'COMPLETED') NOT NULL,
     updated_date TIMESTAMP,
     logistics_no VARCHAR(30),
     delivery_date TIMESTAMP,

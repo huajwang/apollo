@@ -81,7 +81,7 @@
 
   <!-- Submit Order Button -->
   <div class="submit-order">
-    <button id="submit-order-button" type="button">Submit Order</button>
+    <button id="submit-order-button" type="button">Pay Now</button>
   </div>
 
   <!-- Customer Info Edit Modal -->
@@ -125,7 +125,7 @@
           return; // Stop further execution
       }
 
-      fetch("/create-checkout-session", {
+      fetch("/pay/create-checkout-session", {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
           body: new URLSearchParams({

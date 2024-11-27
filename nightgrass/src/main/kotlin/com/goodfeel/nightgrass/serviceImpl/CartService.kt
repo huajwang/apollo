@@ -276,14 +276,14 @@ open class CartService(
             }
             .reduce(BigDecimal.ZERO, BigDecimal::add)
 
-        return userRepository.findByOauthId(cart.userId) // TODO - save userId or OauthId in cart/order table?
+        return userRepository.findByOauthId(cart.userId)
             .zipWith(totalMono) { user: User, total: BigDecimal ->
                 // Create the order
                 val order = Order(
                     orderNo =  generateOrderNo(),
                     userId = cart.userId,
                     createdAt = LocalDateTime.now(),
-                    orderStatus = OrderStatus.CHECKOUT,
+                    orderStatus = OrderStatus.PENDING,
                     total = total,
                     // Copy user details to order
                     contactName = user.customerName,

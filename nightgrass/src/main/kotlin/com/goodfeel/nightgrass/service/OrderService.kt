@@ -6,6 +6,7 @@ import com.goodfeel.nightgrass.dto.OrderDto
 import com.goodfeel.nightgrass.dto.OrderItemDto
 import com.goodfeel.nightgrass.repo.OrderItemRepository
 import com.goodfeel.nightgrass.repo.OrderRepository
+import com.goodfeel.nightgrass.util.OrderStatus
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -43,6 +44,9 @@ class OrderService(private val orderRepository: OrderRepository, private val ord
     override fun updateOrder(order: Order): Mono<Order> {
         return orderRepository.save(order)
     }
+
+    override fun getOrderByOrderStatus(orderStatus: OrderStatus): Flux<Order> =
+        orderRepository.findByOrderStatus(orderStatus)
 
     private fun mapToOrderItemDto(orderItem: OrderItem) = OrderItemDto(
             productName = orderItem.productName,

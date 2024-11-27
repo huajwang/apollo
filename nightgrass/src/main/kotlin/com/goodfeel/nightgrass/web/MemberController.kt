@@ -1,21 +1,26 @@
 package com.goodfeel.nightgrass.web
 
 import com.goodfeel.nightgrass.repo.ReferralRewardRepository
+import com.goodfeel.nightgrass.service.IOrderService
+import com.goodfeel.nightgrass.util.OrderStatus
 import com.goodfeel.nightgrass.util.ReferralRewardStatus
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.RequestMapping
 import reactor.core.publisher.Mono
 import java.math.BigDecimal
 import java.security.Principal
 
 @Controller
-class MemberController(private val rewardRepository: ReferralRewardRepository) {
+@RequestMapping("/member")
+class MemberController(
+    private val orderService: IOrderService,
+    private val rewardRepository: ReferralRewardRepository) {
 
-    @GetMapping("/member")
-    fun getRewards(principal: Principal, model: Model): Mono<String> {
+    @GetMapping
+    fun memberIndex(principal: Principal, model: Model): Mono<String> {
         val userId = principal.name
-
         val rewardsFlux = rewardRepository.findBySharerId(userId)
 
         return rewardsFlux
@@ -34,6 +39,19 @@ class MemberController(private val rewardRepository: ReferralRewardRepository) {
                         model.addAttribute("rewardsTotal", rewardsTotal)
                     }
             )
-            .thenReturn("/member") // Return the view name
+            .thenReturn("/member")
     }
+
+    @GetMapping("/getPendingOrders")
+    fun getPendingOrders() =
+        orderService.getOrderByOrderStatus(OrderStatus.PENDING)
+
+    @GetMapping("/getProcessingOrders")
+    fun getProcessingOrders() =
+        orderService.getOrderByOrderStatus(OrderStatus.PROCESSING)
+
+    @GetMapping("/getCompletedOrders")
+    fun getCompletedOrders() =
+        orderService.getOrderByOrderStatus(OrderStatus.COMPLETED)
+
 }

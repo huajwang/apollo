@@ -1,0 +1,98 @@
+/* General Styles */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 10px;
+    background-color: #f8f8f8;
+}
+
+/* Header Section */
+.header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.header h1 {
+    font-size: 24px;
+    color: #333;
+}
+
+/* Orders List Section */
+.orders {
+    background-color: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.order-header, .order-item {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.order-header {
+    background-color: #f3f3f3;
+    font-weight: bold;
+    color: #555;
+}
+
+.order-item {
+    transition: background-color 0.3s ease;
+}
+
+.order-item:hover {
+    background-color: #fafafa;
+}
+
+.order-id, .order-date, .order-status, .order-total {
+    text-align: center;
+    font-size: 14px;
+    color: #333;
+}
+
+.order-item:last-child {
+    border-bottom: none;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .order-header, .order-item {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .order-id {
+        grid-column: 1 / 3;
+        font-weight: bold;
+        font-size: 16px;
+    }
+
+    .order-date, .order-status, .order-total {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .order-header, .order-item {
+        grid-template-columns: 1fr;
+    }
+
+    .order-id, .order-date, .order-status, .order-total {
+        text-align: left;
+        font-size: 14px;
+        margin-bottom: 5px;
+    }
+
+    .order-item {
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+    }
+}

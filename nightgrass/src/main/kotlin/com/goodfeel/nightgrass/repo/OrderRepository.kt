@@ -7,4 +7,5 @@ import reactor.core.publisher.Flux
 
 interface OrderRepository : ReactiveCrudRepository<Order, Long> {
     fun findByOrderStatus(orderStatus: OrderStatus): Flux<Order>
+    fun findByUserId(userId: String): Flux<Order>
 }

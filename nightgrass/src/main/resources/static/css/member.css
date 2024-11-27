@@ -86,6 +86,20 @@
     margin-top: 5px;
 }
 
+.feature-link {
+    text-decoration: none; /* Remove underline from links */
+    color: inherit; /* Inherit text color from parent */
+    display: block; /* Make the entire block clickable */
+    padding: 10px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.feature-link:hover {
+    background-color: #f3f3f3; /* Highlight on hover */
+}
+
+
 /* Coupons and Balance Section */
 .coupons-balance {
     display: flex;

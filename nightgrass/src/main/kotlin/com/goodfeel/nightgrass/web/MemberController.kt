@@ -42,6 +42,15 @@ class MemberController(
             .thenReturn("/member")
     }
 
+    @GetMapping("/orders")
+    fun getAllOrders(principal: Principal, model: Model): Mono<String> {
+        val userId = principal.name
+        return orderService.findOrderByUserId(userId).collectList()
+            .doOnNext {
+                model.addAttribute("orders", it)
+            }.then(Mono.just("orders"))
+    }
+
     @GetMapping("/getPendingOrders")
     fun getPendingOrders() =
         orderService.getOrderByOrderStatus(OrderStatus.PENDING)

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Orders</title>
+  <link rel="stylesheet" href="/css/orders.css">
+</head>
+<body>
+<div class="container">
+  <!-- Header Section -->
+  <header class="header">
+    <h1>Your Orders</h1>
+  </header>
+
+  <!-- Orders List Section -->
+  <section class="orders">
+    <div class="order-header">
+      <div class="order-id">Order ID</div>
+<!--      <div class="order-date">Date</div>-->
+      <div class="order-status">Status</div>
+      <div class="order-total">Total</div>
+    </div>
+    <div th:each="order : ${orders}" class="order-item">
+      <div class="order-No" th:text="${order.orderNo}"></div>
+<!--      <div class="order-date" th:text="${#dates.format(order.createdAt, 'dd-MM-yyyy HH:mm')}"></div>-->
+      <div class="order-status" th:text="${order.orderStatus}"></div>
+      <div class="order-total" th:text="'$' + ${order.finalTotal}"></div>
+    </div>
+  </section>
+</div>
+</body>
+</html>

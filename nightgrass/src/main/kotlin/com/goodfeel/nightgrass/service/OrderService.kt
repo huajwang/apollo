@@ -48,6 +48,10 @@ class OrderService(private val orderRepository: OrderRepository, private val ord
     override fun getOrderByOrderStatus(orderStatus: OrderStatus): Flux<Order> =
         orderRepository.findByOrderStatus(orderStatus)
 
+    override fun findOrderByUserId(userId: String): Flux<Order> {
+        return orderRepository.findByUserId(userId)
+    }
+
     private fun mapToOrderItemDto(orderItem: OrderItem) = OrderItemDto(
             productName = orderItem.productName,
             imageUrl = orderItem.imageUrl,

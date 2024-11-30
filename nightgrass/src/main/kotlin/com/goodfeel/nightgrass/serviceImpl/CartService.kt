@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import reactor.core.publisher.Sinks
 import java.math.BigDecimal
 import java.text.NumberFormat
 import java.time.LocalDateTime
@@ -29,7 +30,22 @@ open class CartService(
     private val orderItemRepository: OrderItemRepository,
     private val userRepository: UserRepository
 ) : ICartService {
-    private val logger: Logger = LoggerFactory.getLogger(CartService::class.java)
+
+    companion object {
+        private val logger: Logger = LoggerFactory.getLogger(CartService::class.java)
+        private val cartUpdateSink = Sinks.many().multicast().onBackpressureBuffer<Int>()
+    }
+
+
+    private fun sendCartUpdate(event: Int) {
+        logger.debug("Sever sent event: $event")
+        cartUpdateSink.tryEmitNext(event)
+    }
+
+    fun getCartUpdateStream(): Flux<Int> {
+        logger.debug("get cart update stream")
+        return cartUpdateSink.asFlux().share()
+    }
 
     override fun getCartForUser(userId: String): Mono<Cart> {
         if (userId.equals("Guest", ignoreCase = true)) {
@@ -76,6 +92,17 @@ open class CartService(
                         updateCartTotal(updatedCart.cartId!!).thenReturn(updatedCart)
                     }
             }
+            .flatMap { updatedCart ->
+                // Calculate the total quantity of items in the cart in a fully reactive manner
+                cartItemRepository.findByCartId(updatedCart.cartId!!)
+                    .reduce(0) { total, item -> total + item.quantity } // Aggregate directly from the stream
+                    .doOnNext { totalQuantity ->
+                        logger.debug("Notify subscribers about the updated cart item count")
+                        sendCartUpdate(totalQuantity)
+                    }
+                    .thenReturn(updatedCart) // Return the updated cart
+            }
+
     }
 
     override fun getCartItemCount(): Mono<Int> {

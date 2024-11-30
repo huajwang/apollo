@@ -22,9 +22,6 @@
     <button class="carousel-button next" id="nextBtn">❯</button>
   </div>
 
-
-
-
   <!-- Video Icons Section -->
   <div class="video-icons">
     <div th:each="video : ${productVideos}" class="video-icon">
@@ -90,119 +87,11 @@
     </form>
     <button class="buy-now">Buy Now</button>
   </div>
-
 </div>
 
 <!-- Include the bottom navigation bar -->
 <div th:replace="nav :: bottom-nav"></div>
 
-<script>
-  // console.log("Script loaded");
-
-  // Forces a reload when navigating back to the cart page
-  window.addEventListener("pageshow", function (event) {
-      // console.log("pageshow event triggered");
-      if (event.persisted) {
-          //console.log("Page loaded from cache, reloading...");
-          window.location.reload();
-      }
-  });
-
-
-  document.addEventListener("DOMContentLoaded", function () {
-    const videoLinks = document.querySelectorAll(".video-icon a");
-    const modal = document.getElementById("videoModal");
-    const closeModal = document.getElementById("closeModal");
-    const videoPlayer = document.getElementById("videoPlayer");
-    const videoSource = document.getElementById("videoSource");
-
-    videoLinks.forEach(link => {
-      link.addEventListener("click", function (event) {
-        event.preventDefault();
-        const videoUrl = link.getAttribute("href");
-        videoSource.src = videoUrl;
-        videoPlayer.load();
-        modal.style.display = "block";
-      });
-    });
-
-    closeModal.addEventListener("click", function () {
-      modal.style.display = "none";
-      videoPlayer.pause();
-    });
-
-    window.addEventListener("click", function (event) {
-      if (event.target === modal) {
-        modal.style.display = "none";
-        videoPlayer.pause();
-      }
-    });
-  });
-
-
-
-  document.addEventListener("DOMContentLoaded", function () {
-    const track = document.querySelector(".carousel-track");
-    const prevBtn = document.getElementById("prevBtn");
-    const nextBtn = document.getElementById("nextBtn");
-    const slides = Array.from(track.children); // Carousel slides
-    const slideWidth = slides[0].getBoundingClientRect().width; // Width of one slide
-    let currentSlide = 0;
-
-    // Position slides side by side
-    slides.forEach((slide, index) => {
-      slide.style.left = `${slideWidth * index}px`;
-    });
-
-    // Function to move the carousel track
-    const moveToSlide = (currentSlideIndex) => {
-      track.style.transform = `translateX(-${currentSlideIndex * slideWidth}px)`;
-    };
-
-    // Click event for next button
-    nextBtn.addEventListener("click", () => {
-      if (currentSlide < slides.length - 1) {
-        currentSlide++;
-        moveToSlide(currentSlide);
-      }
-    });
-
-    // Click event for previous button
-    prevBtn.addEventListener("click", () => {
-      if (currentSlide > 0) {
-        currentSlide--;
-        moveToSlide(currentSlide);
-      }
-    });
-  });
-
-document.addEventListener("DOMContentLoaded", function () {
-  // Add click event listeners to all option buttons
-  document.querySelectorAll(".option-button").forEach(button => {
-    button.addEventListener("click", function () {
-      const property = button.dataset.property;
-      const value = button.dataset.value;
-
-      // Remove 'selected' class from all buttons in the same group
-      document.querySelectorAll(`.option-button[data-property="${property}"]`).forEach(btn => {
-        btn.classList.remove("selected");
-      });
-
-      // Add 'selected' class to the clicked button
-      button.classList.add("selected");
-
-      // Update the hidden input for the selected property
-      const hiddenInput = document.getElementById(`selected-${property}`);
-      if (hiddenInput) {
-        hiddenInput.value = value;
-      }
-    });
-  });
-});
-
-
-
-
-</script>
+<script src="/js/product-detail.js" th:src="@{/js/product-detail.js}"></script>
 </body>
 </html>

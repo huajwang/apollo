@@ -27,18 +27,5 @@
 
 <!-- Include the bottom navigation bar -->
 <div th:replace="nav :: bottom-nav"></div>
-<script>
-    // console.log("Script loaded");
-
-    // Forces a reload when navigating back to the cart page
-    window.addEventListener("pageshow", function (event) {
-        // console.log("pageshow event triggered");
-        if (event.persisted) {
-            //console.log("Page loaded from cache, reloading...");
-            window.location.reload();
-        }
-    });
-</script>
-
 </body>
 </html>

@@ -11,9 +11,11 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.http.codec.ServerSentEvent
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.*
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.math.BigDecimal
 
@@ -46,10 +48,10 @@ class CartController(private val cartService: CartService) {
     }
 
     @PostMapping("/add")
-    fun addToCart(@ModelAttribute addCartRequest: AddCartRequest): Mono<String> {
+    fun addToCart(@RequestBody addCartRequest: AddCartRequest): Mono<ResponseEntity<Void>> {
         logger.debug("Adding product ${addCartRequest.productId} with properties: ${addCartRequest.properties}")
         return cartService.addProductToCart(addCartRequest)
-            .thenReturn("redirect:/product/detail?id=${addCartRequest.productId}")
+            .then(Mono.just(ResponseEntity.ok().build())) // Respond with HTTP 200 OK
     }
 
     @PostMapping("/remove")

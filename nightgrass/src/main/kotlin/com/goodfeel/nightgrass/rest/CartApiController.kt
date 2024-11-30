@@ -1,6 +1,7 @@
 package com.goodfeel.nightgrass.rest
 
 import com.goodfeel.nightgrass.serviceImpl.CartService
+import com.goodfeel.nightgrass.serviceImpl.CartService.Companion
 import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
 import org.springframework.http.codec.ServerSentEvent
@@ -16,9 +17,11 @@ class CartApiController(private val cartService: CartService) {
 
     @GetMapping("/cart/updates", produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
     fun streamCartUpdates(): Flux<ServerSentEvent<Int>> {
-        logger.debug("cart updates controller gets invoked")
         val heartbeat = Flux.interval(Duration.ofSeconds(15))
             .map { ServerSentEvent.builder<Int>().event("heartbeat").data(0).build() }
+            .doOnNext {
+                logger.debug("heartbeat is sent: ${it.data()}")
+            }
 
         val updates = cartService.getCartUpdateStream()
             .map { updatedCount ->
@@ -28,8 +31,8 @@ class CartApiController(private val cartService: CartService) {
         return Flux.merge(heartbeat, updates)
             .doOnSubscribe { logger.debug("SSE connection started") }
             .doOnCancel { logger.debug("SSE connection closed") }
-            .doOnComplete { logger.debug("SSE connection completed") } // Log completions
-            .doOnError { error -> logger.error("SSE error occurred: ${error.message}", error) } // Log errors
+            .doOnComplete { logger.debug("SSE connection completed") }
+            .doOnError { error -> logger.error("SSE error occurred: ${error.message}", error) }
 
     }
 

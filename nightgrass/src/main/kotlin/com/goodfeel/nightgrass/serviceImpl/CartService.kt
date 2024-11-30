@@ -33,18 +33,24 @@ open class CartService(
 
     companion object {
         private val logger: Logger = LoggerFactory.getLogger(CartService::class.java)
-        private val cartUpdateSink = Sinks.many().multicast().onBackpressureBuffer<Int>()
+        private val cartUpdateSink = Sinks.many().replay().latest<Int>()
     }
 
 
     private fun sendCartUpdate(event: Int) {
-        logger.debug("Sever sent event: $event")
-        cartUpdateSink.tryEmitNext(event)
+        val result = cartUpdateSink.tryEmitNext(event)
+        logger.debug("Emit cartUpdateSink emit result: $result")
     }
 
     fun getCartUpdateStream(): Flux<Int> {
-        logger.debug("get cart update stream")
-        return cartUpdateSink.asFlux().share()
+        return cartUpdateSink.asFlux()
+            .share()
+            .doOnSubscribe {
+                logger.debug("New subscriber connected to cartUpdateSink")
+            }
+            .doOnCancel {
+                logger.debug("Subscriber disconnected from cartUpdateSink")
+            }
     }
 
     override fun getCartForUser(userId: String): Mono<Cart> {
@@ -93,16 +99,8 @@ open class CartService(
                     }
             }
             .flatMap { updatedCart ->
-                // Calculate the total quantity of items in the cart in a fully reactive manner
-                cartItemRepository.findByCartId(updatedCart.cartId!!)
-                    .reduce(0) { total, item -> total + item.quantity } // Aggregate directly from the stream
-                    .doOnNext { totalQuantity ->
-                        logger.debug("Notify subscribers about the updated cart item count")
-                        sendCartUpdate(totalQuantity)
-                    }
-                    .thenReturn(updatedCart) // Return the updated cart
+                   notifyCartUpdate(updatedCart.cartId!!).thenReturn(updatedCart)
             }
-
     }
 
     override fun getCartItemCount(): Mono<Int> {
@@ -127,7 +125,9 @@ open class CartService(
             .flatMap { cartItem: CartItem ->
                 cartItemRepository.delete(cartItem)
                     .then(updateCartTotal(cartItem.cartId))
-            } // Update total after deletion
+                    .then(notifyCartUpdate(cartItem.cartId))
+                    .then()
+            }
     }
 
     override fun getCartItems(): Flux<CartItemDto> {
@@ -179,10 +179,11 @@ open class CartService(
         return cartItemRepository.findById(itemId)
             .flatMap { cartItem: CartItem ->
                 cartItem.quantity = quantity
-                cartItemRepository.save(cartItem) //  ensure that the total is only updated when a cart item is selected
+                cartItemRepository.save(cartItem)
+                    //  ensure that the total is only updated when a cart item is selected
                     .then(if (cartItem.isSelected) updateCartTotal(cartItem.cartId) else Mono.empty())
             }
-            .then(cartItemRepository.findById(itemId)) // Return updated cart item
+            .then(cartItemRepository.findById(itemId))
     }
 
     /**
@@ -210,6 +211,9 @@ open class CartService(
                         cart.total = total
                         cartRepository.save(cart)
                     }
+            }
+            .flatMap { savedCart ->
+                notifyCartUpdate(savedCart.cartId!!)
             }
             .then()
     }
@@ -370,4 +374,15 @@ open class CartService(
         val randomSuffix = ThreadLocalRandom.current().nextInt(1000, 9999)
         return dateTimePart + randomSuffix
     }
+
+
+    private fun notifyCartUpdate(cartId: Long): Mono<Int> {
+        return cartItemRepository.findByCartId(cartId)
+            .reduce(0) { total, cartItem -> total + cartItem.quantity }
+            .doOnNext { totalQuantity ->
+                logger.debug("Centralized notification: Cart item count is now $totalQuantity")
+                sendCartUpdate(totalQuantity)
+            }
+    }
+
 }

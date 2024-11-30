@@ -80,10 +80,33 @@
 
     function updateCheckoutButtonState() {
         const checkoutButton = document.querySelector(".checkout-btn");
-        const cartItems = document.querySelectorAll(".cart-item");
+         // Check if the "Checkout" button exists
+         if (!checkoutButton) {
+            return;
+         }
 
-        // Disable the button if there are no items in the cart
-        checkoutButton.disabled = cartItems.length === 0;
+        const selectedItems = document.querySelectorAll(".cart-item input[type='checkbox']:checked");
+
+        // Disable the button if no items are selected
+        checkoutButton.disabled = selectedItems.length === 0;
+
+        // update the button's appearance (e.g., grayed-out style)
+        if (checkoutButton.disabled) {
+            checkoutButton.classList.add("disabled");
+        } else {
+            checkoutButton.classList.remove("disabled");
+        }
     }
 
-    document.addEventListener("DOMContentLoaded", updateCheckoutButtonState);
+    // Ensure the checkout button state is updated on page load
+    document.addEventListener("DOMContentLoaded", () => {
+        updateCheckoutButtonState();
+
+        // Add event listeners for checkboxes to dynamically update button state
+        const checkboxes = document.querySelectorAll(".cart-item input[type='checkbox']");
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener("change", () => {
+                updateCheckoutButtonState();
+            });
+        });
+    });

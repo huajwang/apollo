@@ -134,6 +134,11 @@
         background-color: #218838;
     }
 
+    .checkout-btn.disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
 
     /* Responsive adjustments */
     @media (max-width: 768px) {

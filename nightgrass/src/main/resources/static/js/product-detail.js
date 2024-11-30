@@ -32,7 +32,15 @@ document.addEventListener("DOMContentLoaded", function () {
                 body: JSON.stringify(payload),
             })
                 .then((response) => {
-                    if (response.ok) {
+                    if (response.redirected) {
+                        // Handle redirect explicitly if response is a 302
+                        console.warn("User not authenticated. Redirecting to login...");
+                        window.location.href = response.url; // Redirect to the login page
+                    } else if (response.status === 401) {
+                        // Handle unauthorized (401)
+                        console.error("Unauthorized. Redirecting to login...");
+                        window.location.href = "/login";
+                    } else if (response.ok) {
                         console.log("Product added to cart successfully.");
                     } else {
                         console.error("Failed to add product to cart.");

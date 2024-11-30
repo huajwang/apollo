@@ -19,7 +19,7 @@ open class SecurityConfig {
                     .pathMatchers(
                         "/", "/product/**", "/videos/**",
                         "/login**", "/error",
-                        "/images/**", "/css/**", "/icons/**", "/js/**", "/webjars/**", "/cart/updates"
+                        "/images/**", "/css/**", "/icons/**", "/js/**", "/webjars/**",
                     ).permitAll()
                     .anyExchange().authenticated()
             }

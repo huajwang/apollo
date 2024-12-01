@@ -140,24 +140,6 @@
         pointer-events: none;
     }
 
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-        .cart-item {
-            flex-direction: column;
-            text-align: center;
-        }
-
-        .item-details {
-            align-items: center;
-            margin-top: 10px;
-        }
-
-        .delete-btn {
-            margin-top: 10px;
-        }
-    }
-
-
     /* Style for the empty cart message */
     .empty-cart {
         text-align: center;

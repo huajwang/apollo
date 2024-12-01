@@ -28,14 +28,6 @@
     font-size: 1.2em;
 }
 
-@media only screen and (max-width: 768px) {
-    /* Adjust styles for tablet */
-}
-
-@media only screen and (max-width: 480px) {
-    /* Adjust styles for mobile */
-}
-
 /* Modal overlay */
 .modal {
     display: none; /* Hidden by default */

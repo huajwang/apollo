@@ -5,13 +5,22 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title th:text="${pageTitle}">Yaojia Buy</title>
+  <link rel="stylesheet" th:href="@{/css/layout.css}">
   <link rel="stylesheet" th:href="@{/css/bottom_nav.css}">
   <link rel="stylesheet" th:href="@{/css/cart.css}">
   <link th:if="${pageCss}" rel="stylesheet" th:href="${pageCss}">
   <script th:src="@{/js/cart-update.js}" defer></script>
 </head>
 <body>
-<header>
+<header class="header">
+  <div class="logo">ShopLogo</div>
+  <nav class="navbar">
+    <a href="#home">Home</a>
+    <a href="#shop">Shop</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
+    <a href="#cart" class="cart-icon">🛒 Cart (0)</a>
+  </nav>
 </header>
 
 <main>

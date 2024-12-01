@@ -1,200 +1,201 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Checkout</title>
-  <link rel="stylesheet" th:href="@{/css/checkout.css}"/>
-  <link rel="stylesheet" th:href="@{/css/bottom_nav.css}">
-  <script src="https://js.stripe.com/v3/"></script>
-</head>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout (
+          pageContent=~{:: checkoutContent},
+          pageTitle='Checkout',
+          pageCss=@{/css/checkout.css}
+      )}">
 <body>
-<div class="checkout-container">
-  <!-- Customer Info with Edit Option -->
-  <div class="customer-info">
-    <p><strong>Customer:</strong> <span id="customerNameDisplay" th:text="${user.customerName}"></span></p>
-    <p><strong>Phone:</strong> <span id="phoneDisplay" th:text="${user.phone}"></span></p>
-    <p><strong>Address:</strong> <span id="addressDisplay" th:text="${user.address}"></span></p>
-    <button class="edit-button" onclick="openEditDialog()">&#8250;</button>
-  </div>
+  <div th:fragment="checkoutContent">
+    <div class="checkout-container">
+      <!-- Customer Info with Edit Option -->
+      <div class="customer-info">
+        <p><strong>Customer:</strong> <span id="customerNameDisplay" th:text="${user.customerName}"></span></p>
+        <p><strong>Phone:</strong> <span id="phoneDisplay" th:text="${user.phone}"></span></p>
+        <p><strong>Address:</strong> <span id="addressDisplay" th:text="${user.address}"></span></p>
+        <button class="edit-button" onclick="openEditDialog()">&#8250;</button>
+      </div>
 
 
-  <!-- Dashed Line Separator -->
-  <div class="dashed-line"></div>
+      <!-- Dashed Line Separator -->
+      <div class="dashed-line"></div>
 
-  <!-- Order Items -->
-  <div class="order-items">
-    <h3>Order Items</h3>
-    <ul>
-      <li th:each="item : ${orderItems}">
-        <img th:src="${item.imageUrl}" alt="Product Image" style="width: 50px; height: 50px; margin-right: 10px;">
-        <span th:text="${item.productName}"></span> -
-        <span th:text="${item.unitPrice}"></span> x
-        <span th:text="${item.quantity}"></span>
-        <br>
+      <!-- Order Items -->
+      <div class="order-items">
+        <h3>Order Items</h3>
         <ul>
-          <li th:each="entry : ${item.formattedProperties}">
-            <strong th:text="${entry.key}"></strong>: <span th:text="${entry.value}"></span>
+          <li th:each="item : ${orderItems}">
+            <img th:src="${item.imageUrl}" alt="Product Image" style="width: 50px; height: 50px; margin-right: 10px;">
+            <span th:text="${item.productName}"></span> -
+            <span th:text="${item.unitPrice}"></span> x
+            <span th:text="${item.quantity}"></span>
+            <br>
+            <ul>
+              <li th:each="entry : ${item.formattedProperties}">
+                <strong th:text="${entry.key}"></strong>: <span th:text="${entry.value}"></span>
+              </li>
+            </ul>
           </li>
         </ul>
-      </li>
-    </ul>
-  </div>
+      </div>
 
-  <!-- Payment Options -->
-  <div class="payment-options">
-    <h3>Payment Options</h3>
-    <label><input type="radio" name="paymentMethod" value="Visa"> Visa</label>
-    <label><input type="radio" name="paymentMethod" value="PayPal"> PayPal</label>
-    <label><input type="radio" name="paymentMethod" value="ApplePay"> Apple Pay</label>
-  </div>
+      <!-- Payment Options -->
+      <div class="payment-options">
+        <h3>Payment Options</h3>
+        <label><input type="radio" name="paymentMethod" value="Visa"> Visa</label>
+        <label><input type="radio" name="paymentMethod" value="PayPal"> PayPal</label>
+        <label><input type="radio" name="paymentMethod" value="ApplePay"> Apple Pay</label>
+      </div>
 
-  <!-- Apply Coupon Code -->
-  <div class="apply-coupon">
-    <label>Apply coupon code</label>
-    <input type="text" name="couponCode"/>
-    <button type="button">></button>
-  </div>
+      <!-- Apply Coupon Code -->
+      <div class="apply-coupon">
+        <label>Apply coupon code</label>
+        <input type="text" name="couponCode"/>
+        <button type="button">></button>
+      </div>
 
-  <!-- Totals and Discount -->
-  <div class="totals">
-    <p><strong>Total:</strong> <span th:text="${order.orderTotal}"></span></p>
-    <p><strong>Discount:</strong> <span th:text="${discount}"></span></p>
-    <p><strong>Total after discount:</strong> <span th:text="${discountedTotal}"></span></p>
-  </div>
+      <!-- Totals and Discount -->
+      <div class="totals">
+        <p><strong>Total:</strong> <span th:text="${order.orderTotal}"></span></p>
+        <p><strong>Discount:</strong> <span th:text="${discount}"></span></p>
+        <p><strong>Total after discount:</strong> <span th:text="${discountedTotal}"></span></p>
+      </div>
 
-  <!-- Shipping Section -->
-  <div class="shipping">
-    <h3>Shipping</h3>
-    <p th:text="${shippingDetails}"></p>
-  </div>
+      <!-- Shipping Section -->
+      <div class="shipping">
+        <h3>Shipping</h3>
+        <p th:text="${shippingDetails}"></p>
+      </div>
 
-  <!-- Estimated HST -->
-  <div class="hst">
-    <p><strong>Estimated HST:</strong> <span th:text="${estimatedHST}"></span></p>
-  </div>
+      <!-- Estimated HST -->
+      <div class="hst">
+        <p><strong>Estimated HST:</strong> <span th:text="${estimatedHST}"></span></p>
+      </div>
 
-  <!-- Order Total -->
-  <div class="order-total">
-    <p><strong>Order Total:</strong> <span th:text="${orderTotalFinal}"></span></p>
-  </div>
+      <!-- Order Total -->
+      <div class="order-total">
+        <p><strong>Order Total:</strong> <span th:text="${orderTotalFinal}"></span></p>
+      </div>
 
-  <!-- Submit Order Button -->
-  <div class="submit-order">
-    <button id="submit-order-button" type="button">Pay Now</button>
-  </div>
+      <!-- Submit Order Button -->
+      <div class="submit-order">
+        <button id="submit-order-button" type="button">Pay Now</button>
+      </div>
 
-  <!-- Customer Info Edit Modal -->
-  <div id="editDialog" class="modal">
-    <div class="modal-content">
-      <span class="close-button" onclick="closeEditDialog()">&times;</span>
-      <h2>Edit Customer Information</h2>
-      <form id="editCustomerForm">
-        <label for="customerName">Customer Name:</label>
-        <input type="text" id="customerName" name="customerName" th:value="${user.customerName}"/>
+      <!-- Customer Info Edit Modal -->
+      <div id="editDialog" class="modal">
+        <div class="modal-content">
+          <span class="close-button" onclick="closeEditDialog()">&times;</span>
+          <h2>Edit Customer Information</h2>
+          <form id="editCustomerForm">
+            <label for="customerName">Customer Name:</label>
+            <input type="text" id="customerName" name="customerName" th:value="${user.customerName}"/>
 
-        <label for="phone">Phone:</label>
-        <input type="text" id="phone" name="phone" th:value="${user.phone}"/>
+            <label for="phone">Phone:</label>
+            <input type="text" id="phone" name="phone" th:value="${user.phone}"/>
 
-        <label for="address">Address:</label>
-        <input type="text" id="address" name="address" th:value="${user.address}"/>
+            <label for="address">Address:</label>
+            <input type="text" id="address" name="address" th:value="${user.address}"/>
 
-        <button type="button" onclick="submitEditForm()">Save Changes</button>
-      </form>
+            <button type="button" onclick="submitEditForm()">Save Changes</button>
+          </form>
+        </div>
+      </div>
+
     </div>
+
+    <script src="https://js.stripe.com/v3/"></script>
+
+    <script th:inline="javascript">
+      const stripe = Stripe([[${STRIPE_PUBLIC_KEY}]]);
+       // Inject the Thymeleaf variable into JavaScript
+      const orderTotalFinal = /*[[${orderTotalFinal}]]*/ 0;
+      const orderId = /*[[${order.orderId}]]*/ 0; // Set the orderId from the order object
+
+      document.getElementById("submit-order-button").addEventListener("click", function () {
+
+          const customerName = document.getElementById("customerNameDisplay").textContent.trim();
+          const address = document.getElementById("addressDisplay").textContent.trim();
+
+          // Check if customer name and address are provided
+          if (!customerName || !address) {
+              // Open edit dialog if customer information is missing
+              openEditDialog();
+              alert("Please enter your name and address to continue with the order.");
+              return; // Stop further execution
+          }
+
+          fetch("/pay/create-checkout-session", {
+              method: "POST",
+              headers: { "Content-Type": "application/x-www-form-urlencoded" },
+              body: new URLSearchParams({
+                amount: orderTotalFinal,
+                orderId: orderId
+              })
+          })
+          .then(response => {
+              if (!response.ok) {
+                  return response.text().then(errorText => {
+                      throw new Error('Network response was not ok: ' + errorText);
+                  });
+              }
+              return response.text();
+          })
+          .then(sessionUrl => {
+              window.location = sessionUrl;
+          })
+          .catch(error => console.error('Error: ', error));
+      });
+
+
+
+      function openEditDialog() {
+          document.getElementById("editDialog").style.display = "block";
+      }
+
+      function closeEditDialog() {
+          document.getElementById("editDialog").style.display = "none";
+      }
+
+     function submitEditForm() {
+        const customerData = {
+            customerName: document.getElementById("customerName").value,
+            phone: document.getElementById("phone").value,
+            address: document.getElementById("address").value,
+            orderId: orderId
+        };
+
+        fetch('/update-user-info', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(customerData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Update the displayed values on the page with the new data
+            document.getElementById("customerNameDisplay").textContent = data.customerName;
+            document.getElementById("phoneDisplay").textContent = data.phone;
+            document.getElementById("addressDisplay").textContent = data.address;
+
+
+            // Close the modal dialog
+            closeEditDialog();
+
+
+        })
+        .catch(error => console.error('Error updating customer info:', error));
+    }
+
+
+      window.onclick = function(event) {
+          const modal = document.getElementById("editDialog");
+          if (event.target === modal) {
+              closeEditDialog();
+          }
+      }
+    </script>
+
   </div>
 
-</div>
-
-<script th:inline="javascript">
-  const stripe = Stripe([[${STRIPE_PUBLIC_KEY}]]);
-   // Inject the Thymeleaf variable into JavaScript
-  const orderTotalFinal = /*[[${orderTotalFinal}]]*/ 0;
-  const orderId = /*[[${order.orderId}]]*/ 0; // Set the orderId from the order object
-
-  document.getElementById("submit-order-button").addEventListener("click", function () {
-
-      const customerName = document.getElementById("customerNameDisplay").textContent.trim();
-      const address = document.getElementById("addressDisplay").textContent.trim();
-
-      // Check if customer name and address are provided
-      if (!customerName || !address) {
-          // Open edit dialog if customer information is missing
-          openEditDialog();
-          alert("Please enter your name and address to continue with the order.");
-          return; // Stop further execution
-      }
-
-      fetch("/pay/create-checkout-session", {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: new URLSearchParams({
-            amount: orderTotalFinal,
-            orderId: orderId
-          })
-      })
-      .then(response => {
-          if (!response.ok) {
-              return response.text().then(errorText => {
-                  throw new Error('Network response was not ok: ' + errorText);
-              });
-          }
-          return response.text();
-      })
-      .then(sessionUrl => {
-          window.location = sessionUrl;
-      })
-      .catch(error => console.error('Error: ', error));
-  });
-
-
-
-  function openEditDialog() {
-      document.getElementById("editDialog").style.display = "block";
-  }
-
-  function closeEditDialog() {
-      document.getElementById("editDialog").style.display = "none";
-  }
-
- function submitEditForm() {
-    const customerData = {
-        customerName: document.getElementById("customerName").value,
-        phone: document.getElementById("phone").value,
-        address: document.getElementById("address").value,
-        orderId: orderId
-    };
-
-    fetch('/update-user-info', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(customerData)
-    })
-    .then(response => response.json())
-    .then(data => {
-        // Update the displayed values on the page with the new data
-        document.getElementById("customerNameDisplay").textContent = data.customerName;
-        document.getElementById("phoneDisplay").textContent = data.phone;
-        document.getElementById("addressDisplay").textContent = data.address;
-
-
-        // Close the modal dialog
-        closeEditDialog();
-
-
-    })
-    .catch(error => console.error('Error updating customer info:', error));
-}
-
-
-  window.onclick = function(event) {
-      const modal = document.getElementById("editDialog");
-      if (event.target === modal) {
-          closeEditDialog();
-      }
-  }
-</script>
-
-  <div th:replace="nav :: bottom-nav"></div>
 </body>
 </html>

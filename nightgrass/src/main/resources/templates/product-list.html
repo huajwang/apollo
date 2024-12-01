@@ -1,31 +1,22 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product List</title>
-    <link rel="stylesheet" th:href="@{/css/styles.css}">
-    <link rel="stylesheet" th:href="@{/css/cart.css}">
-    <link rel="stylesheet" th:href="@{/css/bottom_nav.css}">
-</head>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout (
+          pageContent=~{:: categoryContent},
+          pageTitle='Category',
+          pageCss=@{/css/category.css}
+      )}">
 <body>
-
-<header>
-
-</header>
-
-<div class="product-list">
-    <div th:each="product : ${products}" class="product-card">
-        <a th:href="@{/product/detail(id=${product.productId})}">
-            <img th:src="${product.imageUrl}" th:alt="${product.productName}">
-            <h3 th:text="${product.productName}">Product Name</h3>
-            <p th:text="${product.description}">Product description goes here.</p>
-            <span class="price" th:text="${product.price}">Price</span>
-        </a>
+    <div th:fragment="categoryContent">
+        <div class="product-list">
+            <div th:each="product : ${products}" class="product-card">
+                <a th:href="@{/product/detail(id=${product.productId})}">
+                    <img th:src="${product.imageUrl}" th:alt="${product.productName}">
+                    <h3 th:text="${product.productName}">Product Name</h3>
+                    <p th:text="${product.description}">Product description goes here.</p>
+                    <span class="price" th:text="${product.price}">Price</span>
+                </a>
+            </div>
+        </div>
     </div>
-</div>
-
-<!-- Include the bottom navigation bar -->
-<div th:replace="nav :: bottom-nav"></div>
 </body>
 </html>

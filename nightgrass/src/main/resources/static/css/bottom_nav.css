@@ -1,9 +1,3 @@
-/* Ensure the body and html take the full height */
-html, body {
-    height: 100%;
-    margin: 0;
-}
-
 /* Style for the navigation bar */
 nav {
     position: fixed;

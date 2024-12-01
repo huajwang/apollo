@@ -1,7 +1,3 @@
-let eventSource
-
-
-
 document.addEventListener("DOMContentLoaded", function () {
 
     const addToCartForm = document.getElementById("add-to-cart-form");
@@ -50,41 +46,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     console.error("Error while adding product to cart:", error);
                 });
         });
-
-    if (!eventSource) {
-        // Initialize Server-Sent Events (SSE)
-            eventSource = new EventSource("/cart/updates");
-
-            eventSource.addEventListener("cart-update", function (event) {
-                const data = JSON.parse(event.data);
-                console.log("Cart updated:", data);
-
-                const cartCountElement = document.querySelector(".cart-count");
-                if (cartCountElement) {
-                    cartCountElement.innerText = data; // Assuming the event sends the updated count as a number
-                }
-            });
-
-             eventSource.addEventListener("heartbeat", function () {
-                        console.log("Heartbeat received");
-             });
-
-            eventSource.onerror = function (event) {
-                console.error("SSE connection error:", event);
-                console.error("Attempting to reconnect...");
-
-                setTimeout(() => {
-                    eventSource.close();
-                    eventSource = new EventSource("/cart/updates");
-                }, 5000);
-            };
-
-            eventSource.onopen = function () {
-                console.log("SSE connection established");
-            };
-    }
-
-
 
     // Handle video modal interactions
     const videoLinks = document.querySelectorAll(".video-icon a");

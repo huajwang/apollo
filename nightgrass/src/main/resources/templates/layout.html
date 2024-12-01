@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en"
+      th:fragment="layout (pageContent, pageTitle, pageCss)">
+<head>
+  <meta charset="UTF-8">
+  <title th:text="${pageTitle}">Yaojia Buy</title>
+  <link rel="stylesheet" th:href="@{/css/bottom_nav.css}">
+  <link rel="stylesheet" th:href="@{/css/cart.css}">
+  <link th:if="${pageCss}" rel="stylesheet" th:href="${pageCss}">
+  <script th:src="@{/js/cart-update.js}" defer></script>
+</head>
+<body>
+<header>
+</header>
+
+<main>
+  <div th:insert="${pageContent}"></div>
+</main>
+<script th:if="${pageJs}" th:src="${pageJs}" defer></script>
+<footer th:insert="nav :: bottom-nav"></footer>
+</body>
+</html>

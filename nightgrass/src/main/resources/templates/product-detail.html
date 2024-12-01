@@ -1,97 +1,10 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Product Detail</title>
-  <link rel="stylesheet" href="/css/product-detail.css" th:href="@{/css/product-detail.css}">
-  <link rel="stylesheet" th:href="@{/css/bottom_nav.css}">
-  <link rel="stylesheet" th:href="@{/css/cart.css}">
-</head>
-<body>
-<div class="product-detail-container">
-  <!-- Carousel Section -->
-  <div class="carousel">
-    <div class="carousel-track">
-      <div th:each="productPhoto : ${productPhotos}" class="carousel-slide">
-        <img th:src="${productPhoto.photoUrl}" alt="Product Photo">
-      </div>
-    </div>
-    <!-- Navigation buttons -->
-    <button class="carousel-button prev" id="prevBtn">❮</button>
-    <button class="carousel-button next" id="nextBtn">❯</button>
-  </div>
-
-  <!-- Video Icons Section -->
-  <div class="video-icons">
-    <div th:each="video : ${productVideos}" class="video-icon">
-      <a th:href="@{/videos/{filename}(filename=${video.fileName})}" target="_blank">
-        <img src="/icons/video-icon.png" alt="Play Video" class="video-icon-image">
-      </a>
-    </div>
-  </div>
-
-  <!-- Optional Video Modal -->
-  <div id="videoModal" class="modal" style="display: none;">
-    <div class="modal-content">
-      <span id="closeModal" class="close">&times;</span>
-      <video id="videoPlayer" controls>
-        <source id="videoSource" src="" type="video/mp4">
-        Your browser does not support the video tag.
-      </video>
-    </div>
-  </div>
-
-  <!-- Product Options Section -->
-  <div class="product-options">
-    <div th:each="property : ${productProperties}">
-      <div class="option-group">
-        <h3 th:text="'Select ' + ${property.propertyName} + ':'"></h3>
-        <div class="option-buttons">
-          <button type="button"
-                  class="option-button"
-                  th:data-property="${property.propertyName}"
-                  th:data-value="${value}"
-                  th:each="value, iterStat : ${property.propertyValue.split(',')}"
-                  th:text="${value}"
-                  th:classappend="${iterStat.index == 0 ? 'selected' : ''}">
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- User Comments Section -->
-  <div class="user-comments">
-    <h3>Customer Reviews</h3>
-    <div class="comment">
-      <p><strong>Jane Doe:</strong> Love the product! Great quality and perfect fit.</p>
-    </div>
-    <div class="comment">
-      <p><strong>John Smith:</strong> The color options are amazing! Highly recommend.</p>
-    </div>
-  </div>
-
-  <!-- Action Buttons Section -->
-  <div class="action-buttons">
-    <form th:action="@{/cart/add}" method="post" id="add-to-cart-form">
-      <input type="hidden" name="productId" th:value="${product.productId}">
-      <!-- Dynamic properties -->
-      <input type="hidden"
-             th:each="property : ${productProperties}"
-             th:id="'selected-' + ${property.propertyName}"
-             th:name="'properties[' + ${property.propertyName} + ']'"
-             th:value="${property.propertyValue.split(',')[0]}">
-
-      <button type="submit" class="add-to-cart">Add to Cart</button>
-    </form>
-    <button class="buy-now">Buy Now</button>
-  </div>
-</div>
-
-<!-- Include the bottom navigation bar -->
-<div th:replace="nav :: bottom-nav"></div>
-
-<script src="/js/product-detail.js" th:src="@{/js/product-detail.js}"></script>
-</body>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout (
+          pageContent=~{product-detail-content :: productDetailContent},
+          pageTitle='Product Detail',
+          pageCss=@{/css/product-detail.css},
+          pageJs=@{/js/product-detail.js}
+      )}">
 </html>
+

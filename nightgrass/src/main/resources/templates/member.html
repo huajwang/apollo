@@ -1,104 +1,100 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Membership Dashboard</title>
-    <link rel="stylesheet" href="/css/member.css">
-    <link rel="stylesheet" th:href="@{/css/bottom_nav.css}">
-</head>
-<body>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout (
+          pageContent=~{:: memberContent},
+          pageTitle='Membership Dashboard',
+          pageCss=@{/css/member.css}
+      )}">
 
-<div class="container">
-    <!-- Header Section -->
-    <header class="header">
-        <div class="profile">
-            <img src="profile.png" alt="Profile Image" class="profile-img">
-            <div class="profile-info">
-                <h1 class="profile-name">微信用户</h1>
-                <p class="profile-status">注册会员</p>
-                <p class="profile-description">注册有好礼，送您会员专属权益</p>
+<div th:fragment="memberContent">
+    <div class="container">
+        <!-- Header Section -->
+        <header class="header">
+            <div class="profile">
+                <img src="profile.png" alt="Profile Image" class="profile-img">
+                <div class="profile-info">
+                    <h1 class="profile-name">微信用户</h1>
+                    <p class="profile-status">注册会员</p>
+                    <p class="profile-description">注册有好礼，送您会员专属权益</p>
+                </div>
+                <div class="vip-icon">会员</div>
             </div>
-            <div class="vip-icon">会员</div>
-        </div>
-    </header>
+        </header>
 
-    <!-- Features Section -->
-    <section class="features">
-        <div class="feature">
-            <a href="/member/coupons" class="feature-link">
-                <span>Coupons</span>
-                <p>0</p>
-            </a>
-        </div>
-        <div class="feature">
-            <a href="/member/address" class="feature-link">
-                <span>Address</span>
-                <p>0</p>
-            </a>
-        </div>
-        <div class="feature">
-            <a href="/member/orders" class="feature-link">
-                <span>Your orders</span>
-                <p>0</p>
-            </a>
-        </div>
-        <div class="feature">
-            <a href="/member/messages" class="feature-link">
-                <span>Messages</span>
-                <p>0</p>
-            </a>
-        </div>
-    </section>
+        <!-- Features Section -->
+        <section class="features">
+            <div class="feature">
+                <a href="/member/coupons" class="feature-link">
+                    <span>Coupons</span>
+                    <p>0</p>
+                </a>
+            </div>
+            <div class="feature">
+                <a href="/member/address" class="feature-link">
+                    <span>Address</span>
+                    <p>0</p>
+                </a>
+            </div>
+            <div class="feature">
+                <a href="/member/orders" class="feature-link">
+                    <span>Your orders</span>
+                    <p>0</p>
+                </a>
+            </div>
+            <div class="feature">
+                <a href="/member/messages" class="feature-link">
+                    <span>Messages</span>
+                    <p>0</p>
+                </a>
+            </div>
+        </section>
 
 
-    <!-- Coupons and Balance Section -->
-    <section class="coupons-balance">
-        <div class="coupon">
-            <p>优惠券</p>
-            <span>0个未使用</span>
-        </div>
-        <div class="balance">
-            <p>储值余额</p>
-            <span>0</span>
-        </div>
-    </section>
+        <!-- Coupons and Balance Section -->
+        <section class="coupons-balance">
+            <div class="coupon">
+                <p>优惠券</p>
+                <span>0个未使用</span>
+            </div>
+            <div class="balance">
+                <p>储值余额</p>
+                <span>0</span>
+            </div>
+        </section>
 
-    <!-- Membership Card Section -->
-    <section class="membership-card">
-        <div class="card-title">
-            <span>我的卡包</span>
-            <button class="member-benefits">会员权益</button>
-        </div>
-    </section>
+        <!-- Membership Card Section -->
+        <section class="membership-card">
+            <div class="card-title">
+                <span>我的卡包</span>
+                <button class="member-benefits">会员权益</button>
+            </div>
+        </section>
 
-    <!-- Rewards Section -->
-    <section class="rewards-section">
-        <div class="rewards-total">
-            <p><strong>Rewards Total: </strong> <span th:text="'$' + ${rewardsTotal}"></span></p>
-        </div>
-        <ul class="rewards-list">
-            <th:block th:each="reward : ${rewards}">
-                <li class="reward-item">
-                    <span><strong>Order ID:</strong> <span th:text="${reward.orderId}"></span></span>
-                    <span><strong>Reward Amount:</strong> <span th:text="'$' + ${reward.rewardAmount}"></span></span>
-                    <span><strong>Reward Date:</strong> <span th:text="${reward.createdAt}"></span></span>
-                </li>
-            </th:block>
-        </ul>
-    </section>
+        <!-- Rewards Section -->
+        <section class="rewards-section">
+            <div class="rewards-total">
+                <p><strong>Rewards Total: </strong> <span th:text="'$' + ${rewardsTotal}"></span></p>
+            </div>
+            <ul class="rewards-list">
+                <th:block th:each="reward : ${rewards}">
+                    <li class="reward-item">
+                        <span><strong>Order ID:</strong> <span th:text="${reward.orderId}"></span></span>
+                        <span><strong>Reward Amount:</strong> <span th:text="'$' + ${reward.rewardAmount}"></span></span>
+                        <span><strong>Reward Date:</strong> <span th:text="${reward.createdAt}"></span></span>
+                    </li>
+                </th:block>
+            </ul>
+        </section>
 
 
-    <section>
-        <ul class="options">
-            <li><i class="icon">&#9733;</i> 会员等级规则</li>
-            <li><i class="icon">&#128100;</i> 客户服务</li>
-            <li><i class="icon">&#9881;</i> 设置</li>
-        </ul>
-    </section>
+        <section>
+            <ul class="options">
+                <li><i class="icon">&#9733;</i> 会员等级规则</li>
+                <li><i class="icon">&#128100;</i> 客户服务</li>
+                <li><i class="icon">&#9881;</i> 设置</li>
+            </ul>
+        </section>
+    </div>
 </div>
 
-<!-- Include the bottom navigation bar -->
-<div th:replace="nav :: bottom-nav"></div>
-</body>
 </html>

@@ -1,77 +1,76 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Shopping Cart</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" th:href="@{/css/bottom_nav.css}">
-  <link rel="stylesheet" th:href="@{/css/shopping-cart.css}">
-</head>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout (
+          pageContent=~{:: shoppingCartContent},
+          pageTitle='Shopping Cart',
+          pageCss=@{/css/shopping-cart.css},
+          pageJs=@{/js/shopping-cart.js}
+      )}">
 <body>
+  <div th:fragment="shoppingCartContent">
+    <div class="cart-container">
+      <h1>Shopping Cart</h1>
 
-<div class="cart-container">
-  <h1>Shopping Cart</h1>
-
-  <!-- Check if the cart is empty -->
-  <div th:if="${#lists.isEmpty(cartItems)}" class="empty-cart">
-    <img src="/images/empty-cart.png" alt="Empty Cart">
-    <p>Your cart is empty.</p>
-    <a href="/product/all">Go Shopping</a>
-  </div>
-
-
-
-  <div th:if="${!#lists.isEmpty(cartItems)}" th:each="item : ${cartItems}" class="cart-item">
-
-    <input type="checkbox" th:id="'selected_' + ${item.itemId}" th:name="'selected_' + ${item.itemId}" th:value="${item.itemId}"
-           th:attr="onchange=|handleCheckboxChange(${item.itemId}, this.checked)|"
-           th:checked="${item.isSelected}" />
+      <!-- Check if the cart is empty -->
+      <div th:if="${#lists.isEmpty(cartItems)}" class="empty-cart">
+        <img src="/images/empty-cart.png" alt="Empty Cart">
+        <p>Your cart is empty.</p>
+        <a href="/product/all">Go Shopping</a>
+      </div>
 
 
-    <!-- Item image -->
-    <img th:src="${item.imageUrl}" alt="Product Image" class="item-image" />
 
-    <!-- Item details -->
-    <div class="item-details">
-      <span class="item-name" th:text="${item.productName}">Item Name</span>
-      <span class="item-description" th:text="${item.description}">Item description goes here...</span>
+      <div th:if="${!#lists.isEmpty(cartItems)}" th:each="item : ${cartItems}" class="cart-item">
 
-      <ul>
-        <li th:each="entry : ${item.formattedProperties}">
-          <strong th:text="${entry.key}"></strong>: <span th:text="${entry.value}"></span>
-        </li>
-      </ul>
-      
-      <!-- Price display -->
-      <span class="item-price" th:text="${item.formattedPrice}">Price: $0.00</span>
+        <input type="checkbox" th:id="'selected_' + ${item.itemId}" th:name="'selected_' + ${item.itemId}" th:value="${item.itemId}"
+               th:attr="onchange=|handleCheckboxChange(${item.itemId}, this.checked)|"
+               th:checked="${item.isSelected}" />
 
-    <!-- Quantity controls with event listener for debounced update -->
-    <div class="quantity-controls">
-      <label th:for="'quantity_' + ${item.itemId}">Qty:</label>
-      <input type="number"
-             th:id="'quantity_' + ${item.itemId}"
-             th:name="'quantity_' + ${item.itemId}"
-             th:value="${item.quantity}"
-             min="1"
-             th:attr="onchange=|handleQuantityChange(${item.itemId}, this.value)|" />
+
+        <!-- Item image -->
+        <img th:src="${item.imageUrl}" alt="Product Image" class="item-image" />
+
+        <!-- Item details -->
+        <div class="item-details">
+          <span class="item-name" th:text="${item.productName}">Item Name</span>
+          <span class="item-description" th:text="${item.description}">Item description goes here...</span>
+
+          <ul>
+            <li th:each="entry : ${item.formattedProperties}">
+              <strong th:text="${entry.key}"></strong>: <span th:text="${entry.value}"></span>
+            </li>
+          </ul>
+
+          <!-- Price display -->
+          <span class="item-price" th:text="${item.formattedPrice}">Price: $0.00</span>
+
+          <!-- Quantity controls with event listener for debounced update -->
+          <div class="quantity-controls">
+            <label th:for="'quantity_' + ${item.itemId}">Qty:</label>
+            <input type="number"
+                   th:id="'quantity_' + ${item.itemId}"
+                   th:name="'quantity_' + ${item.itemId}"
+                   th:value="${item.quantity}"
+                   min="1"
+                   th:attr="onchange=|handleQuantityChange(${item.itemId}, this.value)|" />
+          </div>
+        </div>
+
+        <form th:action="@{/cart/remove}" method="post" style="display:inline;">
+          <input type="hidden" name="itemId" th:value="${item.itemId}">
+          <button type="submit" class="delete-btn">Delete</button>
+        </form>
+      </div>
+
+      <!-- Cart total and checkout section -->
+      <div class="cart-footer" th:if="${!#lists.isEmpty(cartItems)}">
+        <div id="cartTotal" class="cart-total">Total: $<span th:text="${cartTotal}">0.00</span></div>
+        <button class="checkout-btn" onclick="handleCheckout()" th:disabled="${#lists.isEmpty(cartItems)}">Checkout</button>
+      </div>
+
     </div>
+
   </div>
 
-    <form th:action="@{/cart/remove}" method="post" style="display:inline;">
-      <input type="hidden" name="itemId" th:value="${item.itemId}">
-      <button type="submit" class="delete-btn">Delete</button>
-    </form>
-  </div>
-
-  <!-- Cart total and checkout section -->
-  <div class="cart-footer" th:if="${!#lists.isEmpty(cartItems)}">
-    <div id="cartTotal" class="cart-total">Total: $<span th:text="${cartTotal}">0.00</span></div>
-    <button class="checkout-btn" onclick="handleCheckout()" th:disabled="${#lists.isEmpty(cartItems)}">Checkout</button>
-  </div>
-
-</div>
-
-  <div th:replace="nav :: bottom-nav"></div>
-  <script th:src="@{/js/shopping-cart.js}"></script>
 </body>
 </html>

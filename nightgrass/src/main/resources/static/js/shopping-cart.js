@@ -221,8 +221,21 @@
                 document.querySelector(`#selected_${itemId}`).closest('.cart-item').remove();
                 console.log("cart items: ", data.items);
                 cart.items = data.items;
+
+                if (data.items.length > 0) {
+                    // Update the cart total dynamically
+                    cart.updateTotal();
+                    // Ensure empty cart message is hidden
+                    document.querySelector('.empty-cart').style.display = 'none';
+                    // Ensure cart footer remains visible
+                    document.querySelector('.cart-footer').style.display = 'block';
+                } else {
+                    // Show the empty cart message
+                    document.querySelector('.empty-cart').style.display = 'block';
+                    // Hide the cart footer
+                    document.querySelector('.cart-footer').style.display = 'none';
+                }
                 cart.updateItemCount();
-                cart.updateTotal();
             }
         })
         .catch(error => {

@@ -56,7 +56,7 @@ class ShoppingCartController(private val cartService: CartService) {
     fun removeFromCart(@RequestBody removeCartRequest: RemoveCartRequest): Mono<ResponseEntity<Map<String, Any>>> {
         logger.debug("Remove cartItem: ${removeCartRequest.itemId}")
         return cartService.removeCartItemFromCart(removeCartRequest.itemId)
-            .flatMap {
+            .then(
                 cartService.getCartItems()
                     .doOnNext { item -> logger.debug("Emitted cart item: $item") } // Log each item emitted
                     .collectList()
@@ -69,7 +69,7 @@ class ShoppingCartController(private val cartService: CartService) {
                         logger.debug("Response body: $responseBody")
                         ResponseEntity.ok(responseBody)
                     }
-            }
+            )
             .switchIfEmpty(
                 Mono.just(
                     ResponseEntity.ok(

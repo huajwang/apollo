@@ -10,22 +10,16 @@
   <div th:fragment="shoppingCartContent">
     <div class="cart-container">
       <h1>Shopping Cart</h1>
-
-      <!-- Check if the cart is empty -->
-      <div th:if="${#lists.isEmpty(cartItems)}" class="empty-cart">
+      <div th:style="${#lists.isEmpty(cartItems)} ? 'display: block;' : 'display: none;'" class="empty-cart">
         <img src="/images/empty-cart.png" alt="Empty Cart">
         <p>Your cart is empty.</p>
         <a href="/product/all">Go Shopping</a>
       </div>
 
-
-
       <div th:if="${!#lists.isEmpty(cartItems)}" th:each="item : ${cartItems}" class="cart-item">
-
         <input type="checkbox" th:id="'selected_' + ${item.itemId}" th:name="'selected_' + ${item.itemId}" th:value="${item.itemId}"
                th:attr="onchange=|handleCheckboxChange(${item.itemId}, this.checked)|"
                th:checked="${item.isSelected}" />
-
 
         <!-- Item image -->
         <img th:src="${item.imageUrl}" alt="Product Image" class="item-image" />
@@ -60,12 +54,10 @@
                 th:attr="onclick=|handleRemoveItem(${item.itemId})|">
           Delete
         </button>
-
-
       </div>
 
-      <!-- Cart total and checkout section -->
-      <div class="cart-footer" th:if="${!#lists.isEmpty(cartItems)}">
+      <!-- Cart footer -->
+      <div class="cart-footer" th:style="${#lists.isEmpty(cartItems)} ? 'display: none;' : 'display: block;'">
         <div id="cartTotal" class="cart-total">Total: $<span th:text="${cartTotal}">0.00</span></div>
         <button class="checkout-btn" onclick="handleCheckout()" th:disabled="${#lists.isEmpty(cartItems)}">Checkout</button>
       </div>

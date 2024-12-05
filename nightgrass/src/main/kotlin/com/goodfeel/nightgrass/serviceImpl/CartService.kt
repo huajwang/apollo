@@ -39,7 +39,7 @@ open class CartService(
 
     private fun sendCartUpdate(event: Int) {
         val result = cartUpdateSink.tryEmitNext(event)
-        logger.debug("Emit cartUpdateSink emit result: $result")
+        logger.debug("cartUpdateSink emit result: $result")
     }
 
     fun getCartUpdateStream(): Flux<Int> {
@@ -95,7 +95,7 @@ open class CartService(
                             }
                     ) // After adding/updating the item, update the cart total
                     .flatMap { updatedCart: Cart ->
-                        updateCartTotal(updatedCart.cartId!!).thenReturn(updatedCart)
+                        updateCartTotalAndSelected(updatedCart.cartId!!).thenReturn(updatedCart)
                     }
             }
             .flatMap { updatedCart ->
@@ -112,6 +112,7 @@ open class CartService(
 
                 cart.cartId?.let {
                     cartItemRepository.findByCartId(cart.cartId)
+                        .filter { it.isSelected }
                         .map(CartItem::quantity) // Extract quantity of each item
                         .reduce(0) { total, quantity -> total + quantity }
                 } ?: Mono.just(0)
@@ -124,7 +125,7 @@ open class CartService(
         return cartItemRepository.findById(itemId)
             .flatMap { cartItem: CartItem ->
                 cartItemRepository.delete(cartItem)
-                    .then(updateCartTotal(cartItem.cartId))
+                    .then(updateCartTotalAndSelected(cartItem.cartId))
                     .then(notifyCartUpdate(cartItem.cartId))
                     .then()
             }
@@ -181,7 +182,7 @@ open class CartService(
                 cartItem.quantity = quantity
                 cartItemRepository.save(cartItem)
                     //  ensure that the total is only updated when a cart item is selected
-                    .then(if (cartItem.isSelected) updateCartTotal(cartItem.cartId) else Mono.empty())
+                    .then(if (cartItem.isSelected) updateCartTotalAndSelected(cartItem.cartId) else Mono.empty())
             }
             .then(cartItemRepository.findById(itemId))
     }
@@ -195,7 +196,7 @@ open class CartService(
      * @param cartId
      * @return
      */
-    private fun updateCartTotal(cartId: Long): Mono<Void> {
+    private fun updateCartTotalAndSelected(cartId: Long): Mono<Void> {
         // Retrieve all items in the cart
         return cartItemRepository.findByCartId(cartId)
             .flatMap { cartItem ->
@@ -225,7 +226,7 @@ open class CartService(
      * @param isSelected Is the cart item selected or not
      * @return
      */
-    open fun updateCartTotal(itemId: Long, isSelected: Boolean): Mono<Void> {
+    open fun updateCartTotalAndSelected(itemId: Long, isSelected: Boolean): Mono<Void> {
         return cartItemRepository.findById(itemId)
             .flatMap { cartItem: CartItem ->
                 cartItem.isSelected = isSelected

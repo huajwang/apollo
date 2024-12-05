@@ -1,31 +1,40 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
-<body>
+<body  x-data="globalState">
 <div th:fragment="bottom-nav">
   <nav class="bottom-nav">
     <ul>
-      <li><a href="/">
+      <li>
+        <a href="/" @click.prevent="navigate('/')">
         <div class="cat_icon">
           <img src="/images/old/gift.png" style="opacity: 1; transition: opacity 0.3s;">
         </div>
         <p class="cat_name">Home</p>
-      </a></li>
+        </a>
+      </li>
 
-      <li><a href="/product/all">
+      <li>
+          <a href="/product/all">
         <div class="cat_icon">
           <img src="/images/old/category.png" style="opacity: 1; transition: opacity 0.3s;">
         </div>
         <p class="cat_name">Category</p>
-      </a></li>
+        </a>
+      </li>
 
-      <li><a href="/cart">
+      <li>
+        <a href="/cart">
+<!--        <a href="/cart" @click.prevent="navigate('/cart')">-->
         <div class="cat_icon">
           <img src="/images/old/cart.png" style="opacity: 1; transition: opacity 0.3s;">
           <!-- Cart count badge -->
-          <span id="cartItemCount" class="cart-count" th:text="${cartItemCount}">0</span>
+<!--          <span id="cartItemCount" class="cart-count" th:text="${cartItemCount}">0</span>-->
+          <span id="cartItemCount" class="cart-count" x-text="$store.cart.count">0</span>
+
         </div>
         <p class="cat_name">购物车</p>
-      </a></li>
+        </a>
+      </li>
 
 
       <li><a href="/groupon">
@@ -35,12 +44,14 @@
         <p class="cat_name">欢乐拼</p>
       </a></li>
 
-      <li><a href="/member">
+      <li>
+        <a href="/member" @click.prevent="navigate('/member')">
         <div class="cat_icon">
           <img src="/images/old/me.png" style="opacity: 1; transition: opacity 0.3s;">
         </div>
         <p class="cat_name">我的中心</p>
-      </a></li>
+        </a>
+      </li>
     </ul>
   </nav>
 </div>

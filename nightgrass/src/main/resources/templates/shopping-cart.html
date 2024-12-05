@@ -56,10 +56,12 @@
           </div>
         </div>
 
-        <form th:action="@{/cart/remove}" method="post" style="display:inline;">
-          <input type="hidden" name="itemId" th:value="${item.itemId}">
-          <button type="submit" class="delete-btn">Delete</button>
-        </form>
+        <button type="button" class="delete-btn"
+                th:attr="onclick=|handleRemoveItem(${item.itemId})|">
+          Delete
+        </button>
+
+
       </div>
 
       <!-- Cart total and checkout section -->

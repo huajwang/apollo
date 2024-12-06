@@ -1,13 +1,16 @@
 package com.goodfeel.nightgrass.web
 
+import com.goodfeel.nightgrass.data.Order
 import com.goodfeel.nightgrass.repo.ReferralRewardRepository
 import com.goodfeel.nightgrass.service.IOrderService
 import com.goodfeel.nightgrass.util.OrderStatus
 import com.goodfeel.nightgrass.util.ReferralRewardStatus
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.reactive.result.view.Rendering
 import reactor.core.publisher.Mono
 import java.math.BigDecimal
 import java.security.Principal
@@ -17,6 +20,8 @@ import java.security.Principal
 class MemberController(
     private val orderService: IOrderService,
     private val rewardRepository: ReferralRewardRepository) {
+
+    private val logger = LoggerFactory.getLogger(MemberController::class.simpleName)
 
     @GetMapping
     fun memberIndex(principal: Principal, model: Model): Mono<String> {
@@ -39,16 +44,23 @@ class MemberController(
                         model.addAttribute("rewardsTotal", rewardsTotal)
                     }
             )
+            .then(orderService.findOrderByUserId(principal.name).collectList())
+            .doOnNext {
+                model.addAttribute("orders", it)
+            }
             .thenReturn("/member")
     }
 
     @GetMapping("/orders")
-    fun getAllOrders(principal: Principal, model: Model): Mono<String> {
+    fun getAllOrders(principal: Principal, model: Model): Mono<Rendering> {
         val userId = principal.name
         return orderService.findOrderByUserId(userId).collectList()
-            .doOnNext {
-                model.addAttribute("orders", it)
-            }.then(Mono.just("orders"))
+            .map { orders ->
+                logger.debug("orders: ${orders.size}")
+                Rendering.view("orders")
+                    .modelAttribute("orders", orders ?: emptyList<Order>())
+                    .build()
+            }
     }
 
     @GetMapping("/getPendingOrders")

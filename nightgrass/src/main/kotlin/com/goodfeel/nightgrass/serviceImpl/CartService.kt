@@ -63,7 +63,9 @@ open class CartService(
         }
         return cartRepository.findByUserId(userId)
             .switchIfEmpty(
-                cartRepository.save(Cart(null, BigDecimal.ZERO, userId))
+                Mono.defer {
+                    cartRepository.save(Cart(null, BigDecimal.ZERO, userId))
+                }
             )
     }
 
@@ -82,19 +84,18 @@ open class CartService(
                         cartItemRepository.save(existingItem).thenReturn(cart)
                     }
                     .switchIfEmpty( // If product does not exist in cart, add as new CartItem
-                        productRepository.findById(addCartRequest.productId)
-                            .flatMap { product: Product ->
-                                val newItem = CartItem(
-                                    itemId = null,
-                                    cartId =  cart.cartId,
-                                    productId = addCartRequest.productId,
-                                    quantity =  1,
-                                    isSelected = true
-                                )
-                                newItem.setPropertiesFromMap(map = addCartRequest.properties)
-                                cartItemRepository.save(newItem)
-                                    .thenReturn(cart)
-                            }
+                        Mono.defer {
+                            val newItem = CartItem(
+                                itemId = null,
+                                cartId =  cart.cartId,
+                                productId = addCartRequest.productId,
+                                quantity =  1,
+                                isSelected = true
+                            )
+                            newItem.setPropertiesFromMap(map = addCartRequest.properties)
+                            cartItemRepository.save(newItem)
+                                .thenReturn(cart)
+                        }
                     ) // After adding/updating the item, update the cart total
                     .flatMap { updatedCart: Cart ->
                         updateCartTotalAndSelected(updatedCart.cartId!!).thenReturn(updatedCart)

@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 import reactor.core.publisher.Flux
-import java.math.BigDecimal
 import java.util.UUID
 
 @Service
@@ -22,13 +21,15 @@ class ReferralService(
     fun getReferralLinkForUser(userId: String): Mono<String> {
         return referralRepository.findBySharerId(userId)
             .switchIfEmpty(
-                referralRepository.save(
-                    Referral(
-                        sharerId = userId,
-                        referralCode = UUID.randomUUID().toString()
-                    )
-                )
-            ).doOnNext { logger.debug("Saved referral from user: ${it.sharerId}") }
+                Mono.defer {
+                    referralRepository.save(
+                        Referral(
+                            sharerId = userId,
+                            referralCode = UUID.randomUUID().toString()
+                        )
+                    ).doOnNext { logger.debug("Saved referral from user: ${it.sharerId}") }
+                }
+            )
             .map { "${Constant.baseUrl}/referral/${it.referralCode}" }
     }
 

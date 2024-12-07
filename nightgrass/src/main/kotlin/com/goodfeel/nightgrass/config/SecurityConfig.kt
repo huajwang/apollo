@@ -1,5 +1,7 @@
 package com.goodfeel.nightgrass.config
 
+import com.goodfeel.nightgrass.serviceImpl.CartService
+import com.goodfeel.nightgrass.web.CartMergeAuthenticationSuccessHandler
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.Customizer
@@ -10,7 +12,9 @@ import org.springframework.security.web.server.SecurityWebFilterChain
 
 @Configuration
 @EnableWebFluxSecurity
-open class SecurityConfig {
+open class SecurityConfig(
+    private val cartService: CartService
+) {
     @Bean
     open fun securityWebFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain {
         http
@@ -18,12 +22,15 @@ open class SecurityConfig {
                 exchange
                     .pathMatchers(
                         "/", "/product/**", "/videos/**",
-                        "/login**", "/error",
+                        "/login**", "/error", "/cart/**",
                         "/images/**", "/css/**", "/icons/**", "/js/**", "/webjars/**",
                     ).permitAll()
                     .anyExchange().authenticated()
             }
-            .oauth2Login(Customizer.withDefaults<OAuth2LoginSpec>())
+            .oauth2Login{
+                // Use custom handler
+                it.authenticationSuccessHandler(CartMergeAuthenticationSuccessHandler(cartService))
+            }
             .oauth2Client(Customizer.withDefaults<OAuth2ClientSpec>())
             .csrf { it.disable() }
 

@@ -72,7 +72,9 @@ open class CartService(
             .flatMap { userId: String -> this.getCartForUser(userId) }
             .flatMap { cart: Cart ->
                 cartItemRepository.findByCartId(cart.cartId!!)
-                    .filter { item -> item.productId == addCartRequest.productId }
+                    .filter { item -> item.productId == addCartRequest.productId &&
+                            item.getPropertiesAsMap() == addCartRequest.properties
+                    }
                     .next() // Take the first matching item, if any
                     .flatMap { existingItem: CartItem ->
                         // If product exists, increment quantity and save

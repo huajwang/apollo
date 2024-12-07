@@ -1,160 +1,49 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-  <title>Share and Earn Rewards</title>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    /* Global styles */
-    body {
-        font-family: 'Arial', sans-serif;
-        margin: 0;
-        padding: 0;
-        background-color: #f9f9f9;
-        color: #333;
-    }
-
-    header {
-        background-color: #007bff;
-        color: white;
-        padding: 20px;
-        text-align: center;
-    }
-
-    header h1 {
-        margin: 0;
-        font-size: 2.5em;
-    }
-
-    .container {
-        max-width: 800px;
-        margin: 30px auto;
-        padding: 20px;
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    }
-
-    .content {
-        margin-bottom: 20px;
-    }
-
-    .content h2 {
-        font-size: 2em;
-        color: #555;
-        margin-bottom: 10px;
-    }
-
-    .content p {
-        font-size: 1.1em;
-        line-height: 1.6;
-        color: #666;
-    }
-
-    .link-box {
-        text-align: center;
-        margin-top: 20px;
-        padding: 15px;
-        background: #f0f4f7;
-        border-radius: 8px;
-        border: 1px solid #ddd;
-    }
-
-    .link-box a {
-        color: #007bff;
-        font-weight: bold;
-        text-decoration: none;
-        word-break: break-all; /* Handle long links */
-    }
-
-    .link-box a:hover {
-        text-decoration: underline;
-    }
-
-    footer {
-        text-align: center;
-        margin-top: 40px;
-        padding: 10px;
-        background: #007bff;
-        color: white;
-    }
-
-    footer p {
-        margin: 0;
-        font-size: 0.9em;
-    }
-
-    /* Button styles */
-    .share-buttons {
-        display: flex;
-        justify-content: center;
-        gap: 15px;
-        margin-top: 20px;
-    }
-
-    .btn {
-        display: inline-block;
-        padding: 10px 20px;
-        font-size: 1em;
-        font-weight: bold;
-        color: white;
-        background: #007bff;
-        border: none;
-        border-radius: 4px;
-        text-decoration: none;
-        transition: background 0.3s;
-    }
-
-    .btn:hover {
-        background: #0056b3;
-    }
-
-    .btn-facebook {
-        background: #4267b2;
-    }
-
-    .btn-facebook:hover {
-        background: #365899;
-    }
-
-    .btn-twitter {
-        background: #1da1f2;
-    }
-
-    .btn-twitter:hover {
-        background: #0d95e8;
-    }
-  </style>
-</head>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout (
+          pageContent=~{:: pageContent},
+          pageTitle='Share and Earn Rewards',
+          pageCss=@{/css/referral.css}
+      )}">
 <body>
+  <div th:fragment="pageContent">
+    <div class="container">
+      <div class="content">
+        <h2>Share Your Referral Link</h2>
+        <p>Invite your friends to join and shop on our platform using the link below. You'll earn <b>10% rewards</b> on every purchase they make through your referral link. Start sharing now and earn more!</p>
+      </div>
 
-<header>
-  <h1>Earn Rewards by Sharing</h1>
-</header>
+      <div class="link-box">
+        <p>Share this link to earn rewards:</p>
+        <a href="#" th:href="${referralLink}" th:text="${referralLink}">Referral Link</a>
+      </div>
 
-<div class="container">
-  <div class="content">
-    <h2>Share Your Referral Link</h2>
-    <p>Invite your friends to join and shop on our platform using the link below. You'll earn <b>10% rewards</b> on every purchase they make through your referral link. Start sharing now and earn more!</p>
+      <div class="share-buttons">
+        <!-- Facebook Share -->
+        <a th:href="'https://www.facebook.com/sharer/sharer.php?u=' + ${referralLink}" target="_blank" class="btn btn-facebook">Share on Facebook</a>
+
+        <!-- Twitter Share -->
+        <a th:href="'https://twitter.com/intent/tweet?text=Check%20out%20this%20amazing%20site!%20' + ${referralLink}" target="_blank" class="btn btn-twitter">Share on Twitter</a>
+
+        <!-- WhatsApp Share -->
+        <a th:href="'https://api.whatsapp.com/send?text=Check%20out%20this%20amazing%20site!%20' + ${referralLink}" target="_blank" class="btn btn-whatsapp">Share on WhatsApp</a>
+
+        <!-- LinkedIn Share -->
+        <a th:href="'https://www.linkedin.com/sharing/share-offsite/?url=' + ${referralLink}" target="_blank" class="btn btn-linkedin">Share on LinkedIn</a>
+
+        <!-- Reddit Share -->
+        <a th:href="'https://www.reddit.com/submit?url=' + ${referralLink} + '&title=Check%20out%20this%20amazing%20site!'" target="_blank" class="btn btn-reddit">Share on Reddit</a>
+
+        <!-- Email Share -->
+        <a th:href="'mailto:?subject=Check%20out%20this%20amazing%20site!&body=I%20found%20this%20great%20site!%20' + ${referralLink}" target="_blank" class="btn btn-email">Share via Email</a>
+
+        <!-- Telegram Share -->
+        <a th:href="'https://t.me/share/url?url=' + ${referralLink} + '&text=Check%20out%20this%20amazing%20site!'" target="_blank" class="btn btn-telegram">Share on Telegram</a>
+
+        <!-- Pinterest Share -->
+        <a th:href="'https://pinterest.com/pin/create/button/?url=' + ${referralLink} + '&description=Check%20out%20this%20amazing%20site!'" target="_blank" class="btn btn-pinterest">Share on Pinterest</a>
+      </div>
+    </div>
   </div>
-
-  <div class="link-box">
-    <p>Share this link to earn rewards:</p>
-    <a href="#" th:href="${referralLink}" th:text="${referralLink}">Referral Link</a>
-  </div>
-
-  <div class="share-buttons">
-    <!-- Facebook Share -->
-    <a th:href="'https://www.facebook.com/sharer/sharer.php?u=' + ${referralLink}" target="_blank" class="btn btn-facebook">Share on Facebook</a>
-
-    <!-- Twitter Share -->
-    <a th:href="'https://twitter.com/intent/tweet?text=Check%20out%20this%20amazing%20site!%20' + ${referralLink}" target="_blank" class="btn btn-twitter">Share on Twitter</a>
-  </div>
-</div>
-
-<footer>
-  <p>&copy; 2024 YaoJiaBuy. All Rights Reserved.</p>
-</footer>
-
 </body>
 </html>

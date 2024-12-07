@@ -11,4 +11,6 @@ interface CartRepository : ReactiveCrudRepository<Cart, Long> {
 
     @Query("UPDATE e_mall_cart SET total = :total WHERE cart_id = :cartId")
     fun updateTotal(cartId: Long, total: BigDecimal): Mono<Void>
+    fun findByGuestId(guestId: String): Mono<Cart>
+    fun deleteByCartId(cartId: Long): Mono<Void>
 }

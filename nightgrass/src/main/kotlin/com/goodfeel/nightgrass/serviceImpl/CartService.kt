@@ -6,7 +6,6 @@ import com.goodfeel.nightgrass.repo.*
 import com.goodfeel.nightgrass.service.ICartService
 import com.goodfeel.nightgrass.util.OrderStatus
 import com.goodfeel.nightgrass.web.util.AddCartRequest
-import com.goodfeel.nightgrass.web.util.Utility
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -53,64 +52,73 @@ open class CartService(
             }
     }
 
-    override fun getCartForUser(userId: String): Mono<Cart> {
-        if (userId.equals("Guest", ignoreCase = true)) {
-            // Handle guest cart logic (e.g., use session storage or a temporary in-memory cart)
-            return Mono.just(Cart(
-                total = BigDecimal.ZERO,
-                userId = ""
-            ))
+    override fun addProductToCart(addCartRequest: AddCartRequest, userId: String?, guestId: String?): Mono<Cart> {
+        return getCartForUserOrGuest(userId, guestId)
+            .flatMap { cart -> findOrAddCartItem(cart, addCartRequest) }
+            .flatMap { cart -> updateCartTotalAndSelected(cart.cartId!!).thenReturn(cart) }
+            .flatMap { cart -> notifyCartUpdate(cart.cartId!!).thenReturn(cart) }
+    }
+
+    override fun getCartForUserOrGuest(userId: String?, guestId: String?): Mono<Cart> {
+        logger.debug("userId = $userId, guestId = $guestId")
+        return when {
+            userId != null -> {
+                cartRepository.findByUserId(userId)
+                    .switchIfEmpty(
+                        Mono.defer {
+                            val newCart = Cart(cartId = null, userId = userId, guestId = null, total = BigDecimal.ZERO)
+                            cartRepository.save(newCart)
+                        }.doOnSuccess {
+                            logger.debug("new cart is saved for userId: $it")
+                        }
+                    )
+            }
+            guestId != null -> {
+                cartRepository.findByGuestId(guestId)
+                    .switchIfEmpty(
+                        Mono.defer {
+                            val newCart = Cart(cartId = null, userId = null, guestId = guestId, total = BigDecimal.ZERO)
+                            cartRepository.save(newCart)
+                        }.doOnSuccess {
+                            logger.debug("new cart is saved for guest: $it")
+                        }
+                    )
+            }
+            else -> Mono.error(IllegalArgumentException("Either userId or guestId must be provided"))
         }
-        return cartRepository.findByUserId(userId)
+    }
+
+    private fun findOrAddCartItem(cart: Cart, addCartRequest: AddCartRequest): Mono<Cart> {
+        return cartItemRepository.findByCartId(cart.cartId!!)
+            .filter { item ->
+                item.productId == addCartRequest.productId &&
+                        item.getPropertiesAsMap() == addCartRequest.properties
+            }
+            .next()
+            .flatMap { existingItem ->
+                logger.debug("Updating quantity for existing item in cart: ${cart.cartId}")
+                existingItem.quantity += 1
+                cartItemRepository.save(existingItem).thenReturn(cart)
+            }
             .switchIfEmpty(
                 Mono.defer {
-                    cartRepository.save(Cart(null, BigDecimal.ZERO, userId))
+                    logger.debug("Adding new item to cart: ${cart.cartId}")
+                    val newItem = CartItem(
+                        itemId = null,
+                        cartId = cart.cartId,
+                        productId = addCartRequest.productId,
+                        quantity = 1,
+                        isSelected = true
+                    )
+                    newItem.setPropertiesFromMap(map = addCartRequest.properties)
+                    cartItemRepository.save(newItem).thenReturn(cart)
                 }
             )
     }
 
-    override fun addProductToCart(addCartRequest: AddCartRequest): Mono<Cart> {
-        return Utility.currentUserId
-            .flatMap { userId: String -> this.getCartForUser(userId) }
-            .flatMap { cart: Cart ->
-                cartItemRepository.findByCartId(cart.cartId!!)
-                    .filter { item -> item.productId == addCartRequest.productId &&
-                            item.getPropertiesAsMap() == addCartRequest.properties
-                    }
-                    .next() // Take the first matching item, if any
-                    .flatMap { existingItem: CartItem ->
-                        // If product exists, increment quantity and save
-                        existingItem.quantity += 1
-                        cartItemRepository.save(existingItem).thenReturn(cart)
-                    }
-                    .switchIfEmpty( // If product does not exist in cart, add as new CartItem
-                        Mono.defer {
-                            val newItem = CartItem(
-                                itemId = null,
-                                cartId =  cart.cartId,
-                                productId = addCartRequest.productId,
-                                quantity =  1,
-                                isSelected = true
-                            )
-                            newItem.setPropertiesFromMap(map = addCartRequest.properties)
-                            cartItemRepository.save(newItem)
-                                .thenReturn(cart)
-                        }
-                    ) // After adding/updating the item, update the cart total
-                    .flatMap { updatedCart: Cart ->
-                        updateCartTotalAndSelected(updatedCart.cartId!!).thenReturn(updatedCart)
-                    }
-            }
-            .flatMap { updatedCart ->
-                   notifyCartUpdate(updatedCart.cartId!!).thenReturn(updatedCart)
-            }
-    }
 
-    override fun getCartItemCount(): Mono<Int> {
-        return Utility.currentUserId
-            .flatMap { userId: String ->
-                getCartForUser(userId)
-            }
+    override fun getCartItemCount(userId: String?, guestId: String?): Mono<Int> {
+        return getCartForUserOrGuest(userId, guestId)
             .flatMap { cart: Cart ->
 
                 cart.cartId?.let {
@@ -124,21 +132,19 @@ open class CartService(
     }
 
 
-    override fun removeCartItemFromCart(itemId: Long): Mono<Void> {
+    override fun removeCartItemFromCart(itemId: Long): Mono<Long> {
         return cartItemRepository.findById(itemId)
             .flatMap { cartItem: CartItem ->
                 cartItemRepository.delete(cartItem)
                     .then(updateCartTotalAndSelected(cartItem.cartId))
                     .then(notifyCartUpdate(cartItem.cartId))
-                    .then()
+                    .thenReturn(cartItem.cartId)
             }
     }
 
-    override fun getCartItems(): Flux<CartItemDto> {
-        return Utility.currentUserId
-            .flatMap { userId: String -> this.getCartForUser(userId) }
-            .flatMapMany { cart: Cart -> cartItemRepository.findByCartId(cart.cartId!!) }
-            .flatMap { cartItem: CartItem -> this.mapToCartItemDto(cartItem) }
+    override fun getCartItemsForCart(cartId: Long): Flux<CartItemDto> {
+        return cartItemRepository.findByCartId(cartId)
+            .flatMap { cartItem -> this.mapToCartItemDto(cartItem) }
     }
 
     private fun mapToCartItemDto(cartItem: CartItem): Mono<CartItemDto> {
@@ -161,22 +167,16 @@ open class CartService(
             }
     }
 
-    override fun getTotalPrice(): Mono<BigDecimal> {
-        return Utility.currentUserId
-            .flatMap { userId ->
-                getCartForUser(userId) // Get the cart for the current user
-            }
-            .flatMap { cart ->
-                cartItemRepository.findByCartId(cart.cartId!!) // Fetch all items in the cart
-                    .filter(CartItem::isSelected) // Only include selected items
-                    .flatMap { cartItem ->
-                        productRepository.findById(cartItem.productId) // Fetch product details
-                            .map { product ->
-                                product.price.multiply(BigDecimal.valueOf(cartItem.quantity.toLong())) // Calculate total for the item
-                            }
+    override fun getTotalPriceForCart(cartId: Long): Mono<BigDecimal> {
+        return cartItemRepository.findByCartId(cartId) // Fetch all items in the cart
+            .filter(CartItem::isSelected) // Only include selected items
+            .flatMap { cartItem ->
+                productRepository.findById(cartItem.productId) // Fetch product details
+                    .map { product ->
+                        product.price.multiply(BigDecimal.valueOf(cartItem.quantity.toLong())) // Calculate total for the item
                     }
-                    .reduce(BigDecimal.ZERO, BigDecimal::add) // Sum up all item totals
             }
+            .reduce(BigDecimal.ZERO, BigDecimal::add) // Sum up all item totals
     }
 
     open fun updateQuantity(itemId: Long, quantity: Int): Mono<CartItem> {
@@ -229,7 +229,7 @@ open class CartService(
      * @param isSelected Is the cart item selected or not
      * @return
      */
-    open fun updateCartTotalAndSelected(itemId: Long, isSelected: Boolean): Mono<Void> {
+    open fun updateCartTotalAndSelected(itemId: Long, isSelected: Boolean): Mono<Cart> {
         return cartItemRepository.findById(itemId)
             .flatMap { cartItem: CartItem ->
                 cartItem.isSelected = isSelected
@@ -254,7 +254,6 @@ open class CartService(
                         cartRepository.save(cart)
                     }
             }
-            .then()
     }
 
     // Helper class to carry cart ID and item total to avoid recalculations
@@ -286,6 +285,77 @@ open class CartService(
             }
     }
 
+    override fun mergeCart(userId: String, guestId: String): Mono<Void> {
+        return cartRepository.findByGuestId(guestId)
+            .doOnSuccess {
+                logger.debug("Found Guest cart: $it")
+            }
+            .zipWith(cartRepository.findByUserId(userId)
+                .doOnSuccess {
+                    logger.debug("Found user cart: $it")
+                }
+                .defaultIfEmpty(Cart(userId = userId, total = BigDecimal.ZERO))
+                .flatMap { userCart ->
+                    if (userCart.cartId == null) {
+                        cartRepository.save(userCart)
+                            .doOnSuccess { savedCart ->
+                                logger.debug("Saved new user cart: $savedCart")
+                            }
+                    } else {
+                        Mono.just(userCart)
+                    }
+                }
+            )
+            .flatMap { tuple ->
+                val guestCart = tuple.t1
+                val userCart = tuple.t2
+                mergeCartItems(guestCart, userCart)
+                    .then(
+                        cartRepository.deleteByCartId(guestCart.cartId!!)
+                            .doOnSuccess {
+                                logger.debug("Delete the guest cart after merging: ${guestCart.cartId}")
+                            }
+                    )
+                    .then(
+                        getTotalPriceForCart(userCart.cartId!!).flatMap { cartTotal ->
+                            cartRepository.updateTotal(userCart.cartId, cartTotal)
+                        }
+                    )
+                    .then()
+            }
+    }
+
+    private fun mergeCartItems(guestCart: Cart, userCart: Cart): Mono<Void> {
+        return cartItemRepository.findByCartId(guestCart.cartId!!)
+            .flatMap { guestItem ->
+                // Ensure user cart ID is not null
+                if (userCart.cartId == null) {
+                    return@flatMap Mono.error<Void>(
+                        IllegalStateException("User cart ID is null during item merge")
+                    )
+                }
+                cartItemRepository.findByCartIdAndProductId(userCart.cartId, guestItem.productId)
+                    .defaultIfEmpty(guestItem.copy(itemId = null, cartId = userCart.cartId))
+                    .flatMap { existingItem ->
+                        if (existingItem.itemId == null) {
+                            // Save the guest item into the user cart
+                            cartItemRepository.save(guestItem.copy(itemId = null, cartId = userCart.cartId))
+                                .doOnSuccess { savedItem ->
+                                    logger.debug("Saved new item in user cart: $savedItem")
+                                }
+                        } else {
+                            // Update the quantity of the existing item in the user cart
+                            cartItemRepository.updateQuantity(
+                                existingItem.itemId, existingItem.quantity + guestItem.quantity)
+                                .doOnSuccess {
+                                    logger.debug("Updated quantity for existing item: $existingItem")
+                                }
+                        }
+                    }
+            }
+            .then() // Convert Flux to Mono<Void>
+    }
+
 
     private fun populateCartItemWithProductInfo(cartItem: CartItem): Mono<CartItemDto> {
         return productRepository.findById(cartItem.productId)
@@ -311,7 +381,7 @@ open class CartService(
             }
             .reduce(BigDecimal.ZERO, BigDecimal::add)
 
-        return userRepository.findByOauthId(cart.userId)
+        return userRepository.findByOauthId(cart.userId!!)
             .zipWith(totalMono) { user: User, total: BigDecimal ->
                 // Create the order
                 val order = Order(

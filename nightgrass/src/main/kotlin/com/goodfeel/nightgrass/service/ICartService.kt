@@ -8,11 +8,12 @@ import reactor.core.publisher.Mono
 import java.math.BigDecimal
 
 interface ICartService {
-    fun getCartForUser(userId: String): Mono<Cart>
-    fun addProductToCart(addCartRequest: AddCartRequest): Mono<Cart>
-    fun getCartItemCount(): Mono<Int>
+    fun getCartForUserOrGuest(userId: String?, guestId: String?): Mono<Cart>
+    fun addProductToCart(addCartRequest: AddCartRequest, userId: String?, guestId: String?): Mono<Cart>
+    fun getCartItemCount(userId: String?, guestId: String?): Mono<Int>
 
-    fun removeCartItemFromCart(itemId: Long): Mono<Void>
-    fun getCartItems(): Flux<CartItemDto>
-    fun getTotalPrice(): Mono<BigDecimal>
+    fun removeCartItemFromCart(itemId: Long): Mono<Long>
+    fun getCartItemsForCart(cartId: Long): Flux<CartItemDto>
+    fun getTotalPriceForCart(cartId: Long): Mono<BigDecimal>
+    fun mergeCart(userId: String, guestId: String): Mono<Void>
 }

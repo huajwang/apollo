@@ -23,19 +23,10 @@ class ProductController(
 
     @GetMapping("/all")
     fun listProducts(model: Model): Mono<String> {
-        val productsFlux = productService.allProducts()
-        val cartItemCountMono = cartService.getCartItemCount()
-
-        return Mono.zip(productsFlux.collectList(), cartItemCountMono)
-            .map { tuple ->
-                val products = tuple.t1
-                val cartItemCount = tuple.t2
-                model.addAttribute("products", products)
-                model.addAttribute("cartItemCount", cartItemCount)
-                "product-list"
-            }
+        return productService.allProducts().collectList()
+            .doOnNext { model.addAttribute("products", it) }
+            .thenReturn("product-list")
     }
-
 
     @GetMapping("/detail")
     fun productDetail(@RequestParam("id") productId: Long, model: Model): Mono<String> {
@@ -45,22 +36,19 @@ class ProductController(
             ProductVideo("E99K3-eng.mp4")
         )
 
-        val cartItemCountMono = cartService.getCartItemCount()
         val productMono = productService.getProductById(productId)
         val productPhotosFlux = productPhotoService.findProductImg(productId)
         val productPropertyFlux = productPropertyService.getProductProperties(productId)
 
-        return Mono.zip(cartItemCountMono, productMono,
+        return Mono.zip(productMono,
             productPhotosFlux.collectList(), productPropertyFlux.collectList())
             .map { tuple ->
                 // Explicitly access Tuple3 components
-                val cartItemCount = tuple.t1
-                val product = tuple.t2
-                val productPhotos = tuple.t3
-                val productProperties = tuple.t4
+                val product = tuple.t1
+                val productPhotos = tuple.t2
+                val productProperties = tuple.t3
 
                 // Add attributes to the model
-                model.addAttribute("cartItemCount", cartItemCount)
                 model.addAttribute("product", product)
                 model.addAttribute("productPhotos", productPhotos)
                 model.addAttribute("productVideos", productVideos)

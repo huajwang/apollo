@@ -27,8 +27,7 @@
 <!--        <a href="/cart" @click.prevent="navigate('/cart')">-->
         <div class="cat_icon">
           <img src="/images/old/cart.png" style="opacity: 1; transition: opacity 0.3s;">
-          <!-- Cart count badge -->
-<!--          <span id="cartItemCount" class="cart-count" th:text="${cartItemCount}">0</span>-->
+          <!-- Cart item count badge -->
           <span id="cartItemCount" class="cart-count" x-text="$store.cart.count">0</span>
 
         </div>

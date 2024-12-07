@@ -9,5 +9,6 @@ data class Cart(
     @Id
     val cartId: Long? = null,
     var total: BigDecimal = BigDecimal.ZERO,
-    val userId: String
+    val userId: String? = null,
+    val guestId: String? = null
 )

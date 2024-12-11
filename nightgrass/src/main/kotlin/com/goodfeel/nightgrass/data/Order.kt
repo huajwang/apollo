@@ -10,7 +10,7 @@ import java.time.LocalDateTime
 data class Order(
     @Id val orderId: Long? = null,
     val orderNo: String,
-    val userId: String,
+    var userId: String,
     var deliveryAddress: String? = null,
     var contactName: String? = null,
     var contactPhone: String? = null,

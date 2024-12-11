@@ -9,9 +9,6 @@ import com.goodfeel.nightgrass.web.util.CheckoutRequest
 import com.stripe.model.checkout.Session
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.ResponseEntity
-import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Mono
 
@@ -19,9 +16,6 @@ import reactor.core.publisher.Mono
 @RequestMapping("/pay")
 class PaymentApiController(private val orderService: OrderService, private val stripeService: StripeService) {
     private val logger: Logger = LoggerFactory.getLogger(PaymentApiController::class.java)
-
-    @Value("\${STRIPE_PUBLIC_KEY}")
-    private val stripePublicKey: String? = null
 
     @PostMapping("/create-checkout-session")
     fun createCheckoutSession(@ModelAttribute checkoutRequest: CheckoutRequest): Mono<String> {

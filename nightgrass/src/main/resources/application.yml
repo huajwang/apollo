@@ -6,6 +6,9 @@ spring:
 
   security:
     oauth2:
+      resourceserver:
+        jwt:
+            secret: ${JWT-SECRET-KEY}
       client:
         registration:
           google:
@@ -59,14 +62,14 @@ spring:
 
 logging:
   level:
-    root: INFO
-    org.springframework.r2dbc: DEBUG
-    io.r2dbc.spi: DEBUG
-    org.springframework.web: DEBUG
+    root: OFF
+    org.springframework.r2dbc: OFF
+    io.r2dbc.spi: OFF
+    org.springframework.web: OFF
     org:
       springframework:
         security:
-          oauth2: DEBUG
+          oauth2: OFF
     com.goodfeel.nightgrass: DEBUG
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n"

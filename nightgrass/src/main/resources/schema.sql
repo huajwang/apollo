@@ -16,7 +16,8 @@ CREATE TABLE IF NOT EXISTS e_mall_product_property (
 
 CREATE TABLE IF NOT EXISTS e_mall_user (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    oauth_id VARCHAR(255) UNIQUE NOT NULL,
+    oauth_id VARCHAR(255) UNIQUE,
+    guest_id VARCHAR(255) UNIQUE,
     nick_name VARCHAR(255),
     email VARCHAR(255),
     customer_name VARCHAR(50),

@@ -61,6 +61,14 @@ class OrderService(
         return orderRepository.findByUserId(userId)
     }
 
+    override fun mergeOrder(userId: String, guestId: String): Mono<Void> {
+        return orderRepository.findByUserId(guestId)
+            .flatMap { order ->
+                order.userId = userId
+                orderRepository.save(order)
+            }.then()
+    }
+
     private fun mapToOrderItemDto(orderItem: OrderItem) = OrderItemDto(
         productName = orderItem.productName,
         imageUrl = orderItem.imageUrl,

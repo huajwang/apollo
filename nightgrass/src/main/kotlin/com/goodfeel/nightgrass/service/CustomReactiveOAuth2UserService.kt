@@ -35,18 +35,20 @@ class CustomReactiveOAuth2UserService(private val userRepository: UserRepository
                     else -> null
                 }
                 val email = oAuth2User.getAttribute<String>("email") // Email may not be available for WeChat
-                logger.info("Exact the logged-in user's information and persist it. oauthId: $oauthId," +
-                        " name: $name, email: $email")
-
                 userRepository.findByOauthId(oauthId)
-                    .switchIfEmpty(Mono.defer {
-                        val newUser = User(
-                            oauthId = oauthId,
-                            nickName = name,
-                            email = email
-                        )
-                        Mono.just(newUser)
-                    })
+                    .switchIfEmpty(
+                        Mono.defer {
+                            val newUser = User(
+                                oauthId = oauthId,
+                                nickName = name,
+                                email = email
+                            )
+                            Mono.just(newUser)
+                        }.doOnSuccess {
+                            logger.info("Exact the logged-in user's information and persist it. oauthId: $oauthId," +
+                                    " name: $name, email: $email")
+                        }
+                    )
                     .flatMap { user: User ->
                         // Update existing user details if needed
                         val updatedUser = user.copy(nickName = name, email = email)

@@ -52,7 +52,7 @@ public class ProductServiceTest {
         when(productRepository.findById(productId)).thenReturn(Mono.just(product));
 
         StepVerifier.create(productService.getProductById(productId))
-                .expectNextMatches(productDto -> productDto.getProductId().equals(productId) &&
+                .expectNextMatches(productDto -> productDto.getProductId() == productId &&
                         productDto.getProductName().equals("Product 1"))
                 .verifyComplete();
     }

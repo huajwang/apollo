@@ -9,10 +9,11 @@ data class User(
     @Id
     val id: Long? = null,
     @Column("oauth_id")
-    val oauthId: String,
+    val oauthId: String? =null,
+    val guestId: String? = null,
     val nickName: String? = null,
     val email: String? = null,
-    val customerName: String? = null,
-    val phone: String? = null,
-    val address: String? = null
+    var customerName: String? = null,
+    var phone: String? = null,
+    var address: String? = null
 )

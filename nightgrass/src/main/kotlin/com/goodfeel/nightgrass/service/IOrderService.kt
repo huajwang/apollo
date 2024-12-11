@@ -14,4 +14,5 @@ interface IOrderService {
     fun updateOrder(order: Order): Mono<Order>
     fun getOrderByOrderStatus(orderStatus: OrderStatus): Flux<Order>
     fun findOrderByUserId(userId: String): Flux<Order>
+    fun mergeOrder(userId: String, guestId: String): Mono<Void>
 }

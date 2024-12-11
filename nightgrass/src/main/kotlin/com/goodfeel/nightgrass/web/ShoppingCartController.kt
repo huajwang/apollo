@@ -3,15 +3,13 @@ package com.goodfeel.nightgrass.web
 import com.goodfeel.nightgrass.data.Order
 import com.goodfeel.nightgrass.dto.CartItemDto
 import com.goodfeel.nightgrass.serviceImpl.CartService
+import com.goodfeel.nightgrass.serviceImpl.GuestService
 import com.goodfeel.nightgrass.web.util.CartItemUpdateRequest
 import com.goodfeel.nightgrass.web.util.AddCartRequest
 import com.goodfeel.nightgrass.web.util.RemoveCartRequest
-import com.goodfeel.nightgrass.web.util.Utility
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseCookie
 import org.springframework.http.ResponseEntity
 import org.springframework.http.server.reactive.ServerHttpRequest
 import org.springframework.http.server.reactive.ServerHttpResponse
@@ -21,15 +19,14 @@ import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Mono
 import java.math.BigDecimal
 import java.security.Principal
-import java.util.*
 
 @Controller
 @RequestMapping("/cart")
-class ShoppingCartController(private val cartService: CartService) {
+class ShoppingCartController(
+    private val cartService: CartService,
+    private val guestService: GuestService
+) {
     private val logger: Logger = LoggerFactory.getLogger(ShoppingCartController::class.java)
-
-    @Value("\${STRIPE_PUBLIC_KEY}")
-    private val stripePublicKey: String? = null
 
     @GetMapping
     fun viewCart(
@@ -38,10 +35,11 @@ class ShoppingCartController(private val cartService: CartService) {
         request: ServerHttpRequest,
         response: ServerHttpResponse
     ): Mono<String> {
-        val (userId, guestId) = retrieveUserIdOrGuestId(principal, request, response)
         // cache the cart
-        val cartMono = cartService.getCartForUserOrGuest(userId, guestId).cache()
-
+        val cartMono = guestService.retrieveUserGuestOrCreate(principal, request, response)
+            .flatMap { user ->
+                cartService.getCartForUserOrGuest(user).cache()
+            }
 
         val cartItemDtosFlux = cartMono.flatMapMany { cart ->
             cartService.getCartItemsForCart(cart.cartId!!)
@@ -71,11 +69,19 @@ class ShoppingCartController(private val cartService: CartService) {
         principal: Principal?, // Null for guest users
         request: ServerHttpRequest,
         response: ServerHttpResponse
-    ): Mono<ResponseEntity<Void>> {
+    ): Mono<ResponseEntity<Map<String, Int>>> {
         logger.debug("Adding product ${addCartRequest.productId} with properties: ${addCartRequest.properties}")
-        val (userId, guestId) = retrieveUserIdOrGuestId(principal, request, response)
-        return cartService.addProductToCart(addCartRequest, userId, guestId)
-            .thenReturn(ResponseEntity.ok().build())
+        return guestService.retrieveUserGuestOrCreate(principal, request, response)
+            .flatMap { user ->
+                cartService.addProductToCart(addCartRequest, user)
+                    .flatMap { _ ->
+                        cartService.getCartItemCount(user)
+                    }
+                    .map {
+                        ResponseEntity.ok(mapOf("cartItemCount" to it))
+                    }
+            }
+
     }
 
     @PostMapping("/remove")
@@ -159,9 +165,14 @@ class ShoppingCartController(private val cartService: CartService) {
      * @return
      */
     @PostMapping("/checkout")
-    fun checkout(): Mono<ResponseEntity<Map<String, Long?>>> {
-        return Utility.currentUserId.flatMap { userId: String -> // TODO
-            cartService.createOrderAndCleanupShoppingCart(userId)
+    fun checkout(
+        principal: Principal?,
+        httpRequest: ServerHttpRequest,
+        httpResponse: ServerHttpResponse
+    ): Mono<ResponseEntity<Map<String, Long?>>> {
+        val userMono = guestService.retrieveUserGuestOrCreate(principal, httpRequest, httpResponse)
+        return userMono.flatMap { user ->
+            cartService.createOrderAndCleanupShoppingCart(user.oauthId, user.guestId)
                 .map { order: Order ->
                     ResponseEntity.ok(mapOf("orderId" to order.orderId))
                 }
@@ -180,13 +191,15 @@ class ShoppingCartController(private val cartService: CartService) {
         principal: Principal?, // Null for guests
         httpRequest: ServerHttpRequest,
         httpResponse: ServerHttpResponse): Mono<ResponseEntity<BigDecimal>> {
-        val (userId, guestId) = retrieveUserIdOrGuestId(principal, httpRequest, httpResponse)
-        return cartService.getCartForUserOrGuest(userId, guestId)
-            .flatMap { cart ->
-                cartService.getTotalPriceForCart(cart.cartId!!)
-                    .map { body -> ResponseEntity.ok(body) }
-                    .defaultIfEmpty(ResponseEntity.status(HttpStatus.NOT_FOUND).body(BigDecimal.ZERO))
-            }
+        val userMono = guestService.retrieveUserGuestOrCreate(principal, httpRequest, httpResponse)
+        return userMono.flatMap { user ->
+            cartService.getCartForUserOrGuest(user)
+                .flatMap { cart ->
+                    cartService.getTotalPriceForCart(cart.cartId!!)
+                        .map { body -> ResponseEntity.ok(body) }
+                        .defaultIfEmpty(ResponseEntity.status(HttpStatus.NOT_FOUND).body(BigDecimal.ZERO))
+                }
+        }
     }
 
     @GetMapping("/items")
@@ -195,56 +208,33 @@ class ShoppingCartController(private val cartService: CartService) {
         httpRequest: ServerHttpRequest,
         httpResponse: ServerHttpResponse
     ): Mono<ResponseEntity<Map<String, Any>>> {
-        val (userId, guestId) = retrieveUserIdOrGuestId(principal, httpRequest, httpResponse)
-        return cartService.getCartForUserOrGuest(userId, guestId)
-            .flatMap { cart ->
-                cartService.getCartItemsForCart(cart.cartId!!).collectList()
-                    .map { cartItems ->
-                        ResponseEntity.ok(mapOf("items" to cartItems))
-                    }
-            }
-
-    }
-
-
-//    @PostMapping("/cart/merge")
-//    fun mergeCart(
-//        @RequestBody userId: String,
-//        request: ServerHttpRequest
-//    ): Mono<ResponseEntity<String>> {
-//        val guestId = request.cookies["guestId"]?.firstOrNull()?.value
-//            ?: return Mono.just(ResponseEntity.badRequest().build())
-//
-//        return cartService.mergeCart(userId, guestId)
-//            .thenReturn(ResponseEntity.ok("Cart merged successfully"))
-//            .onErrorResume { error ->
-//                Mono.just(
-//                    ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                        .body("Failed to merge carts: ${error.message}")
-//                )
-//            }
-//    }
-
-    private fun getOrCreateGuestId(request: ServerHttpRequest, response: ServerHttpResponse): String {
-        val guestIdCookie = request.cookies["guestId"]?.firstOrNull()
-        if (guestIdCookie != null) {
-            return guestIdCookie.value
+        val userMono = guestService.retrieveUserGuestOrCreate(principal, httpRequest, httpResponse)
+        return userMono.flatMap { user ->
+            cartService.getCartForUserOrGuest(user)
+                .flatMap { cart ->
+                    cartService.getCartItemsForCart(cart.cartId!!).collectList()
+                        .map { cartItems ->
+                            ResponseEntity.ok(mapOf("items" to cartItems))
+                        }
+                }
         }
-        val newGuestId = UUID.randomUUID().toString()
-        response.addCookie(ResponseCookie.from("guestId", newGuestId).path("/").build())
-        return newGuestId
+
     }
 
-    private fun retrieveUserIdOrGuestId(
+    @GetMapping("/cart-item-count")
+    fun getCartItemCount(
         principal: Principal?,
         httpRequest: ServerHttpRequest,
-        httpResponse: ServerHttpResponse
-    ): Pair<String?, String?> {
-        val guestId = if (principal == null) {
-            getOrCreateGuestId(httpRequest, httpResponse)
-        } else null
-        val userId = principal?.name
-        return Pair(userId, guestId)
+    ): Mono<ResponseEntity<Map<String, Int>>> {
+        return guestService.retrieveUserOrGuest(principal, httpRequest)
+            .flatMap { user ->
+                cartService.getCartItemCount(user)
+                    .map {
+                        ResponseEntity.ok(mapOf("cartItemCount" to it))
+                    }
+            }
+            .defaultIfEmpty(ResponseEntity.ok(mapOf("cartItemCount" to 0)))
+
     }
 
 }

@@ -19,6 +19,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             });
 
+            // Optimistically update the cart count
+            Alpine.store("cart").count++;
+
             // Send POST request to add item to the cart
             fetch("/cart/add", {
                 method: "POST",
@@ -28,22 +31,22 @@ document.addEventListener("DOMContentLoaded", function () {
                 body: JSON.stringify(payload),
             })
                 .then((response) => {
-                    if (response.redirected) {
-                        // Handle redirect explicitly if response is a 302
-                        console.warn("User not authenticated. Redirecting to login...");
-                        window.location.href = response.url; // Redirect to the login page
-                    } else if (response.status === 401) {
-                        // Handle unauthorized (401)
-                        console.error("Unauthorized. Redirecting to login...");
-                        window.location.href = "/login";
-                    } else if (response.ok) {
+                   if (response.ok) {
                         console.log("Product added to cart successfully.");
+                        return response.json(); // Expect server response to contain the latest cart count
                     } else {
                         console.error("Failed to add product to cart.");
+                        throw new Error("Failed to add product to cart");
                     }
                 })
+                .then((data) => {
+                    // Update the cart count with the server-provided value
+                    Alpine.store("cart").count = data.cartItemCount;
+                })
                 .catch((error) => {
-                    console.error("Error while adding product to cart:", error);
+                    // Revert the optimistic update if there's an error
+                    Alpine.store("cart").count--;
+                    alert('Error while adding product to cart. Please try again later. Error: ', error);
                 });
         });
 

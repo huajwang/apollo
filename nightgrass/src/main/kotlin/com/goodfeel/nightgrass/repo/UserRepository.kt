@@ -6,4 +6,6 @@ import reactor.core.publisher.Mono
 
 interface UserRepository : ReactiveCrudRepository<User, Long> {
     fun findByOauthId(oauthId: String): Mono<User>
+    fun findByGuestId(guestId: String): Mono<User>
+    fun deleteByGuestId(guestId: String): Mono<Void>
 }

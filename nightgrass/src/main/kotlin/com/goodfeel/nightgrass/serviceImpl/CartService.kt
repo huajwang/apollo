@@ -52,38 +52,47 @@ open class CartService(
             }
     }
 
-    override fun addProductToCart(addCartRequest: AddCartRequest, userId: String?, guestId: String?): Mono<Cart> {
-        return getCartForUserOrGuest(userId, guestId)
+    override fun addProductToCart(
+        addCartRequest: AddCartRequest,
+        user: User
+    ): Mono<Cart> {
+        return getCartForUserOrGuest(user)
             .flatMap { cart -> findOrAddCartItem(cart, addCartRequest) }
             .flatMap { cart -> updateCartTotalAndSelected(cart.cartId!!).thenReturn(cart) }
             .flatMap { cart -> notifyCartUpdate(cart.cartId!!).thenReturn(cart) }
     }
 
-    override fun getCartForUserOrGuest(userId: String?, guestId: String?): Mono<Cart> {
-        logger.debug("userId = $userId, guestId = $guestId")
+    /**
+     * If shopping cart is not yet in DB, insert one. TODO - to confirm shopping cart insertion
+     */
+    override fun getCartForUserOrGuest(user: User): Mono<Cart> {
         return when {
-            userId != null -> {
-                cartRepository.findByUserId(userId)
+            user.oauthId != null -> {
+                cartRepository.findByUserId(user.oauthId)
                     .switchIfEmpty(
                         Mono.defer {
-                            val newCart = Cart(cartId = null, userId = userId, guestId = null, total = BigDecimal.ZERO)
+                            val newCart =
+                                Cart(cartId = null, userId = user.oauthId, guestId = null, total = BigDecimal.ZERO)
                             cartRepository.save(newCart)
                         }.doOnSuccess {
                             logger.debug("new cart is saved for userId: $it")
                         }
                     )
             }
-            guestId != null -> {
-                cartRepository.findByGuestId(guestId)
+
+            user.guestId != null -> {
+                cartRepository.findByGuestId(user.guestId)
                     .switchIfEmpty(
                         Mono.defer {
-                            val newCart = Cart(cartId = null, userId = null, guestId = guestId, total = BigDecimal.ZERO)
+                            val newCart =
+                                Cart(cartId = null, userId = null, guestId = user.guestId, total = BigDecimal.ZERO)
                             cartRepository.save(newCart)
                         }.doOnSuccess {
                             logger.debug("new cart is saved for guest: $it")
                         }
                     )
             }
+
             else -> Mono.error(IllegalArgumentException("Either userId or guestId must be provided"))
         }
     }
@@ -116,11 +125,9 @@ open class CartService(
             )
     }
 
-
-    override fun getCartItemCount(userId: String?, guestId: String?): Mono<Int> {
-        return getCartForUserOrGuest(userId, guestId)
+    override fun getCartItemCount(user: User): Mono<Int> {
+        return getCartForUserOrGuest(user)
             .flatMap { cart: Cart ->
-
                 cart.cartId?.let {
                     cartItemRepository.findByCartId(cart.cartId)
                         .filter { it.isSelected }
@@ -129,6 +136,7 @@ open class CartService(
                 } ?: Mono.just(0)
             }
             .switchIfEmpty(Mono.just(0))
+
     }
 
 
@@ -266,21 +274,26 @@ open class CartService(
      * @return
      */
     @Transactional
-    open fun createOrderAndCleanupShoppingCart(userId: String): Mono<Order> {
-        return cartRepository.findByUserId(userId)
+    open fun createOrderAndCleanupShoppingCart(userId: String?, guestId: String?): Mono<Order> {
+        val cartMono = if (userId != null) {
+            cartRepository.findByUserId(userId)
+        } else if (guestId != null) {
+            cartRepository.findByGuestId(guestId)
+        } else {
+            throw IllegalArgumentException("Both userId and guestId are null")
+        }
+        return cartMono
             .flatMap { cart: Cart ->
                 val cartItemDtoFlux = cartItemRepository.findByCartId(cart.cartId!!)
                     .filter(CartItem::isSelected)
                     .flatMap { cartItem: CartItem ->
-                        this.populateCartItemWithProductInfo(
-                            cartItem
-                        )
+                        this.populateCartItemWithProductInfo(cartItem)
                     }
+
                 createOrder(cart, cartItemDtoFlux)
                     .flatMap { order: Order ->
-                        clearCartItemsAndTotal(
-                            cart
-                        ).thenReturn(order)
+                        clearCartItemsAndTotal(cart)
+                            .thenReturn(order)
                     }
             }
     }
@@ -313,7 +326,7 @@ open class CartService(
                     .then(
                         cartRepository.deleteByCartId(guestCart.cartId!!)
                             .doOnSuccess {
-                                logger.debug("Delete the guest cart after merging: ${guestCart.cartId}")
+                                logger.debug("Delete the guest cart after merging guest cardId: ${guestCart.cartId}")
                             }
                     )
                     .then(
@@ -346,7 +359,8 @@ open class CartService(
                         } else {
                             // Update the quantity of the existing item in the user cart
                             cartItemRepository.updateQuantity(
-                                existingItem.itemId, existingItem.quantity + guestItem.quantity)
+                                existingItem.itemId, existingItem.quantity + guestItem.quantity
+                            )
                                 .doOnSuccess {
                                     logger.debug("Updated quantity for existing item: $existingItem")
                                 }
@@ -359,7 +373,7 @@ open class CartService(
 
     private fun populateCartItemWithProductInfo(cartItem: CartItem): Mono<CartItemDto> {
         return productRepository.findById(cartItem.productId)
-            .map{ product: Product ->
+            .map { product: Product ->
                 CartItemDto(
                     itemId = cartItem.itemId,
                     productId = cartItem.productId,
@@ -373,20 +387,40 @@ open class CartService(
             }
     }
 
-    private fun createOrder(cart: Cart, cartItemDtoFlux: Flux<CartItemDto>): Mono<Order> {
+    private fun createOrder(
+        cart: Cart,
+        cartItemDtoFlux: Flux<CartItemDto>
+    ): Mono<Order> {
         // Calculate total reactively from Flux<CartItemDto>
         val totalMono = cartItemDtoFlux
-            .map{ item: CartItemDto ->
+            .map { item: CartItemDto ->
                 item.price.multiply(BigDecimal.valueOf(item.quantity.toLong()))
             }
             .reduce(BigDecimal.ZERO, BigDecimal::add)
 
-        return userRepository.findByOauthId(cart.userId!!)
+        val userMono = if (cart.userId != null)
+            userRepository.findByOauthId(cart.userId)
+        else if (cart.guestId != null) {
+            userRepository.findByGuestId(cart.guestId)
+                .switchIfEmpty(
+                    Mono.defer {
+                        val guest = User(guestId = cart.guestId)
+                        userRepository.save(guest)
+                    }.doOnSuccess {
+                        logger.debug("Huajian should not see this one --- create order. save user....")
+                    }
+                )
+        } else {
+            throw IllegalArgumentException("Both userId and guestId are null")
+        }
+
+        return userMono
             .zipWith(totalMono) { user: User, total: BigDecimal ->
                 // Create the order
                 val order = Order(
-                    orderNo =  generateOrderNo(),
-                    userId = cart.userId,
+                    orderNo = generateOrderNo(),
+                    userId = cart.userId ?: cart.guestId
+                    ?: throw IllegalArgumentException("userId and guestId is null"),
                     createdAt = LocalDateTime.now(),
                     orderStatus = OrderStatus.PENDING,
                     total = total,

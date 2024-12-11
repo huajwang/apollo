@@ -107,6 +107,7 @@
             cart.updateItemQuantity(itemId, previousQuantity);
           } else {
             cart.items = data.items;
+            cart.updateItemCount();
             cart.updateTotal();
           }
         })

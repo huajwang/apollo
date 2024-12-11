@@ -4,13 +4,13 @@ import com.goodfeel.nightgrass.service.OrderService
 import com.goodfeel.nightgrass.service.UserService
 import com.goodfeel.nightgrass.serviceImpl.CartService
 import com.goodfeel.nightgrass.serviceImpl.GuestService
-import com.goodfeel.nightgrass.serviceImpl.JwtService
 import org.slf4j.LoggerFactory
-import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.security.core.Authentication
 import org.springframework.security.web.server.WebFilterExchange
 import org.springframework.security.web.server.authentication.ServerAuthenticationSuccessHandler
+import org.springframework.security.web.server.savedrequest.ServerRequestCache
+import org.springframework.security.web.server.savedrequest.WebSessionServerRequestCache
 import reactor.core.publisher.Mono
 import java.net.URI
 
@@ -18,7 +18,8 @@ class CartMergeAuthenticationSuccessHandler(
     private val cartService: CartService,
     private val guestService: GuestService,
     private val orderService: OrderService,
-    private val userService: UserService
+    private val userService: UserService,
+    private val requestCache: ServerRequestCache = WebSessionServerRequestCache()
 ) : ServerAuthenticationSuccessHandler {
 
     private val logger = LoggerFactory.getLogger(CartMergeAuthenticationSuccessHandler::class.java)
@@ -33,7 +34,7 @@ class CartMergeAuthenticationSuccessHandler(
         val guestIdMono = guestService.getGuestId(webFilterExchange.exchange.request)
 
         // Merge guest cart into user's cart if guestId exists
-        val mergeCartMono = guestIdMono.flatMap { guestId ->
+        val mergeOperationsMono = guestIdMono.flatMap { guestId ->
             cartService.mergeCart(userId, guestId)
                 .doOnSuccess {
                     logger.debug("Successfully merged cart for user $userId and guest $guestId")
@@ -64,14 +65,15 @@ class CartMergeAuthenticationSuccessHandler(
                 )
         }
 
-        // Redirect to the home page after merging the cart
-        return mergeCartMono.then(
-            Mono.defer {
-                val response = webFilterExchange.exchange.response
-                response.statusCode = HttpStatus.FOUND // HTTP 302 redirect
-                response.headers.location = URI.create("/") // Redirect to home page
-                response.setComplete() // Finalize the response
-            }
+        return mergeOperationsMono.then(
+            requestCache.getRedirectUri(webFilterExchange.exchange) // Retrieve the original URL from the cache
+                .defaultIfEmpty(URI.create("/")) // Default to home page if no target URL is saved
+                .flatMap { targetUri ->
+                    val response = webFilterExchange.exchange.response
+                    response.statusCode = HttpStatus.FOUND // HTTP 302 redirect
+                    response.headers.location = targetUri // Redirect to the original target page
+                    response.setComplete() // Finalize the response
+                }
         )
     }
 }

@@ -58,7 +58,7 @@ open class CartService(
     ): Mono<Cart> {
         return getCartForUserOrGuest(user)
             .flatMap { cart -> findOrAddCartItem(cart, addCartRequest) }
-            .flatMap { cart -> updateCartTotalAndSelected(cart.cartId!!).thenReturn(cart) }
+            .flatMap { cart -> updateCartTotalAndNotifyCartUpdate(cart) }
             .flatMap { cart -> notifyCartUpdate(cart.cartId!!).thenReturn(cart) }
     }
 
@@ -144,7 +144,7 @@ open class CartService(
         return cartItemRepository.findById(itemId)
             .flatMap { cartItem: CartItem ->
                 cartItemRepository.delete(cartItem)
-                    .then(updateCartTotalAndSelected(cartItem.cartId))
+                    .then(updateCartTotalAndNotifyCartUpdate(cartItem.cartId))
                     .then(notifyCartUpdate(cartItem.cartId))
                     .thenReturn(cartItem.cartId)
             }
@@ -187,15 +187,23 @@ open class CartService(
             .reduce(BigDecimal.ZERO, BigDecimal::add) // Sum up all item totals
     }
 
+    /**
+     * If cart item with itemID does not exist, emit an error downstream
+     */
     open fun updateQuantity(itemId: Long, quantity: Int): Mono<CartItem> {
         return cartItemRepository.findById(itemId)
             .flatMap { cartItem: CartItem ->
                 cartItem.quantity = quantity
                 cartItemRepository.save(cartItem)
                     //  ensure that the total is only updated when a cart item is selected
-                    .then(if (cartItem.isSelected) updateCartTotalAndSelected(cartItem.cartId) else Mono.empty())
+                    .then(
+                        if (cartItem.isSelected)
+                            updateCartTotalAndNotifyCartUpdate(cartItem.cartId)
+                        else Mono.empty()
+                    )
+                    .thenReturn(cartItem)
             }
-            .then(cartItemRepository.findById(itemId))
+            .switchIfEmpty(Mono.error(IllegalArgumentException("Cart item with ID $itemId not found")))
     }
 
     /**
@@ -207,7 +215,7 @@ open class CartService(
      * @param cartId
      * @return
      */
-    private fun updateCartTotalAndSelected(cartId: Long): Mono<Void> {
+    internal fun updateCartTotalAndNotifyCartUpdate(cartId: Long): Mono<Void> {
         // Retrieve all items in the cart
         return cartItemRepository.findByCartId(cartId)
             .flatMap { cartItem ->
@@ -230,6 +238,26 @@ open class CartService(
             .then()
     }
 
+    private fun updateCartTotalAndNotifyCartUpdate(cart: Cart): Mono<Cart> {
+        return cartItemRepository.findByCartId(cart.cartId!!)
+            .flatMap { cartItem ->
+                productRepository.findById(cartItem.productId)
+                    .map { product ->
+                        product.price.multiply(BigDecimal.valueOf(cartItem.quantity.toLong()))
+                    }
+            }
+            .reduce(BigDecimal.ZERO, BigDecimal::add)
+            .flatMap { total ->
+                cart.total = total
+                cartRepository.save(cart)
+            }
+            .flatMap { savedCart ->
+                notifyCartUpdate(savedCart.cartId!!)
+            }
+            .thenReturn(cart)
+
+    }
+
     /**
      * This function is used to update the cart total when user select/deselect the item by (un)check the checkbox
      *
@@ -237,7 +265,7 @@ open class CartService(
      * @param isSelected Is the cart item selected or not
      * @return
      */
-    open fun updateCartTotalAndSelected(itemId: Long, isSelected: Boolean): Mono<Cart> {
+    open fun updateCartTotalAndNotifyCartUpdate(itemId: Long, isSelected: Boolean): Mono<Cart> {
         return cartItemRepository.findById(itemId)
             .flatMap { cartItem: CartItem ->
                 cartItem.isSelected = isSelected

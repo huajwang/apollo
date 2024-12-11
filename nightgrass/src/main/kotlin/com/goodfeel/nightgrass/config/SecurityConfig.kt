@@ -4,7 +4,7 @@ import com.goodfeel.nightgrass.service.OrderService
 import com.goodfeel.nightgrass.service.UserService
 import com.goodfeel.nightgrass.serviceImpl.CartService
 import com.goodfeel.nightgrass.serviceImpl.GuestService
-import com.goodfeel.nightgrass.web.CartMergeAuthenticationSuccessHandler
+import com.goodfeel.nightgrass.web.MergeAuthenticationSuccessHandler
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.Customizer
@@ -39,7 +39,7 @@ open class SecurityConfig(
             .oauth2Login{
                 // Use custom handler
                 it.authenticationSuccessHandler(
-                    CartMergeAuthenticationSuccessHandler(
+                    MergeAuthenticationSuccessHandler(
                         cartService, guestService, orderService, userService))
             }
             .oauth2Client(Customizer.withDefaults<OAuth2ClientSpec>())

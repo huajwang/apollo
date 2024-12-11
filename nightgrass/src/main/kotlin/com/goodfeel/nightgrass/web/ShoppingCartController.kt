@@ -143,6 +143,14 @@ class ShoppingCartController(
                         )
                     }
             }
+            .onErrorResume { e ->
+                // Handle specific exceptions with tailored responses
+                val errorResponse = mapOf(
+                    "message" to "Failed to update quantity",
+                    "error" to (e.message ?: "Unknown error on update quantity")
+                )
+                Mono.just(ResponseEntity.badRequest().body(errorResponse))
+            }
     }
 
     @PostMapping("/update-total-on-checkbox")
@@ -150,7 +158,7 @@ class ShoppingCartController(
         @RequestBody request: CartItemUpdateRequest
     ): Mono<ResponseEntity<Map<String, Any>>> {
         logger.debug("updateTotal on checkbox update: $request")
-        return cartService.updateCartTotalAndSelected(request.itemId, request.isChecked!!)
+        return cartService.updateCartTotalAndNotifyCartUpdate(request.itemId, request.isChecked!!)
             .flatMap { cart ->
                 cartService.getCartItemsForCart(cart.cartId!!).collectList()
             }

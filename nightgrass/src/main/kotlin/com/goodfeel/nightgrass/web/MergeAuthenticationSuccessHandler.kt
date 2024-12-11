@@ -14,7 +14,7 @@ import org.springframework.security.web.server.savedrequest.WebSessionServerRequ
 import reactor.core.publisher.Mono
 import java.net.URI
 
-class CartMergeAuthenticationSuccessHandler(
+class MergeAuthenticationSuccessHandler(
     private val cartService: CartService,
     private val guestService: GuestService,
     private val orderService: OrderService,
@@ -22,7 +22,7 @@ class CartMergeAuthenticationSuccessHandler(
     private val requestCache: ServerRequestCache = WebSessionServerRequestCache()
 ) : ServerAuthenticationSuccessHandler {
 
-    private val logger = LoggerFactory.getLogger(CartMergeAuthenticationSuccessHandler::class.java)
+    private val logger = LoggerFactory.getLogger(MergeAuthenticationSuccessHandler::class.java)
 
     override fun onAuthenticationSuccess(
         webFilterExchange: WebFilterExchange,

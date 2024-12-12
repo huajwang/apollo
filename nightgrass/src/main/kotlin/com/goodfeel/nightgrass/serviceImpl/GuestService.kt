@@ -33,8 +33,11 @@ class GuestService(
         request: ServerHttpRequest,
         response: ServerHttpResponse): Mono<User> {
         val userId = principal?.name
-        if (userId != null) {
+        userId?.let {
             return userRepository.findByOauthId(userId)
+                .doOnError {
+                    logger.error("Failed to find user by oauthId: $userId")
+                }
         }
         return getOrCreateGuestId(request, response).flatMap { guestId ->
             userRepository.findByGuestId(guestId)
@@ -44,10 +47,16 @@ class GuestService(
                             .doOnSuccess {
                                 logger.debug("getOrCreateGuestId. Saved Guest user guestId: $guestId")
                             }
+                            .doOnError { e ->
+                                logger.error("Failed to save Guest: ${e.message}")
+                            }
                     }
 
                 )
+        }.doOnError { e ->
+            logger.error("Error retrieving or creating guest user: ${e.message}", e)
         }
+
     }
 
     /**

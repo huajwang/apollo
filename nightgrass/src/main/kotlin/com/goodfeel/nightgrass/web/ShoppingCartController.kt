@@ -43,9 +43,9 @@ class ShoppingCartController(
 
         val cartItemDtosFlux = cartMono.flatMapMany { cart ->
             cartService.getCartItemsForCart(cart.cartId!!)
-                .map {
-                    it.processProperties()
-                    it
+                .map { cartItemDto ->
+                    cartItemDto.processProperties()
+                    cartItemDto
                 }
         }
 
@@ -61,6 +61,11 @@ class ShoppingCartController(
                 model.addAttribute("cartTotal", cartTotal)
                 "shopping-cart" // Return the view name
             }
+            .onErrorResume { e ->
+                logger.error("Error retrieving cart: ${e.message}", e)
+                model.addAttribute("error", "Failed to load cart")
+                Mono.just("error")
+            }
     }
 
     @PostMapping("/add")
@@ -69,19 +74,20 @@ class ShoppingCartController(
         principal: Principal?, // Null for guest users
         request: ServerHttpRequest,
         response: ServerHttpResponse
-    ): Mono<ResponseEntity<Map<String, Int>>> {
+    ): Mono<ResponseEntity<Map<String, Any>>> {
         logger.debug("Adding product ${addCartRequest.productId} with properties: ${addCartRequest.properties}")
         return guestService.retrieveUserGuestOrCreate(principal, request, response)
             .flatMap { user ->
                 cartService.addProductToCart(addCartRequest, user)
-                    .flatMap { _ ->
-                        cartService.getCartItemCount(user)
-                    }
-                    .map {
-                        ResponseEntity.ok(mapOf("cartItemCount" to it))
+                    .flatMap { _ -> cartService.getCartItemCount(user) }
+                    .map { count ->
+                        ResponseEntity.ok(mapOf<String, Any>("cartItemCount" to count))
                     }
             }
-
+            .onErrorResume { e ->
+                logger.error("Failed to add product to cart: ${e.message}", e)
+                Mono.just(ResponseEntity.badRequest().body(mapOf("error" to "Failed to add product to cart")))
+            }
     }
 
     @PostMapping("/remove")

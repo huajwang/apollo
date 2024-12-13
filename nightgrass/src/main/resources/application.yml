@@ -8,7 +8,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-            secret: ${JWT-SECRET-KEY}
+            secret: ${JWT_SECRET_KEY}
       client:
         registration:
           google:
@@ -63,9 +63,9 @@ spring:
 logging:
   level:
     root: OFF
-    org.springframework.r2dbc: OFF
+    org.springframework.r2dbc: DEBUG
     io.r2dbc.spi: OFF
-    org.springframework.web: OFF
+    org.springframework.web: DEBUG
     org:
       springframework:
         security:

@@ -136,6 +136,7 @@ class GuestService(
 
         // Generate a new JWT for the guestId
         val jwtToken = jwtService.generateJwt(newGuestId)
+        println("aaaaaaaaaaaaaaaaa $jwtToken")
         response.headers.add(HttpHeaders.AUTHORIZATION, "Bearer $jwtToken")
 
         return Mono.just(newGuestId)

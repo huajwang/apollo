@@ -72,15 +72,16 @@ class GuestService(
      */
     fun getGuestId(request: ServerHttpRequest): Mono<String> {
         val guestIdCookie = request.cookies["guestId"]?.firstOrNull()
-        if (guestIdCookie != null) {
-            return Mono.just(guestIdCookie.value)
+
+        return guestIdCookie?.let {
+            Mono.just(it.value)
+        } ?: run {
+            // Check for guestId in Authorization header (JWT token)
+            val authToken = request.headers.getFirst(HttpHeaders.AUTHORIZATION)?.removePrefix("Bearer ")
+            authToken?.let {
+                jwtService.validateAndExtractGuestId(it)
+            } ?: Mono.empty()
         }
-        // Check for guestId in Authorization header (JWT token)
-        val authToken = request.headers.getFirst(HttpHeaders.AUTHORIZATION)?.removePrefix("Bearer ")
-        if (authToken != null) {
-            return jwtService.validateAndExtractGuestId(authToken)
-        }
-        return Mono.empty()
     }
 
     /**
@@ -93,10 +94,9 @@ class GuestService(
         request: ServerHttpRequest,
     ): Mono<User> {
         val userId = principal?.name
-        if (userId != null) {
-            return userRepository.findByOauthId(userId)
-        }
-        return getGuestId(request).flatMap {
+        return userId?.let { oauthId ->
+            userRepository.findByOauthId(oauthId)
+        } ?: getGuestId(request).flatMap {
             userRepository.findByGuestId(it)
         }
     }
@@ -107,24 +107,19 @@ class GuestService(
     ): Mono<String> {
         // Check for guestId in cookies
         val guestIdCookie = request.cookies["guestId"]?.firstOrNull()
-        if (guestIdCookie != null) {
-            return Mono.just(guestIdCookie.value)
+        guestIdCookie?.let {
+            return Mono.just(it.value)
         }
-
         // Check for guestId in Authorization header (JWT token)
         val authToken = request.headers.getFirst(HttpHeaders.AUTHORIZATION)?.removePrefix("Bearer ")
-        if (authToken != null) {
-            return jwtService.validateAndExtractGuestId(authToken)
+        return authToken?.let {
+            jwtService.validateAndExtractGuestId(it)
                 .switchIfEmpty(generateNewGuestId(response)) // Generate a new guestId if token is invalid
-        }
-
-        // Generate a new guestId for the first request and add it in response cookie and JWT token
-        return generateNewGuestId(response)
+        } ?: generateNewGuestId(response) // Generate a new guestId for the first request and add it in response cookie and JWT token
     }
 
-    private fun generateNewGuestId(response: ServerHttpResponse): Mono<String> {
+    internal fun generateNewGuestId(response: ServerHttpResponse): Mono<String> {
         val newGuestId = UUID.randomUUID().toString()
-
         // Set the guestId in a secure cookie
         response.addCookie(
             ResponseCookie.from("guestId", newGuestId)
@@ -133,12 +128,9 @@ class GuestService(
                 .path("/")
                 .build()
         )
-
         // Generate a new JWT for the guestId
         val jwtToken = jwtService.generateJwt(newGuestId)
-        println("aaaaaaaaaaaaaaaaa $jwtToken")
         response.headers.add(HttpHeaders.AUTHORIZATION, "Bearer $jwtToken")
-
         return Mono.just(newGuestId)
     }
 }

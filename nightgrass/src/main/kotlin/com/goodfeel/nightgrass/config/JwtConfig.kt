@@ -19,7 +19,7 @@ import org.springframework.security.oauth2.jwt.*
 open class JwtConfig {
 
     @Value("\${spring.security.oauth2.resourceserver.jwt.secret}")
-    private lateinit var secretKeyString: String
+    internal lateinit var secretKeyString: String
 
     @Bean
     open fun jwtEncoder(): JwtEncoder {
@@ -30,10 +30,7 @@ open class JwtConfig {
             .build()
 
         val jwkSet = JWKSet(listOf(jwk))
-        println("Internal keys: ${jwkSet.keys}")
-
         val jwkSource: JWKSource<SecurityContext> = ImmutableJWKSet(jwkSet)
-        println("JWKSource: $jwkSource")
 
         // Create the wrapped encoder with enforced keyID and algorithm
         val delegate = NimbusJwtEncoder(jwkSource)
@@ -45,11 +42,6 @@ open class JwtConfig {
     open fun reactiveJwtDecoder(): ReactiveJwtDecoder {
         val secretKey: SecretKey = SecretKeySpec(secretKeyString.toByteArray(), "HmacSHA256")
         return NimbusReactiveJwtDecoder.withSecretKey(secretKey).build()
-    }
-
-    @PostConstruct
-    fun logSecretKey() {
-        println("Loaded secret key: $secretKeyString")
     }
 
 }

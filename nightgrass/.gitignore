@@ -34,4 +34,5 @@ build/
 
 application-secret.yml
 src/main/resources/keystore.p12
+selfsigned.crt
 

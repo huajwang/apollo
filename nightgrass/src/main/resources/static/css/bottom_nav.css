@@ -1,5 +1,5 @@
 /* Style for the navigation bar */
-nav {
+footer nav {
     position: fixed;
     bottom: 0;
     width: 100%;
@@ -9,7 +9,7 @@ nav {
 }
 
 /* Styling the list items */
-nav ul {
+footer nav ul {
     display: flex;
     justify-content: space-around; /* Distributes items evenly */
     padding: 10px 0;
@@ -17,12 +17,12 @@ nav ul {
     list-style-type: none;
 }
 
-nav li {
+footer nav li {
     text-align: center;
 }
 
 /* Style for the anchor links */
-nav a {
+footer nav a {
     text-decoration: none;
     color: #333; /* Adjust color as needed */
 }

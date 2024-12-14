@@ -10,109 +10,325 @@ body {
     color: #333;
 }
 
+
 /* Hero Section */
 .hero {
-    background-image: url('hero-image.jpg');
-    background-size: cover;
-    background-position: center;
-    color: white;
-    text-align: center;
-    padding: 80px 20px;
+  display: flex;
+  align-items: center;
+  height: 400px; /* Adjust height as needed */
+  position: relative;
+  background-image: url('/images/hero-image.jpg'); /* Add your image here */
+  background-size: cover; /* Make the background cover the entire area */
+  background-position: center; /* Center the image */
+  padding: 20px;
 }
 
-.hero-content h1 {
-    font-size: 36px;
-    margin-bottom: 10px;
+.hero-container {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end; /* Push the text to the right */
+  position: relative;
 }
 
-.hero-content p {
-    font-size: 18px;
-    margin-bottom: 20px;
+.hero-text {
+  max-width: 400px; /* Limit the width of the text box */
+  padding: 20px;
+  background-color: #fef4e8; /* Light peach color */
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for a polished look */
+  z-index: 2; /* Ensure the text is on top of the background */
 }
 
-.shop-now {
-    padding: 10px 20px;
-    background-color: #f53b2a;
-    color: white;
-    border: none;
-    cursor: pointer;
-    font-size: 16px;
-    border-radius: 5px;
+.hero-text .subheading {
+  font-size: 14px;
+  color: #999; /* Light gray for the subheading */
+  margin-bottom: 10px;
 }
 
-.shop-now:hover {
-    background-color: #e0451b;
+.hero-text h1 {
+  font-size: 32px;
+  color: #d4a200; /* Golden color for the heading */
+  margin-bottom: 15px;
 }
 
-/* Categories Section */
-.categories {
-    padding: 40px 20px;
-    text-align: center;
+.hero-text p {
+  font-size: 16px;
+  color: #666; /* Slightly darker gray for the paragraph */
+  margin-bottom: 20px;
 }
 
-.categories h2 {
-    margin-bottom: 20px;
-    font-size: 24px;
+.hero-btn {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #d4a200; /* Golden button color */
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
-.category-list {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
+.hero-btn:hover {
+  background-color: #a58200; /* Darker gold on hover */
 }
 
-.category-item {
-    padding: 15px 20px;
-    background-color: #333;
-    color: white;
-    border-radius: 5px;
-    cursor: pointer;
+
+
+
+/* Browse The Range Section */
+.browse-range {
+  text-align: center;
+  padding: 10px 10px;
+  background-color: #f9f9f9; /* Optional: Light background color */
 }
 
-.category-item:hover {
-    background-color: #555;
+.browse-range h2 {
+  font-size: 24px;
+  color: #d4a200; /* Golden color for the heading */
+  margin-bottom: 10px;
 }
 
-/* Featured Products Section */
-.featured-products {
-    padding: 40px 20px;
-    text-align: center;
+.browse-range p {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 30px;
 }
 
-.featured-products h2 {
-    margin-bottom: 20px;
-    font-size: 24px;
+.range-cards {
+  display: flex;
+  justify-content: center;
+  gap: 10px; /* Reduce gap to fit 3 cards on small screens */
+  flex-wrap: nowrap; /* Prevent wrapping to a new row */
 }
 
-.product-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    justify-content: center;
+
+.card {
+  background-color: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  text-align: center;
+  flex: 1 1 30%; /* Make cards evenly distribute in the row */
+  max-width: 30%; /* Ensure each card takes about 1/3 of the row */
 }
 
-.product-item {
-    background-color: white;
-    padding: 15px;
-    border-radius: 5px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    width: calc(50% - 20px);
+.card img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
 }
 
-.product-item img {
-    width: 100%;
-    height: auto;
-    border-radius: 5px;
+.card h3 {
+  font-size: 18px;
+  color: #d4a200; /* Golden color for the text */
+  margin: 15px 0;
 }
 
-.product-item h3 {
-    margin-top: 10px;
-    font-size: 18px;
+/* Responsive Design */
+@media (max-width: 768px) {
+  .range-cards {
+    gap: 5px; /* Reduce spacing even further on mobile */
+  }
+
+  .card {
+    flex: 1 1 30%; /* Each card still takes 1/3 of the row */
+    max-width: 30%;
+  }
+
+  .card h3 {
+    font-size: 14px; /* Slightly smaller text for mobile */
+  }
 }
 
-.product-item p {
-    color: #f53b2a;
-    font-size: 16px;
+
+
+
+
+
+
+/* Products Section */
+.products {
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.products h2 {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 4 columns */
+  gap: 20px; /* Space between product cards */
+}
+
+.product-card {
+  background-color: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  position: relative;
+  text-align: left;
+}
+
+.product-card img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+}
+
+.product-info {
+  padding: 15px;
+}
+
+.product-info h3 {
+  font-size: 16px;
+  color: #333;
+  margin: 5px 0;
+}
+
+.product-info p {
+  font-size: 14px;
+  color: #777;
+  margin-bottom: 10px;
+}
+
+.product-info .price {
+  font-size: 14px;
+  color: #333;
+}
+
+.product-info .price .old-price {
+  text-decoration: line-through;
+  color: #bbb;
+  margin-left: 5px;
+}
+
+.badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: #f53b2a;
+  color: #fff;
+  font-size: 12px;
+  padding: 5px 10px;
+  border-radius: 5px;
+}
+
+.badge.new {
+  background-color: #1abc9c;
+}
+
+.show-more {
+  margin-top: 20px;
+  padding: 10px 20px;
+  font-size: 16px;
+  border: 2px solid #d4a200;
+  background-color: transparent;
+  color: #d4a200;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.show-more:hover {
+  background-color: #d4a200;
+  color: #fff;
+}
+
+
+
+
+
+/* Room Inspiration Section */
+.room-inspiration {
+  display: flex;
+  align-items: center;
+  padding: 50px 20px;
+  background-color: #fefaf5;
+}
+
+.content {
+  display: flex;
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.room-inspiration .text-box {
+  flex: 1;
+}
+
+.room-inspiration .text-box h2 {
+  font-size: 28px;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.room-inspiration .text-box p {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.room-inspiration .explore-btn {
+  padding: 10px 20px;
+  background-color: #d4a200; /* Golden button color */
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+/* Carousel */
+.carousel {
+  flex: 2;
+  position: relative;
+  overflow: hidden;
+}
+
+.carousel-wrapper {
+  display: flex;
+  transition: transform 0.5s ease-in-out;
+}
+
+.carousel-item {
+  min-width: 80%; /* Make each item take up 80% of the container width */
+  margin-right: 10px; /* Space between carousel images */
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.carousel-item img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+/* Carousel Indicators */
+.carousel-indicators {
+  display: flex;
+  justify-content: center;
+  margin-top: 15px;
+  gap: 10px;
+}
+
+.carousel-indicators .indicator {
+  width: 10px;
+  height: 10px;
+  background-color: #ccc;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.carousel-indicators .indicator.active {
+  background-color: #d4a200;
 }

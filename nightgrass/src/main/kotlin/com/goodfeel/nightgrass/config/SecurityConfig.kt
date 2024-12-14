@@ -30,7 +30,7 @@ open class SecurityConfig(
             .authorizeExchange { exchange: AuthorizeExchangeSpec ->
                 exchange
                     .pathMatchers(
-                        "/", "/product/**", "/videos/**",
+                        "/home/**", "/product/**", "/videos/**",
                         "/login**", "/error", "/cart/**", "/checkout", "/update-user-info",
                         "/images/**", "/css/**", "/icons/**", "/js/**", "/webjars/**",
                     ).permitAll()

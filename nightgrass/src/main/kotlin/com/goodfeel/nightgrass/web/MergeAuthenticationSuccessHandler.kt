@@ -67,7 +67,7 @@ class MergeAuthenticationSuccessHandler(
 
         return mergeOperationsMono.then(
             requestCache.getRedirectUri(webFilterExchange.exchange) // Retrieve the original URL from the cache
-                .defaultIfEmpty(URI.create("/")) // Default to home page if no target URL is saved
+                .defaultIfEmpty(URI.create("/home")) // Default to home page if no target URL is saved
                 .flatMap { targetUri ->
                     val response = webFilterExchange.exchange.response
                     response.statusCode = HttpStatus.FOUND // HTTP 302 redirect

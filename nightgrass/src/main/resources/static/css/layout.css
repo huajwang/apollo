@@ -23,6 +23,10 @@
     color: #f53b2a;
 }
 
+main {
+  padding-bottom: 70px; /* Adjust this value to match the height of the bottom nav */
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .product-item {

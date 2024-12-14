@@ -3,56 +3,179 @@
       th:replace="~{layout :: layout (
           pageContent=~{:: homeContent},
           pageTitle='Yaojia Buy',
-          pageCss=@{/css/home.css}
+          pageCss=@{/css/home.css},
+          pageJs=@{/js/home.js}
       )}">
 <div th:fragment="homeContent">
-    <!-- Hero Section -->
-    <section class="hero">
-      <div class="hero-content">
-        <h1>Welcome to Our Store</h1>
-        <p>Discover the best products at amazing prices.</p>
-        <button class="shop-now">Shop Now</button>
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-container">
+      <div class="hero-text">
+        <h1>Discover</h1>
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut elit tellus, luctus nec ullamcorper mattis.</p>
+        <button class="hero-btn">Buy Now</button>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- Categories Section -->
-    <section class="categories">
-      <h2>Shop by Category</h2>
-      <div class="category-list">
-        <div class="category-item">Electronics</div>
-        <div class="category-item">Fashion</div>
-        <div class="category-item">Home & Living</div>
-        <div class="category-item">Beauty</div>
-        <div class="category-item">Sports</div>
-        <div class="category-item">More...</div>
+  <section class="browse-range">
+    <h2>Big Hit</h2>
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+    <div class="range-cards">
+      <div class="card">
+        <img src="/images/glass.png" alt="Dining">
+        <h3>VR Glass</h3>
       </div>
-    </section>
+      <div class="card">
+        <img src="/images/band.png" alt="Living">
+        <h3>Wrist Band</h3>
+      </div>
+      <div class="card">
+        <img src="/images/watch.png" alt="Bedroom">
+        <h3>Watch</h3>
+      </div>
+    </div>
+  </section>
 
-    <!-- Featured Products Section -->
-    <section class="featured-products">
-      <h2>Featured Products</h2>
-      <div class="product-list">
-        <div class="product-item">
-          <img src="product1.jpg" alt="Product 1">
-          <h3>Product 1</h3>
-          <p>$29.99</p>
-        </div>
-        <div class="product-item">
-          <img src="product2.jpg" alt="Product 2">
-          <h3>Product 2</h3>
-          <p>$49.99</p>
-        </div>
-        <div class="product-item">
-          <img src="product3.jpg" alt="Product 3">
-          <h3>Product 3</h3>
-          <p>$19.99</p>
-        </div>
-        <div class="product-item">
-          <img src="product4.jpg" alt="Product 4">
-          <h3>Product 4</h3>
-          <p>$99.99</p>
+
+  <section class="products">
+    <h2>Our Products</h2>
+    <div class="product-grid">
+      <div class="product-card">
+        <img src="/images/product1.png" alt="Syltherine">
+        <div class="product-info">
+          <h3>Syltherine</h3>
+          <p>Stylish cafe chair</p>
+          <div class="price">
+            <span>Rp 2.500.000</span>
+            <span class="old-price">Rp 3.500.000</span>
+          </div>
+          <div class="badge">-30%</div>
         </div>
       </div>
-    </section>
+      <div class="product-card">
+        <img src="/images/product2.png" alt="Leviosa">
+        <div class="product-info">
+          <h3>Leviosa</h3>
+          <p>Stylish cafe chair</p>
+          <div class="price">
+            <span>Rp 2.500.000</span>
+          </div>
+        </div>
+      </div>
+      <div class="product-card">
+        <img src="/images/product3.png" alt="Lolito">
+        <div class="product-info">
+          <h3>Lolito</h3>
+          <p>Luxury big sofa</p>
+          <div class="price">
+            <span>Rp 7.000.000</span>
+            <span class="old-price">Rp 14.000.000</span>
+          </div>
+          <div class="badge">-50%</div>
+        </div>
+      </div>
+      <div class="product-card">
+        <img src="/images/product4.png" alt="Respira">
+        <div class="product-info">
+          <h3>Respira</h3>
+          <p>Outdoor bar table and stool</p>
+          <div class="price">
+            <span>Rp 500.000</span>
+          </div>
+          <div class="badge new">New</div>
+        </div>
+      </div>
+
+      <div class="product-card">
+        <img src="/images/product4.png" alt="Respira">
+        <div class="product-info">
+          <h3>Respira</h3>
+          <p>Outdoor bar table and stool</p>
+          <div class="price">
+            <span>Rp 500.000</span>
+          </div>
+          <div class="badge new">New</div>
+        </div>
+      </div>
+
+      <div class="product-card">
+        <img src="/images/product4.png" alt="Respira">
+        <div class="product-info">
+          <h3>Respira</h3>
+          <p>Outdoor bar table and stool</p>
+          <div class="price">
+            <span>Rp 500.000</span>
+          </div>
+          <div class="badge new">New</div>
+        </div>
+      </div>
+
+      <div class="product-card">
+        <img src="/images/product4.png" alt="Respira">
+        <div class="product-info">
+          <h3>Respira</h3>
+          <p>Outdoor bar table and stool</p>
+          <div class="price">
+            <span>Rp 500.000</span>
+          </div>
+          <div class="badge new">New</div>
+        </div>
+      </div>
+
+      <div class="product-card">
+        <img src="/images/product4.png" alt="Respira">
+        <div class="product-info">
+          <h3>Respira</h3>
+          <p>Outdoor bar table and stool</p>
+          <div class="price">
+            <span>Rp 500.000</span>
+          </div>
+          <div class="badge new">New</div>
+        </div>
+      </div>
+      <!-- Add more product cards as needed -->
+    </div>
+    <button class="show-more">Show More</button>
+  </section>
+
+
+
+  <section class="room-inspiration">
+    <div class="content">
+      <div class="text-box">
+        <h2>50+ Beautiful rooms inspiration</h2>
+        <p>
+          Our designer already made a lot of beautiful prototype of rooms that inspire you.
+        </p>
+        <button class="explore-btn">Explore More</button>
+      </div>
+
+      <!-- Carousel -->
+      <div class="carousel">
+        <div class="carousel-wrapper">
+          <div class="carousel-item active">
+            <img src="/images/room1.png" alt="Room 1">
+          </div>
+          <div class="carousel-item">
+            <img src="/images/room2.png" alt="Room 2">
+          </div>
+          <div class="carousel-item">
+            <img src="/images/room3.png" alt="Room 3">
+          </div>
+          <!-- Add more carousel items as needed -->
+        </div>
+
+        <!-- Carousel Indicators -->
+        <div class="carousel-indicators">
+          <span class="indicator active" data-slide="0"></span>
+          <span class="indicator" data-slide="1"></span>
+          <span class="indicator" data-slide="2"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
 </div>
 </html>

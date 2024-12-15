@@ -35,35 +35,80 @@
       </div>
     </div>
 
-    <!-- Product Options Section -->
-    <div class="product-options">
-      <div th:each="property : ${productProperties}">
-        <div class="option-group">
-          <h3 th:text="'Select ' + ${property.propertyName} + ':'"></h3>
-          <div class="option-buttons">
-            <button type="button"
-                    class="option-button"
-                    th:data-property="${property.propertyName}"
-                    th:data-value="${value}"
-                    th:each="value, iterStat : ${property.propertyValue.split(',')} "
-                    th:text="${value}"
-                    th:classappend="${iterStat.index == 0 ? 'selected' : ''}">
-            </button>
+    <section class="product-details">
+      <div class="product-info">
+        <!-- Product Name -->
+        <h1 th:text="${product.productName}">Product Name</h1>
+
+        <!-- Product Price -->
+        <p class="price">$<span th:text="${product.price}"></span></p>
+
+        <!-- Reviews -->
+        <div class="reviews">
+          <div class="stars">
+            ★★★★☆
+          </div>
+          <span class="review-count">5 Customer Reviews</span>
+        </div>
+
+        <!-- Product Description -->
+        <p class="description" th:text="${product.description}">
+        </p>
+
+        <!-- Product Options Section -->
+        <div class="product-options">
+          <div th:each="property : ${productProperties}">
+            <div class="option-group">
+              <h3 th:text="${property.propertyName} + ':'"></h3>
+              <div class="option-buttons">
+                <button type="button"
+                        class="option-button"
+                        th:data-property="${property.propertyName}"
+                        th:text="${value}"
+                        th:data-value="${value}"
+                        th:each="value, iterStat : ${property.propertyValue.split(',')} "
+                        th:classappend="${iterStat.index == 0 ? 'selected' : ''}">
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
 
-    <!-- User Comments Section -->
-    <div class="user-comments">
-      <h3>Customer Reviews</h3>
-      <div class="comment">
-        <p><strong>Jane Doe:</strong> Love the product! Great quality and perfect fit.</p>
       </div>
-      <div class="comment">
-        <p><strong>John Smith:</strong> The color options are amazing! Highly recommend.</p>
+    </section>
+
+    <section class="product-tabs">
+      <div class="tabs">
+        <button class="tab-link active" onclick="openTab(event, 'description')">Description</button>
+        <button class="tab-link" onclick="openTab(event, 'additional-info')">Additional Information</button>
+        <button class="tab-link" onclick="openTab(event, 'reviews')">Reviews [5]</button>
       </div>
-    </div>
+
+      <div id="description" class="tab-content active">
+        <p>
+          Embodying the raw, wayward spirit of rock 'n' roll, the Kilburn portable active stereo speaker takes the unmistakable look and sound of Marshall, unplugs the chords, and takes the show on the road.
+        </p>
+        <p>
+          Weighing in under 7 pounds, the Kilburn is a lightweight piece of vintage styled engineering. Setting the bar as one of the loudest speakers in its class, the Kilburn is a compact, stout-hearted hero with a well-balanced audio which boasts a clear midrange and extended highs for a sound that is both articulate and pronounced.
+        </p>
+        <div class="images">
+          <img src="/images/lake.jpg" alt="Sofa View 1">
+          <img src="/images/lake.jpg" alt="Sofa View 2">
+        </div>
+      </div>
+
+      <div id="additional-info" class="tab-content">
+        <p>Material: Premium leather upholstery</p>
+        <p>Dimensions: 85 x 35 x 40 inches</p>
+        <p>Warranty: 5 years</p>
+      </div>
+
+      <div id="reviews" class="tab-content">
+        <p><strong>John Doe:</strong> This is an amazing product! High quality and perfect for my living room.</p>
+        <p><strong>Jane Smith:</strong> Absolutely love the design and comfort. Worth every penny.</p>
+      </div>
+    </section>
+
 
     <!-- Action Buttons Section -->
     <div class="action-buttons">

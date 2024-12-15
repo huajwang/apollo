@@ -129,3 +129,24 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
 });
+
+function openTab(event, tabId) {
+    // Hide all tab content
+    const contents = document.querySelectorAll('.tab-content');
+    contents.forEach((content) => {
+      content.classList.remove('active');
+    });
+
+    // Remove active class from all tab links
+    const links = document.querySelectorAll('.tab-link');
+    links.forEach((link) => {
+      link.classList.remove('active');
+    });
+
+    // Show the clicked tab content and mark the tab as active
+    document.getElementById(tabId).classList.add('active');
+    event.currentTarget.classList.add('active');
+}
+
+
+

@@ -79,35 +79,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    // Initialize carousel
-    const track = document.querySelector(".carousel-track");
-    const prevBtn = document.getElementById("prevBtn");
-    const nextBtn = document.getElementById("nextBtn");
-    const slides = Array.from(track.children); // Carousel slides
-    const slideWidth = slides[0].getBoundingClientRect().width; // Width of one slide
-    let currentSlide = 0;
-
-    slides.forEach((slide, index) => {
-        slide.style.left = `${slideWidth * index}px`;
-    });
-
-    const moveToSlide = (currentSlideIndex) => {
-        track.style.transform = `translateX(-${currentSlideIndex * slideWidth}px)`;
-    };
-
-    nextBtn.addEventListener("click", () => {
-        if (currentSlide < slides.length - 1) {
-            currentSlide++;
-            moveToSlide(currentSlide);
-        }
-    });
-
-    prevBtn.addEventListener("click", () => {
-        if (currentSlide > 0) {
-            currentSlide--;
-            moveToSlide(currentSlide);
-        }
-    });
 
     // Handle product option selection
     document.querySelectorAll(".option-button").forEach(button => {

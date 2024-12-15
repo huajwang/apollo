@@ -4,16 +4,15 @@
 <div th:fragment="productDetailContent">
   <div class="product-detail-container">
     <!-- Carousel Section -->
-    <div class="carousel">
-      <div class="carousel-track">
-        <div th:each="productPhoto : ${productPhotos}" class="carousel-slide">
+    <div class="swiper">
+      <div class="swiper-wrapper">
+        <div th:each="productPhoto : ${productPhotos}" class="swiper-slide">
           <img th:src="${productPhoto.photoUrl}" alt="Product Photo">
         </div>
       </div>
-      <!-- Navigation buttons -->
-      <button class="carousel-button prev" id="prevBtn">❮</button>
-      <button class="carousel-button next" id="nextBtn">❯</button>
     </div>
+
+
 
     <!-- Video Icons Section -->
     <div class="video-icons">

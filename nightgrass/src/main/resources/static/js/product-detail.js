@@ -149,4 +149,12 @@ function openTab(event, tabId) {
 }
 
 
-
+const swiper = new Swiper('.swiper', {
+  loop: true, // Optional: Enable infinite looping
+  slidesPerView: 1, // One slide visible at a time
+  spaceBetween: 10, // Optional: Space between slides
+  pagination: {
+    el: '.swiper-pagination',
+    clickable: true, // Enables clickable pagination dots
+  },
+});

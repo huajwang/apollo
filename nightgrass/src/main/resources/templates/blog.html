@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout (
+          pageContent=~{:: pageContent},
+          pageTitle='Blog',
+          pageCss=@{/css/blog.css}
+      )}">
+<div th:fragment="pageContent">
+    <section class="blog-hero">
+        <div class="overlay">
+            <div class="hero-content">
+                <img src="logo-icon.png" alt="Logo" class="hero-logo">
+                <h1>Blog</h1>
+            </div>
+        </div>
+    </section>
+
+    <section class="blog-section">
+        <div class="container">
+            <!-- Main Blog Content -->
+            <div class="blog-content">
+                <!-- Blog Post 1 -->
+                <article class="blog-post">
+                    <img src="/images/lake.jpg" alt="Blog Post 1">
+                    <div class="post-meta">
+                        <span>👤 Admin</span>
+                        <span>📅 14 Oct 2022</span>
+                        <span>📂 Wood</span>
+                    </div>
+                    <h2>Going all-in with millennial design</h2>
+                    <p>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua...
+                    </p>
+                    <a href="#" class="read-more">Read more</a>
+                </article>
+
+                <!-- Blog Post 2 -->
+                <article class="blog-post">
+                    <img src="/images/maple.jpg" alt="Blog Post 2">
+                    <div class="post-meta">
+                        <span>👤 Admin</span>
+                        <span>📅 14 Oct 2022</span>
+                        <span>📂 Handmade</span>
+                    </div>
+                    <h2>Handmade pieces that took time to make</h2>
+                    <p>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua...
+                    </p>
+                    <a href="#" class="read-more">Read more</a>
+                </article>
+            </div>
+
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <!-- Search Box -->
+                <div class="search-box">
+                    <input type="text" placeholder="Search">
+                    <button>🔍</button>
+                </div>
+
+                <!-- Categories -->
+                <div class="categories">
+                    <h3>Categories</h3>
+                    <ul>
+                        <li>Crafts <span>2</span></li>
+                        <li>Design <span>8</span></li>
+                        <li>Handmade <span>7</span></li>
+                        <li>Interior <span>1</span></li>
+                        <li>Wood <span>6</span></li>
+                    </ul>
+                </div>
+
+                <!-- Recent Posts -->
+                <div class="recent-posts">
+                    <h3>Recent Posts</h3>
+                    <ul>
+                        <li>
+                            <img src="/images/lake.jpg" alt="Recent Post 1">
+                            <div>
+                                <a href="#">Going all-in with millennial design</a>
+                                <span>14 Oct 2022</span>
+                            </div>
+                        </li>
+                        <li>
+                            <img src="/images/maple.jpg" alt="Recent Post 2">
+                            <div>
+                                <a href="#">Exploring new ways of decorating</a>
+                                <span>03 Aug 2022</span>
+                            </div>
+                        </li>
+                        <li>
+                            <img src="/images/lake.jpg" alt="Recent Post 3">
+                            <div>
+                                <a href="#">Handmade pieces that took time to make</a>
+                                <span>03 Aug 2022</span>
+                            </div>
+                        </li>
+                        <li>
+                            <img src="/images/lake.jpg" alt="Recent Post 4">
+                            <div>
+                                <a href="#">Modern home in Milan</a>
+                                <span>03 Aug 2022</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </aside>
+        </div>
+    </section>
+
+</div>
+</html>

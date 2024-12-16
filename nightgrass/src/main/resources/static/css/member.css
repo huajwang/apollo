@@ -3,18 +3,6 @@
     padding: 10px;
 }
 
-/* Header Section */
-.header {
-    background-color: #ffe6c8;
-    border-radius: 10px;
-    padding: 20px;
-    display: flex;
-    align-items: center;
-    position: relative;
-    flex-direction: column;
-    text-align: center;
-}
-
 .profile-img {
     width: 60px;
     height: 60px;

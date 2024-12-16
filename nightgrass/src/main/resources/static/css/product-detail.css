@@ -1,8 +1,6 @@
 /* Container for the entire product detail page */
 .product-detail-container {
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 20px;
+    padding: 1px;
 }
 
 .video-icons {
@@ -53,9 +51,15 @@
 /* Product Options Styling */
 .product-options {
     margin-bottom: 20px;
+    display: flex;
+    flex-wrap: wrap; /* Allow wrapping for smaller screens */
+    gap: 15px; /* Add spacing between option-groups */
 }
 
 .option-group {
+    display: flex; /* Make option-group a horizontal flexbox */
+    flex-direction: column; /* Default: vertical layout */
+    align-items: flex-start; /* Align content at the start */
     margin-bottom: 15px;
 }
 
@@ -98,36 +102,56 @@
 
 /* Action Buttons styling */
 .action-buttons {
+    position: fixed; /* Fixes the container at the bottom */
+    bottom: 70px; /* Keeps the buttons above the bottom navigation bar */
+    left: 50%; /* Start positioning from the middle of the screen */
+    transform: translateX(-50%); /* Center the container horizontally */
     display: flex;
     justify-content: space-between;
-    gap: 10px;
+    align-items: center;
+    padding: 5px; /* Padding around the container */
+    background-color: transparent; /* White background for visibility */
+    z-index: 900; /* Ensures buttons stay above other content */
+    width: 100%;
+    max-width: 500px;
 }
 
-.action-buttons button {
-    flex: 1;
-    padding: 15px;
-    font-size: 16px;
-    cursor: pointer;
-    border: none;
-    color: white;
-    border-radius: 5px;
+.action-buttons .half {
+    flex: 1; /* Each section takes up half of the container */
+    display: flex;
+    justify-content: center; /* Center the button horizontally */
 }
+
+
+
+/* Individual Buttons */
+.action-buttons button {
+    justify-content: center;
+    padding: 8px 15px; /* Adjusts padding for better proportions */
+    font-size: 14px; /* Readable text size */
+    cursor: pointer; /* Pointer cursor for buttons */
+    border: none; /* Removes default borders */
+    color: white; /* White text */
+    border-radius: 5px; /* Slightly rounded corners */
+}
+
 
 .add-to-cart {
     background-color: #ff9800; /* Orange */
-}
-
-.buy-now {
-    background-color: #4caf50; /* Green */
 }
 
 .add-to-cart:hover {
     background-color: #e68900;
 }
 
+.buy-now {
+    background-color: #4caf50; /* Green */
+}
+
 .buy-now:hover {
     background-color: #388e3c;
 }
+
 
 /* Product Details Section */
 .product-details {

@@ -8,6 +8,7 @@ import com.goodfeel.nightgrass.util.OrderStatus
 import com.goodfeel.nightgrass.web.util.AddCartRequest
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.dao.DuplicateKeyException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import reactor.core.publisher.Flux
@@ -74,6 +75,17 @@ open class CartService(
                             val newCart =
                                 Cart(cartId = null, userId = user.oauthId, guestId = null, total = BigDecimal.ZERO)
                             cartRepository.save(newCart)
+                                .onErrorResume {
+                                    if (it is DuplicateKeyException) {
+                                        logger.debug("The cart already exists for user: ${user.oauthId}")
+                                        cartRepository.findByUserId(user.oauthId)
+                                    } else {
+                                        Mono.error(it)
+                                    }
+                                }
+                                .doOnError {
+                                    logger.error("Failed to get save or get cart for user: ${user.oauthId}")
+                                }
                         }.doOnSuccess {
                             logger.debug("new cart is saved for userId: $it")
                         }
@@ -87,6 +99,17 @@ open class CartService(
                             val newCart =
                                 Cart(cartId = null, userId = null, guestId = user.guestId, total = BigDecimal.ZERO)
                             cartRepository.save(newCart)
+                                .onErrorResume {
+                                    if (it is DuplicateKeyException) {
+                                        logger.debug("The cart already exists for guest: ${user.guestId}")
+                                        cartRepository.findByGuestId(user.guestId)
+                                    } else {
+                                        Mono.error(it)
+                                    }
+                                }
+                                .doOnError {
+                                    logger.error("Error to save or get for guest: ${user.guestId}")
+                                }
                         }.doOnSuccess {
                             logger.debug("new cart is saved for guest: $it")
                         }

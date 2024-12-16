@@ -111,19 +111,36 @@
 
     <!-- Action Buttons Section -->
     <div class="action-buttons">
-      <form th:action="@{/cart/add}" method="post" id="add-to-cart-form">
-        <input type="hidden" name="productId" th:value="${product.productId}">
-        <!-- Dynamic properties -->
-        <input type="hidden"
-               th:each="property : ${productProperties}"
-               th:id="'selected-' + ${property.propertyName}"
-               th:name="'properties[' + ${property.propertyName} + ']'"
-               th:value="${property.propertyValue.split(',')[0]}">
+      <div class="half">
+        <form th:action="@{/cart/add}" method="post" id="add-to-cart-form">
+          <input type="hidden" name="productId" th:value="${product.productId}">
+          <!-- Dynamic properties -->
+          <input type="hidden"
+                 th:each="property : ${productProperties}"
+                 th:id="'selected-' + ${property.propertyName}"
+                 th:name="'properties[' + ${property.propertyName} + ']'"
+                 th:value="${property.propertyValue.split(',')[0]}">
 
-        <button type="submit" class="add-to-cart">Add to Cart</button>
-      </form>
-      <button class="buy-now">Buy Now</button>
+          <button type="submit" class="add-to-cart">Add to Cart</button>
+        </form>
+      </div>
+
+      <div class="half">
+        <form th:action="@{/buynow}" method="post" id="buy-now-form">
+          <input type="hidden" name="productId" th:value="${product.productId}">
+          <!-- Dynamic properties -->
+          <input type="hidden"
+                 th:each="property : ${productProperties}"
+                 th:id="'selected-' + ${property.propertyName}"
+                 th:name="'properties[' + ${property.propertyName} + ']'"
+                 th:value="${property.propertyValue.split(',')[0]}">
+
+          <button type="submit" class="buy-now">Buy Now</button>
+        </form>
+      </div>
+
     </div>
+
   </div>
 </div>
 

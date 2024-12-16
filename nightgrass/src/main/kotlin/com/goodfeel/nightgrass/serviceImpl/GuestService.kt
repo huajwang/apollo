@@ -3,6 +3,7 @@ package com.goodfeel.nightgrass.serviceImpl
 import com.goodfeel.nightgrass.data.User
 import com.goodfeel.nightgrass.repo.UserRepository
 import org.slf4j.LoggerFactory
+import org.springframework.dao.DuplicateKeyException
 import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseCookie
 import org.springframework.http.server.reactive.ServerHttpRequest
@@ -46,6 +47,14 @@ class GuestService(
                         userRepository.save(User(guestId = guestId))
                             .doOnSuccess {
                                 logger.debug("getOrCreateGuestId. Saved Guest user guestId: $guestId")
+                            }
+                            .onErrorResume {
+                                if (it is DuplicateKeyException) {
+                                    logger.debug("The Guest User already exists: $guestId")
+                                    userRepository.findByGuestId(guestId)
+                                } else {
+                                    Mono.error(it)
+                                }
                             }
                             .doOnError { e ->
                                 logger.error("Failed to save Guest: ${e.message}")

@@ -35,8 +35,8 @@ CREATE TABLE IF NOT EXISTS e_mall_product_photo (
 CREATE TABLE IF NOT EXISTS e_mall_cart (
     cart_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     total DECIMAL(10, 2) NOT NULL,
-    user_id VARCHAR(255),
-    guest_id VARCHAR(255)
+    user_id VARCHAR(255) UNIQUE,
+    guest_id VARCHAR(255) UNIQUE
 );
 
 CREATE TABLE IF NOT EXISTS e_mall_cart_item (

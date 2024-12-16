@@ -1,7 +1,5 @@
     /* Container for the shopping cart */
     .cart-container {
-        max-width: 800px;
-        margin: auto;
         padding: 20px;
     }
 

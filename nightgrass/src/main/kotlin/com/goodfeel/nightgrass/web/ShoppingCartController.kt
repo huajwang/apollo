@@ -17,8 +17,10 @@ import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Mono
+import reactor.util.retry.Retry
 import java.math.BigDecimal
 import java.security.Principal
+import java.time.Duration
 
 @Controller
 @RequestMapping("/cart")
@@ -38,7 +40,9 @@ class ShoppingCartController(
         // cache the cart
         val cartMono = guestService.retrieveUserGuestOrCreate(principal, request, response)
             .flatMap { user ->
-                cartService.getCartForUserOrGuest(user).cache()
+                cartService.getCartForUserOrGuest(user)
+                    .doOnSuccess { cart -> logger.debug("Cart fully saved and retrieved: $cart") }
+                    .cache()
             }
 
         val cartItemDtosFlux = cartMono.flatMapMany { cart ->

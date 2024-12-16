@@ -73,8 +73,6 @@
 .blog-section .container {
   display: flex;
   gap: 30px;
-  max-width: 1200px;
-  margin: 0 auto;
 }
 
 /* Blog Content */

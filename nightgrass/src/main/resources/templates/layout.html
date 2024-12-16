@@ -6,14 +6,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title th:text="${pageTitle}">Yaojia Buy</title>
   <link rel="stylesheet" th:href="@{/css/layout.css}">
-  <link rel="stylesheet" th:href="@{/css/bottom_nav.css}">
-  <link rel="stylesheet" th:href="@{/css/cart.css}">
   <link th:if="${pageCss}" rel="stylesheet" th:href="${pageCss}">
   <script th:src="@{/js/spa-core.js}" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.12.0/dist/cdn.min.js" defer></script>
   <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
   <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
-
   <!--  <script th:src="@{/js/cart-update.js}" defer></script>-->
 </head>
 <body x-data="globalState">

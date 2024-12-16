@@ -2,6 +2,7 @@ package com.goodfeel.nightgrass.repo
 
 import com.goodfeel.nightgrass.data.BlogPost
 import com.goodfeel.nightgrass.dto.CategoryPostCountDto
+import com.goodfeel.nightgrass.dto.RecentBlogPostDto
 import com.goodfeel.nightgrass.dto.StickyBlogPostDto
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.reactive.ReactiveCrudRepository
@@ -24,4 +25,12 @@ interface BlogPostRepository : ReactiveCrudRepository<BlogPost, Int> {
             "GROUP BY c.category_id, c.name\n" +
             "ORDER BY post_count DESC")
     fun findBlogPostsCountByCategory(): Flux<CategoryPostCountDto>
+
+
+    @Query("SELECT post_id, title, thumbnail, published_at\n" +
+            "FROM e_mall_blog_posts\n" +
+            "WHERE status = 'PUBLISHED'\n" +
+            "ORDER BY published_at DESC\n" +
+            "LIMIT 5")
+    fun findRecentPosts(): Flux<RecentBlogPostDto>
 }

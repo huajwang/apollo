@@ -56,32 +56,11 @@
                 <div class="recent-posts">
                     <h3>Recent Posts</h3>
                     <ul>
-                        <li>
-                            <img src="/images/lake.jpg" alt="Recent Post 1">
+                        <li th:each="recentPost: ${recentPosts}">
+                            <img th:src="${recentPost.thumbnail}" alt="Recent Post 1">
                             <div>
-                                <a href="#">Going all-in with millennial design</a>
-                                <span>14 Oct 2022</span>
-                            </div>
-                        </li>
-                        <li>
-                            <img src="/images/maple.jpg" alt="Recent Post 2">
-                            <div>
-                                <a href="#">Exploring new ways of decorating</a>
-                                <span>03 Aug 2022</span>
-                            </div>
-                        </li>
-                        <li>
-                            <img src="/images/lake.jpg" alt="Recent Post 3">
-                            <div>
-                                <a href="#">Handmade pieces that took time to make</a>
-                                <span>03 Aug 2022</span>
-                            </div>
-                        </li>
-                        <li>
-                            <img src="/images/lake.jpg" alt="Recent Post 4">
-                            <div>
-                                <a href="#">Modern home in Milan</a>
-                                <span>03 Aug 2022</span>
+                                <a href="#" th:text="${recentPost.title}"></a>
+                                <span th:text="${#temporals.format(recentPost.publishedAt, 'MMM dd, yyyy')}"></span>
                             </div>
                         </li>
                     </ul>

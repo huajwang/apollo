@@ -1,6 +1,7 @@
 package com.goodfeel.nightgrass.service
 
 import com.goodfeel.nightgrass.dto.CategoryPostCountDto
+import com.goodfeel.nightgrass.dto.RecentBlogPostDto
 import com.goodfeel.nightgrass.dto.StickyBlogPostDto
 import com.goodfeel.nightgrass.repo.BlogPostRepository
 import org.springframework.stereotype.Service
@@ -15,4 +16,7 @@ class BlogPostService(
 
     fun getPostCountByCategory(): Flux<CategoryPostCountDto> =
         blogPostRepository.findBlogPostsCountByCategory()
+
+    fun getRecentPosts(): Flux<RecentBlogPostDto> =
+        blogPostRepository.findRecentPosts()
 }

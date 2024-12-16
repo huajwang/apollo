@@ -23,7 +23,6 @@
         </div>
         <div th:each="order : ${orders}" class="order-item">
           <div class="order-No" th:text="${order.orderNo}"></div>
-          <!--      <div class="order-date" th:text="${#dates.format(order.createdAt, 'dd-MM-yyyy HH:mm')}"></div>-->
           <div class="order-status" th:text="${order.orderStatus}"></div>
           <div class="order-total" th:text="'$' + ${order.finalTotal}"></div>
         </div>

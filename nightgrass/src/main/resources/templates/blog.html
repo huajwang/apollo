@@ -20,32 +20,15 @@
             <!-- Main Blog Content -->
             <div class="blog-content">
                 <!-- Blog Post 1 -->
-                <article class="blog-post">
-                    <img src="/images/lake.jpg" alt="Blog Post 1">
+                <article th:each="blogPost: ${blogPosts}" class="blog-post">
+                    <img th:src="${blogPost.mediaFilePath}" alt="Blog Post 1">
                     <div class="post-meta">
-                        <span>👤 Admin</span>
-                        <span>📅 14 Oct 2022</span>
-                        <span>📂 Wood</span>
+                        <span>👤 <span th:text="${blogPost.authorName}"></span></span>
+                        <span>📅 <span th:text="${#temporals.format(blogPost.publishedAt, 'MMM dd, yyyy')}"></span></span>
+                        <span>📂 <span th:text="${blogPost.categoryName}"></span></span>
                     </div>
-                    <h2>Going all-in with millennial design</h2>
-                    <p>
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua...
-                    </p>
-                    <a href="#" class="read-more">Read more</a>
-                </article>
-
-                <!-- Blog Post 2 -->
-                <article class="blog-post">
-                    <img src="/images/maple.jpg" alt="Blog Post 2">
-                    <div class="post-meta">
-                        <span>👤 Admin</span>
-                        <span>📅 14 Oct 2022</span>
-                        <span>📂 Handmade</span>
-                    </div>
-                    <h2>Handmade pieces that took time to make</h2>
-                    <p>
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua...
-                    </p>
+                    <h2 th:text="${blogPost.title}"></h2>
+                    <p th:text="${blogPost.abstract}"></p>
                     <a href="#" class="read-more">Read more</a>
                 </article>
             </div>
@@ -62,11 +45,10 @@
                 <div class="categories">
                     <h3>Categories</h3>
                     <ul>
-                        <li>Crafts <span>2</span></li>
-                        <li>Design <span>8</span></li>
-                        <li>Handmade <span>7</span></li>
-                        <li>Interior <span>1</span></li>
-                        <li>Wood <span>6</span></li>
+                        <li th:each="categoryPostCount: ${categoryPostCounts}">
+                            <span th:text="${categoryPostCount.categoryName}"></span>
+                            <span th:text="${categoryPostCount.postCount}"></span>
+                        </li>
                     </ul>
                 </div>
 

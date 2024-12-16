@@ -100,3 +100,39 @@ CREATE TABLE IF NOT EXISTS e_mall_referral_rewards (
     FOREIGN KEY (order_id) REFERENCES e_mall_order(order_id) ON DELETE CASCADE,
     FOREIGN KEY (sharer_id) REFERENCES e_mall_user(oauth_id)
 );
+
+CREATE TABLE IF NOT EXISTS e_mall_blog_category (
+    category_id INT AUTO_INCREMENT PRIMARY KEY,
+    slug VARCHAR(255) UNIQUE NOT NULL,
+    name VARCHAR(50) UNIQUE NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS e_mall_blog_posts_media (
+    media_id INT AUTO_INCREMENT PRIMARY KEY,
+    post_id INT NOT NULL,
+    type ENUM('PHOTO', 'AUDIO', 'VIDEO') NOT NULL, -- Type of media
+    file_path VARCHAR(255) NOT NULL, -- Path to the media file
+    caption VARCHAR(255),
+    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    -- FOREIGN KEY (post_id) REFERENCES e_mall_blog_posts(post_id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS e_mall_blog_posts (
+    post_id INT AUTO_INCREMENT PRIMARY KEY,
+    author_id VARCHAR(255) NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    slug VARCHAR(255) UNIQUE NOT NULL,
+    content TEXT NOT NULL,
+    abstract VARCHAR(512),
+    category_id INT NOT NULL,
+    status ENUM('DRAFT', 'PUBLISHED', 'ARCHIVED') DEFAULT 'DRAFT',
+    thumbnail VARCHAR(255) NOT NULL,
+    main_media_id INT NOT NULL,
+    sticky_pin_no INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    published_at TIMESTAMP,
+    FOREIGN KEY (author_id) REFERENCES e_mall_user(oauth_id),
+    FOREIGN KEY (category_id) REFERENCES e_mall_blog_category(category_id),
+    FOREIGN KEY (main_media_id) REFERENCES e_mall_blog_posts_media(media_id)
+);

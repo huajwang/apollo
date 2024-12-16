@@ -18,9 +18,4 @@ class HomeController {
     fun contact(): Mono<String> {
         return Mono.just("contact")
     }
-
-    @GetMapping("/blog")
-    fun blog(): Mono<String> {
-        return Mono.just("blog")
-    }
 }

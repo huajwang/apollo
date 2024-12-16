@@ -7,6 +7,7 @@ import com.goodfeel.nightgrass.dto.StickyBlogPostDto
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.reactive.ReactiveCrudRepository
 import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
 
 interface BlogPostRepository : ReactiveCrudRepository<BlogPost, Int> {
     @Query("SELECT p.post_id, p.title, p.abstract, p.sticky_pin_no, p.published_at, u.nick_name AS author_name, " +
@@ -33,4 +34,6 @@ interface BlogPostRepository : ReactiveCrudRepository<BlogPost, Int> {
             "ORDER BY published_at DESC\n" +
             "LIMIT 5")
     fun findRecentPosts(): Flux<RecentBlogPostDto>
+
+    fun findByPostId(postId: Int): Mono<BlogPost>
 }

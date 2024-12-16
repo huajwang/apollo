@@ -7,7 +7,9 @@ import com.goodfeel.nightgrass.service.BlogPostService
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
@@ -36,4 +38,13 @@ class BlogController(
             model.addAttribute("recentPosts", recentPosts)
         }.then(Mono.just("blog"))
     }
+
+    @GetMapping("/post")
+    fun getBlogPost(@RequestParam("postId") postId: Int, model: Model): Mono<String> {
+        return blogPostService.findByPostId(postId)
+            .doOnNext {
+                model.addAttribute("blogPost", it)
+            }.thenReturn("blog-post")
+    }
+
 }

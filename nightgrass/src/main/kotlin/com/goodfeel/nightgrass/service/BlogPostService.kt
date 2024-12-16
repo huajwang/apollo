@@ -19,4 +19,6 @@ class BlogPostService(
 
     fun getRecentPosts(): Flux<RecentBlogPostDto> =
         blogPostRepository.findRecentPosts()
+
+    fun findByPostId(postId: Int) = blogPostRepository.findByPostId(postId)
 }

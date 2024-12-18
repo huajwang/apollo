@@ -1,5 +1,6 @@
 package com.goodfeel.nightgrass.dto
 
+import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import java.math.BigDecimal
 
@@ -10,7 +11,7 @@ data class CartItemDto(
     val productName: String,
     val description: String,
     val quantity: Int,
-    val properties: String,
+    val properties: String? = null,
     var formattedProperties: Map<String, String> = mapOf(),
     val price: BigDecimal,
     val formattedPrice: String? = null,
@@ -21,10 +22,8 @@ data class CartItemDto(
     }
 
     fun processProperties() {
-        formattedProperties = try {
-            objectMapper.readValue(properties, Map::class.java) as Map<String, String>
-        } catch (e: Exception) {
-            mapOf()
-        }
+        formattedProperties = properties?.let {
+            objectMapper.readValue(it, object : TypeReference<Map<String, String>>() {})
+        } ?: mapOf()
     }
 }

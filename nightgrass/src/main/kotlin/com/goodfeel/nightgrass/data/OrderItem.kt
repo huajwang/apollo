@@ -13,7 +13,7 @@ data class OrderItem(
     val productName: String,
     val imageUrl: String,
     val quantity: Int,
-    var properties: String,
+    var properties: String? = null,
     val unitPrice: BigDecimal
 ) {
     fun getPropertiesAsMap(objectMapper: ObjectMapper): Map<String, String> {

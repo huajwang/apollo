@@ -142,7 +142,7 @@ open class CartService(
                         quantity = 1,
                         isSelected = true
                     )
-                    newItem.setPropertiesFromMap(map = addCartRequest.properties)
+                    newItem.setPropertiesFromMap(map = addCartRequest.properties?: mapOf())
                     cartItemRepository.save(newItem).thenReturn(cart)
                 }
             )

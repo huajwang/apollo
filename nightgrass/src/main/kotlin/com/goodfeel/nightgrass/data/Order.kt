@@ -1,5 +1,6 @@
 package com.goodfeel.nightgrass.data
 
+import com.goodfeel.nightgrass.dto.OrderDto
 import com.goodfeel.nightgrass.util.OrderStatus
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
@@ -25,4 +26,15 @@ data class Order(
     val payNo: String? = null,
     val payType: String? = null,
     val remark: String? = null
-)
+) {
+    fun toDto(): OrderDto {
+        return OrderDto(
+            orderId = this.orderId!!,
+            orderNo = this.orderNo,
+            userId = this.userId,
+            orderTotal = this.total,
+            createdAt = this.createdAt,
+            orderStatus = this.orderStatus
+        )
+    }
+}

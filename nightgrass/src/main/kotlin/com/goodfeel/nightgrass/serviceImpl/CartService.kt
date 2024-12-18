@@ -6,6 +6,7 @@ import com.goodfeel.nightgrass.repo.*
 import com.goodfeel.nightgrass.service.ICartService
 import com.goodfeel.nightgrass.util.OrderStatus
 import com.goodfeel.nightgrass.web.util.AddCartRequest
+import com.goodfeel.nightgrass.web.util.Utility
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.dao.DuplicateKeyException
@@ -458,7 +459,7 @@ open class CartService(
                         val guest = User(guestId = cart.guestId)
                         userRepository.save(guest)
                     }.doOnSuccess {
-                        logger.debug("Huajian should not see this one --- create order. save user....")
+                        logger.debug("should not see this one --- create order. save user....")
                     }
                 )
         } else {
@@ -469,7 +470,7 @@ open class CartService(
             .zipWith(totalMono) { user: User, total: BigDecimal ->
                 // Create the order
                 val order = Order(
-                    orderNo = generateOrderNo(),
+                    orderNo = Utility.generateOrderNo(),
                     userId = cart.userId ?: cart.guestId
                     ?: throw IllegalArgumentException("userId and guestId is null"),
                     createdAt = LocalDateTime.now(),
@@ -524,16 +525,6 @@ open class CartService(
         return cartItemRepository.deleteByCartIdAndIsSelected(cart.cartId!!, true)
             .then(cartRepository.updateTotal(cart.cartId, BigDecimal.ZERO))
     }
-
-    // Helper method to generate a human-readable order ID with date/time and a unique suffix
-    private fun generateOrderNo(): String {
-        // Format current date-time to a string
-        val dateTimePart = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS"))
-        // Generate a random 4-digit number as a suffix to ensure uniqueness
-        val randomSuffix = ThreadLocalRandom.current().nextInt(1000, 9999)
-        return dateTimePart + randomSuffix
-    }
-
 
     private fun notifyCartUpdate(cartId: Long): Mono<Int> {
         return cartItemRepository.findByCartId(cartId)

@@ -1,6 +1,8 @@
 package com.goodfeel.nightgrass.data
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.core.type.TypeReference
+import com.goodfeel.nightgrass.dto.OrderItemDto
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
 import java.math.BigDecimal
@@ -16,13 +18,33 @@ data class OrderItem(
     var properties: String? = null,
     val unitPrice: BigDecimal
 ) {
-    fun getPropertiesAsMap(objectMapper: ObjectMapper): Map<String, String> {
-        return objectMapper.readValue(
-            properties,
-            object : com.fasterxml.jackson.core.type.TypeReference<Map<String, String>>() {})
+
+    companion object {
+        private val objectMapper = ObjectMapper()
     }
 
-    fun setPropertiesFromMap(objectMapper: ObjectMapper, map: Map<String, String>) {
+    fun getPropertiesAsMap(): Map<String, String> {
+        return properties?.let {
+            objectMapper.readValue(
+                properties,
+                object : TypeReference<Map<String, String>>() {})
+        } ?: mapOf()
+
+    }
+
+    fun setPropertiesFromMap(map: Map<String, String>) {
         properties = objectMapper.writeValueAsString(map)
+    }
+
+    fun toDto(): OrderItemDto {
+        return OrderItemDto(
+            productName = this.productName,
+            imageUrl = this.imageUrl,
+            quantity = this.quantity,
+            properties = this.properties,
+            unitPrice = this.unitPrice
+        ).apply {
+            this.processProperties()
+        }
     }
 }

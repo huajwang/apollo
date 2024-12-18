@@ -2,53 +2,53 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const addToCartForm = document.getElementById("add-to-cart-form");
 
-        addToCartForm.addEventListener("submit", function (event) {
-            event.preventDefault(); // Prevent default form submission
+    addToCartForm.addEventListener("submit", function (event) {
+        event.preventDefault(); // Prevent default form submission
 
-            const formData = new FormData(addToCartForm);
-            const payload = {};
+        const formData = new FormData(addToCartForm);
+        const payload = {};
 
-            // Convert form data to JSON
-            formData.forEach((value, key) => {
-                if (key.startsWith("properties[")) {
-                    const propertyKey = key.match(/properties\[(.+)\]/)[1];
-                    payload.properties = payload.properties || {};
-                    payload.properties[propertyKey] = value;
-                } else {
-                    payload[key] = value;
-                }
-            });
-
-            // Optimistically update the cart count
-            Alpine.store("cart").count++;
-
-            // Send POST request to add item to the cart
-            fetch("/cart/add", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(payload),
-            })
-                .then((response) => {
-                   if (response.ok) {
-                        console.log("Product added to cart successfully.");
-                        return response.json(); // Expect server response to contain the latest cart count
-                    } else {
-                        console.error("Failed to add product to cart.");
-                        throw new Error("Failed to add product to cart");
-                    }
-                })
-                .then((data) => {
-                    // Update the cart count with the server-provided value
-                    Alpine.store("cart").count = data.cartItemCount;
-                })
-                .catch((error) => {
-                    // Revert the optimistic update if there's an error
-                    Alpine.store("cart").count--;
-                    alert('Error while adding product to cart. Please try again later. Error: ', error);
-                });
+        // Convert form data to JSON
+        formData.forEach((value, key) => {
+            if (key.startsWith("properties[")) {
+                const propertyKey = key.match(/properties\[(.+)\]/)[1];
+                payload.properties = payload.properties || {};
+                payload.properties[propertyKey] = value;
+            } else {
+                payload[key] = value;
+            }
         });
+
+        // Optimistically update the cart count
+        Alpine.store("cart").count++;
+
+        // Send POST request to add item to the cart
+        fetch("/cart/add", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+        })
+        .then((response) => {
+            if (response.ok) {
+                console.log("Product added to cart successfully.");
+                return response.json(); // Expect server response to contain the latest cart count
+            } else {
+                console.error("Failed to add product to cart.");
+                throw new Error("Failed to add product to cart");
+            }
+        })
+        .then((data) => {
+            // Update the cart count with the server-provided value
+            Alpine.store("cart").count = data.cartItemCount;
+        })
+        .catch((error) => {
+            // Revert the optimistic update if there's an error
+            Alpine.store("cart").count--;
+            alert('Error while adding product to cart. Please try again later. Error: ', error);
+        });
+    });
 
     // Handle video modal interactions
     const videoLinks = document.querySelectorAll(".video-icon a");

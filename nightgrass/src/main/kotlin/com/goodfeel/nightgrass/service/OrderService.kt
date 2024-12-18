@@ -69,6 +69,10 @@ class OrderService(
             }.then()
     }
 
+    override fun save(orderItem: OrderItem): Mono<OrderItem> {
+        return orderItemRepository.save(orderItem)
+    }
+
     private fun mapToOrderItemDto(orderItem: OrderItem) = OrderItemDto(
         productName = orderItem.productName,
         imageUrl = orderItem.imageUrl,

@@ -79,7 +79,7 @@ class CheckoutController(
                     .setScale(2, RoundingMode.HALF_UP)
 
                 // Apply 13% HST on the discounted total
-                val estimatedHST = discountedTotal.multiply(BigDecimal.valueOf(0.13))
+                val estimatedHST = discountedTotal.multiply(BigDecimal.valueOf(Utility.HST))
                     .setScale(2, RoundingMode.HALF_UP)
 
                 // Calculate final order total

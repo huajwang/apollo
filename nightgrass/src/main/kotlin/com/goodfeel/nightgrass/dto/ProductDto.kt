@@ -7,5 +7,6 @@ data class ProductDto(
     val productName: String,
     val description: String,
     val imageUrl: String,
-    val price: BigDecimal
+    val price: BigDecimal,
+    val additionalInfo: Map<String, String> = mapOf()
 )

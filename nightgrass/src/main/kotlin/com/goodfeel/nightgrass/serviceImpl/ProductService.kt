@@ -55,7 +55,8 @@ class ProductService(
             productName = this.productName,
             description = this.description,
             imageUrl = this.imageUrl,
-            price = this.price
+            price = this.price,
+            additionalInfo = this.getAdditionalInfoAsMap()
         )
     }
 }

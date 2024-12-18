@@ -91,9 +91,10 @@
       </div>
 
       <div id="additional-info" class="tab-content">
-        <p>Material: Premium leather upholstery</p>
-        <p>Dimensions: 85 x 35 x 40 inches</p>
-        <p>Warranty: 5 years</p>
+        <p th:each="entry : ${product.additionalInfo}">
+          <strong th:text="${entry.key}">Key</strong>:
+          <span th:text="${entry.value}">Value</span>
+        </p>
       </div>
 
       <div id="reviews" class="tab-content">
@@ -139,8 +140,5 @@
 
   </div>
 </div>
-
-
-
 </body>
 </html>

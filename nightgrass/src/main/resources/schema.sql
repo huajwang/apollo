@@ -3,7 +3,8 @@ CREATE TABLE IF NOT EXISTS e_mall_product (
     product_name VARCHAR(255) NOT NULL,
     description TEXT,
     image_url VARCHAR(255),
-    price DECIMAL(10, 2) NOT NULL
+    price DECIMAL(10, 2) NOT NULL,
+    additional_info JSON
 );
 
 CREATE TABLE IF NOT EXISTS e_mall_product_review (

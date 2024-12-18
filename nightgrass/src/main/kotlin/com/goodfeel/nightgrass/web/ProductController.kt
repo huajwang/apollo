@@ -1,7 +1,7 @@
 package com.goodfeel.nightgrass.web
 
 import com.goodfeel.nightgrass.dto.ProductVideo
-import com.goodfeel.nightgrass.serviceImpl.CartService
+import com.goodfeel.nightgrass.service.ReviewService
 import com.goodfeel.nightgrass.serviceImpl.ProductPhotoService
 import com.goodfeel.nightgrass.serviceImpl.ProductPropertyService
 import com.goodfeel.nightgrass.serviceImpl.ProductService
@@ -16,9 +16,9 @@ import reactor.core.publisher.Mono
 @RequestMapping("/product")
 class ProductController(
     private val productService: ProductService,
-    private val cartService: CartService,
     private val productPhotoService: ProductPhotoService,
-    private val productPropertyService: ProductPropertyService
+    private val productPropertyService: ProductPropertyService,
+    private val reviewService: ReviewService
 ) {
 
     @GetMapping("/all")
@@ -39,20 +39,25 @@ class ProductController(
         val productMono = productService.getProductById(productId)
         val productPhotosFlux = productPhotoService.findProductImg(productId)
         val productPropertyFlux = productPropertyService.getProductProperties(productId)
+        val reviews = reviewService.getProductReview(productId).collectList()
 
         return Mono.zip(productMono,
-            productPhotosFlux.collectList(), productPropertyFlux.collectList())
+            productPhotosFlux.collectList(),
+            productPropertyFlux.collectList(),
+            reviews)
             .map { tuple ->
                 // Explicitly access Tuple3 components
                 val product = tuple.t1
                 val productPhotos = tuple.t2
                 val productProperties = tuple.t3
+                val productReviews = tuple.t4
 
                 // Add attributes to the model
                 model.addAttribute("product", product)
                 model.addAttribute("productPhotos", productPhotos)
                 model.addAttribute("productVideos", productVideos)
                 model.addAttribute("productProperties", productProperties)
+                model.addAttribute("reviews", productReviews)
 
                 "product-detail"
             }

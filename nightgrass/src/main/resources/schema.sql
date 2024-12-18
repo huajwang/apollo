@@ -6,6 +6,15 @@ CREATE TABLE IF NOT EXISTS e_mall_product (
     price DECIMAL(10, 2) NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS e_mall_product_review (
+    review_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    product_id BIGINT NOT NULL,
+    reviewer VARCHAR(50) NOT NULL,
+    content VARCHAR(512) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (product_id) REFERENCES e_mall_product(product_id)
+);
+
 CREATE TABLE IF NOT EXISTS e_mall_product_property (
     property_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     product_id BIGINT NOT NULL,

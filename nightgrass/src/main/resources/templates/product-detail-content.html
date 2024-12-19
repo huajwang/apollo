@@ -128,10 +128,9 @@
           <!-- Dynamic properties -->
           <input type="hidden"
                  th:each="property : ${productProperties}"
-                 th:id="'selected-' + ${property.propertyName}"
+                 th:id="'buy-now-selected-' + ${property.propertyName}"
                  th:name="'properties[' + ${property.propertyName} + ']'"
                  th:value="${property.propertyValue.split(',')[0]}">
-
           <button type="submit" class="buy-now">Buy Now</button>
         </form>
       </div>

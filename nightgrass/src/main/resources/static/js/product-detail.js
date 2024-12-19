@@ -92,9 +92,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
             button.classList.add("selected");
 
-            const hiddenInput = document.getElementById(`selected-${property}`);
-            if (hiddenInput) {
-                hiddenInput.value = value;
+            // Update "Add to Cart" hidden input
+            const addToCartHiddenInput = document.getElementById(`selected-${property}`);
+            if (addToCartHiddenInput) {
+                addToCartHiddenInput.value = value;
+            }
+
+            // Update "Buy Now" hidden input
+            const buyNowHiddenInput = document.getElementById(`buy-now-selected-${property}`);
+            if (buyNowHiddenInput) {
+                buyNowHiddenInput.value = value;
             }
         });
     });

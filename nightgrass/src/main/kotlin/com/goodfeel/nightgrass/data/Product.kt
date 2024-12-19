@@ -2,6 +2,7 @@ package com.goodfeel.nightgrass.data
 
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.goodfeel.nightgrass.util.ProductCategory
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
 import java.math.BigDecimal
@@ -14,7 +15,8 @@ data class Product(
     val description: String,
     val imageUrl: String,  // small image. other photos store in another table
     val price: BigDecimal,
-    var additionalInfo: String? = null
+    var additionalInfo: String? = null,
+    val category: ProductCategory = ProductCategory.NONE
 ) {
     companion object {
         private val objectMapper = ObjectMapper()

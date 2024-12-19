@@ -4,7 +4,18 @@ CREATE TABLE IF NOT EXISTS e_mall_product (
     description TEXT,
     image_url VARCHAR(255),
     price DECIMAL(10, 2) NOT NULL,
-    additional_info JSON
+    additional_info JSON,
+    category ENUM('BIG_HIT', 'POPULAR', 'NEW', 'NONE') DEFAULT 'NONE'
+);
+
+CREATE TABLE IF NOT EXISTS e_mall_discount (
+    discount_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    product_id BIGINT NOT NULL,
+    discount_type ENUM('PERCENTAGE', 'FLAT') NOT NULL,
+    discount_value DECIMAL(10, 2) NOT NULL,
+    start_date DATETIME DEFAULT NULL,
+    end_date DATETIME DEFAULT NULL,
+    FOREIGN KEY (product_id) REFERENCES e_mall_product(product_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS e_mall_product_review (

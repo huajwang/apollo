@@ -49,6 +49,22 @@ class ProductService(
             }
     }
 
+    override fun getTop3BigHits(): Flux<ProductDto> {
+        return productRepository.findTop3BigHits()
+            .map { productDto ->
+                productDto.calculateDiscountedPrice()
+                productDto
+            }
+    }
+
+    override fun getTop8PopularOrNewProducts(): Flux<ProductDto> {
+        return productRepository.findTop8PopularOrNewProducts()
+            .map { productDto ->
+                productDto.calculateDiscountedPrice()
+                productDto
+            }
+    }
+
     private fun Product.toDto(): ProductDto {
         return ProductDto(
             productId = this.productId ?: throw IllegalArgumentException("Product ID cannot be null"),
@@ -56,7 +72,8 @@ class ProductService(
             description = this.description,
             imageUrl = this.imageUrl,
             price = this.price,
-            additionalInfo = this.getAdditionalInfoAsMap()
+            additionalInfo = this.getAdditionalInfoAsMap(),
+            category = this.category
         )
     }
 }

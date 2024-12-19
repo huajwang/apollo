@@ -10,4 +10,6 @@ interface IProductService {
     fun getProductById(id: Long): Mono<ProductDto>
     fun saveProduct(product: Product): Mono<Product>
     fun deleteProduct(id: Long): Mono<Void>
+    fun getTop3BigHits(): Flux<ProductDto>
+    fun getTop8PopularOrNewProducts(): Flux<ProductDto>
 }

@@ -19,122 +19,43 @@
   </section>
 
   <section class="browse-range">
-    <h2>Big Hit</h2>
-    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+    <h2>Take Flight with Our Big-Hit Drones! 🚀</h2>
+    <p>Unleash your inner explorer with the ultimate drones of the year!</p>
     <div class="range-cards">
-      <div class="card">
-        <img src="/images/glass.png" alt="Dining">
-        <h3>VR Glass</h3>
-      </div>
-      <div class="card">
-        <img src="/images/band.png" alt="Living">
-        <h3>Wrist Band</h3>
-      </div>
-      <div class="card">
-        <img src="/images/watch.png" alt="Bedroom">
-        <h3>Watch</h3>
+      <div class="card" th:each="bigHit : ${bigHits}">
+        <img th:src="${bigHit.imageUrl}" alt="Big Hit Drone">
+        <h3 th:text="${bigHit.productName}">Product Name</h3>
       </div>
     </div>
   </section>
 
-
   <section class="products">
-    <h2>Our Products</h2>
+    <h2>Limited-time discounts on our top-rated models!</h2>
+    <p>Grab Your Big-Hit Drone Today and elevate your adventures to new heights!</p>
     <div class="product-grid">
-      <div class="product-card">
-        <img src="/images/product1.png" alt="Syltherine">
+      <div class="product-card" th:each="popular: ${populars}">
+        <img th:src="${popular.imageUrl}" alt="Syltherine">
         <div class="product-info">
-          <h3>Syltherine</h3>
-          <p>Stylish cafe chair</p>
-          <div class="price">
-            <span>Rp 2.500.000</span>
-            <span class="old-price">Rp 3.500.000</span>
+          <h3 th:text="${popular.productName}">Product Name</h3>
+          <p th:text="${popular.description}">Product Description</p>
+          <div class="price" th:if="${popular.discountedPrice != null}">
+            <span th:text="'$' + ${popular.discountedPrice}"></span>
+            <span class="old-price" th:text="'$' + ${popular.price}"></span>
           </div>
-          <div class="badge">-30%</div>
-        </div>
-      </div>
-      <div class="product-card">
-        <img src="/images/product2.png" alt="Leviosa">
-        <div class="product-info">
-          <h3>Leviosa</h3>
-          <p>Stylish cafe chair</p>
-          <div class="price">
-            <span>Rp 2.500.000</span>
+          <div class="price" th:if="${popular.discountedPrice == null}">
+            <span th:text="'$' + ${popular.price}"></span>
           </div>
-        </div>
-      </div>
-      <div class="product-card">
-        <img src="/images/product3.png" alt="Lolito">
-        <div class="product-info">
-          <h3>Lolito</h3>
-          <p>Luxury big sofa</p>
-          <div class="price">
-            <span>Rp 7.000.000</span>
-            <span class="old-price">Rp 14.000.000</span>
-          </div>
-          <div class="badge">-50%</div>
-        </div>
-      </div>
-      <div class="product-card">
-        <img src="/images/product4.png" alt="Respira">
-        <div class="product-info">
-          <h3>Respira</h3>
-          <p>Outdoor bar table and stool</p>
-          <div class="price">
-            <span>Rp 500.000</span>
-          </div>
-          <div class="badge new">New</div>
-        </div>
-      </div>
+          <!-- Discount Badge -->
+          <div th:if="${popular.isPercentageDiscounted}"
+               class="badge"
+               th:text="'-' + ${popular.discountValue.stripTrailingZeros().toPlainString()} + '%'"></div>
+          <div th:if="${popular.isFlatDiscounted}"
+               class="badge"
+               th:text="'-$' + ${popular.discountValue.stripTrailingZeros().toPlainString()}"></div>
+          <div th:if="${popular.showNewProductBadge}" class="badge new">New</div>
 
-      <div class="product-card">
-        <img src="/images/product4.png" alt="Respira">
-        <div class="product-info">
-          <h3>Respira</h3>
-          <p>Outdoor bar table and stool</p>
-          <div class="price">
-            <span>Rp 500.000</span>
-          </div>
-          <div class="badge new">New</div>
         </div>
       </div>
-
-      <div class="product-card">
-        <img src="/images/product4.png" alt="Respira">
-        <div class="product-info">
-          <h3>Respira</h3>
-          <p>Outdoor bar table and stool</p>
-          <div class="price">
-            <span>Rp 500.000</span>
-          </div>
-          <div class="badge new">New</div>
-        </div>
-      </div>
-
-      <div class="product-card">
-        <img src="/images/product4.png" alt="Respira">
-        <div class="product-info">
-          <h3>Respira</h3>
-          <p>Outdoor bar table and stool</p>
-          <div class="price">
-            <span>Rp 500.000</span>
-          </div>
-          <div class="badge new">New</div>
-        </div>
-      </div>
-
-      <div class="product-card">
-        <img src="/images/product4.png" alt="Respira">
-        <div class="product-info">
-          <h3>Respira</h3>
-          <p>Outdoor bar table and stool</p>
-          <div class="price">
-            <span>Rp 500.000</span>
-          </div>
-          <div class="badge new">New</div>
-        </div>
-      </div>
-      <!-- Add more product cards as needed -->
     </div>
     <button class="show-more">Show More</button>
   </section>
@@ -144,9 +65,12 @@
   <section class="room-inspiration">
     <div class="content">
       <div class="text-box">
-        <h2>50+ Beautiful rooms inspiration</h2>
+        <h2>Flying off the shelves—and for good reason:</h2>
         <p>
-          Our designer already made a lot of beautiful prototype of rooms that inspire you.
+          Experience smooth, stable flights with advanced controls
+        </p>
+        <p>
+          High-resolution cameras for stunning aerial photography
         </p>
         <button class="explore-btn">Explore More</button>
       </div>

@@ -23,8 +23,10 @@
     <p>Unleash your inner explorer with the ultimate drones of the year!</p>
     <div class="range-cards">
       <div class="card" th:each="bigHit : ${bigHits}">
-        <img th:src="${bigHit.imageUrl}" alt="Big Hit Drone">
-        <h3 th:text="${bigHit.productName}">Product Name</h3>
+        <a th:href="@{/product/detail(id=${bigHit.productId})}">
+          <img th:src="${bigHit.imageUrl}" alt="Big Hit Drone">
+          <h3 th:text="${bigHit.productName}">Product Name</h3>
+        </a>
       </div>
     </div>
   </section>
@@ -34,27 +36,29 @@
     <p>Grab Your Big-Hit Drone Today and elevate your adventures to new heights!</p>
     <div class="product-grid">
       <div class="product-card" th:each="popular: ${populars}">
-        <img th:src="${popular.imageUrl}" alt="Syltherine">
-        <div class="product-info">
-          <h3 th:text="${popular.productName}">Product Name</h3>
-          <p th:text="${popular.description}">Product Description</p>
-          <div class="price" th:if="${popular.discountedPrice != null}">
-            <span th:text="'$' + ${popular.discountedPrice}"></span>
-            <span class="old-price" th:text="'$' + ${popular.price}"></span>
-          </div>
-          <div class="price" th:if="${popular.discountedPrice == null}">
-            <span th:text="'$' + ${popular.price}"></span>
-          </div>
-          <!-- Discount Badge -->
-          <div th:if="${popular.isPercentageDiscounted}"
+        <a th:href="@{/product/detail(id=${popular.productId})}">
+          <img th:src="${popular.imageUrl}" alt="Syltherine">
+          <div class="product-info">
+            <h3 th:text="${popular.productName}">Product Name</h3>
+            <p th:text="${popular.description}">Product Description</p>
+            <div class="price" th:if="${popular.discountedPrice != null}">
+              <span th:text="'$' + ${popular.discountedPrice}"></span>
+              <span class="old-price" th:text="'$' + ${popular.price}"></span>
+            </div>
+            <div class="price" th:if="${popular.discountedPrice == null}">
+              <span th:text="'$' + ${popular.price}"></span>
+            </div>
+            <!-- Discount Badge -->
+            <div th:if="${popular.isPercentageDiscounted}"
                class="badge"
                th:text="'-' + ${popular.discountValue.stripTrailingZeros().toPlainString()} + '%'"></div>
-          <div th:if="${popular.isFlatDiscounted}"
+            <div th:if="${popular.isFlatDiscounted}"
                class="badge"
                th:text="'-$' + ${popular.discountValue.stripTrailingZeros().toPlainString()}"></div>
-          <div th:if="${popular.showNewProductBadge}" class="badge new">New</div>
-
+            <div th:if="${popular.showNewProductBadge}" class="badge new">New</div>
         </div>
+        </a>
+
       </div>
     </div>
     <button class="show-more">Show More</button>

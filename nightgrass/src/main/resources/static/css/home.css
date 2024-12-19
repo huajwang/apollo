@@ -61,9 +61,6 @@
   background-color: #a58200; /* Darker gold on hover */
 }
 
-
-
-
 /* Browse The Range Section */
 .browse-range {
   text-align: center;
@@ -89,7 +86,6 @@
   gap: 10px; /* Reduce gap to fit 3 cards on small screens */
   flex-wrap: nowrap; /* Prevent wrapping to a new row */
 }
-
 
 .card {
   background-color: #fff;
@@ -129,20 +125,14 @@
   }
 }
 
-
-
-
-
-
-
 /* Products Section */
 .products {
-  padding: 40px 20px;
+  padding: 20px 10px;
   text-align: center;
 }
 
 .products h2 {
-  font-size: 24px;
+  font-size: 16px;
   color: #333;
   margin-bottom: 20px;
 }
@@ -170,12 +160,12 @@
 }
 
 .product-info {
-  padding: 15px;
+  padding: 5px;
 }
 
 .product-info h3 {
-  font-size: 16px;
-  color: #333;
+  font-size: 14px;
+  color: #d4a200; /* Golden color */
   margin: 5px 0;
 }
 

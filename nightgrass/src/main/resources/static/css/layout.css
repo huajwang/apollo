@@ -40,6 +40,14 @@ main {
   padding-bottom: 70px; /* Adjust this value to match the height of the bottom nav */
 }
 
+.product-card a {
+    text-decoration: none; /* Removes underline */
+    color: inherit; /* Ensures text color matches parent styles */
+}
+.product-card a:hover {
+    text-decoration: none;
+}
+
 /* Style for the navigation bar */
 footer nav {
     position: fixed;

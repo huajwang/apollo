@@ -36,24 +36,24 @@ class ProductController(
             ProductVideo("E99K3-eng.mp4")
         )
 
-        val productMono = productService.getProductById(productId)
+        val productDtoMono = productService.getProductById(productId)
         val productPhotosFlux = productPhotoService.findProductImg(productId)
         val productPropertyFlux = productPropertyService.getProductProperties(productId)
         val reviews = reviewService.getProductReview(productId).collectList()
 
-        return Mono.zip(productMono,
+        return Mono.zip(productDtoMono,
             productPhotosFlux.collectList(),
             productPropertyFlux.collectList(),
             reviews)
             .map { tuple ->
                 // Explicitly access Tuple3 components
-                val product = tuple.t1
+                val productDto = tuple.t1
                 val productPhotos = tuple.t2
                 val productProperties = tuple.t3
                 val productReviews = tuple.t4
 
                 // Add attributes to the model
-                model.addAttribute("product", product)
+                model.addAttribute("product", productDto)
                 model.addAttribute("productPhotos", productPhotos)
                 model.addAttribute("productVideos", productVideos)
                 model.addAttribute("productProperties", productProperties)

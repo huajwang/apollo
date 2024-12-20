@@ -40,7 +40,13 @@
         <h1 th:text="${product.productName}">Product Name</h1>
 
         <!-- Product Price -->
-        <p class="price">$<span th:text="${product.price}"></span></p>
+        <div class="price" th:if="${product.discountedPrice != null}">
+          <span th:text="'$' + ${product.discountedPrice}"></span>
+          <span class="old-price" th:text="'$' + ${product.price}"></span>
+        </div>
+        <div class="price" th:if="${product.discountedPrice == null}">
+          <span th:text="'$' + ${product.price}"></span>
+        </div>
 
         <!-- Reviews -->
         <div class="reviews">
@@ -91,7 +97,7 @@
       </div>
 
       <div id="additional-info" class="tab-content">
-        <p th:each="entry : ${product.additionalInfo}">
+        <p th:each="entry : ${product.additionalInfoMap}">
           <strong th:text="${entry.key}">Key</strong>:
           <span th:text="${entry.value}">Value</span>
         </p>

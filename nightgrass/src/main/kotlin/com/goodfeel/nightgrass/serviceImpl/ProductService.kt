@@ -24,9 +24,10 @@ class ProductService(
     }
 
     override fun getProductById(id: Long): Mono<ProductDto> {
-        return productRepository.findById(id)
-            .map { product ->
-                product.toDto()
+        return productRepository.findByProductId(id)
+            .map { productDto ->
+                productDto.calculateDiscountedPrice()
+                productDto
             }
             .onErrorResume { ex ->
                 Mono.error(RuntimeException("Error fetching product with ID $id: ${ex.message}", ex))
@@ -72,7 +73,7 @@ class ProductService(
             description = this.description,
             imageUrl = this.imageUrl,
             price = this.price,
-            additionalInfo = this.getAdditionalInfoAsMap(),
+            additionalInfoMap = this.getAdditionalInfoAsMap(),
             category = this.category
         )
     }

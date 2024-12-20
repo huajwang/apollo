@@ -1,5 +1,7 @@
 package com.goodfeel.nightgrass.dto
 
+import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.goodfeel.nightgrass.util.DiscountType
 import com.goodfeel.nightgrass.util.ProductCategory
 import java.math.BigDecimal
@@ -11,7 +13,8 @@ data class ProductDto(
     val description: String,
     val imageUrl: String,
     val price: BigDecimal,
-    val additionalInfo: Map<String, String> = emptyMap(),
+    var additionalInfo: String? = null,
+    var additionalInfoMap: Map<String, String> = emptyMap(),
     val category: ProductCategory,
     val discountType: DiscountType? = null,
     val discountValue: BigDecimal? = null,
@@ -20,6 +23,10 @@ data class ProductDto(
     var isFlatDiscounted: Boolean = false,
     var showNewProductBadge: Boolean = false
 ) {
+    companion object {
+        private val objectMapper = ObjectMapper()
+    }
+
     /**
      * Calculates the discounted price based on discount type and value.
      * Updates the discountedPrice field if discount details are available.
@@ -44,6 +51,9 @@ data class ProductDto(
             showNewProductBadge = category == ProductCategory.NEW
         }
 
+        additionalInfoMap = additionalInfo?.let {
+            objectMapper.readValue(it, object : TypeReference<Map<String, String>>() {})
+        } ?: emptyMap()
     }
 
 }

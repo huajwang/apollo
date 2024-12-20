@@ -178,6 +178,12 @@
   margin-bottom: 15px;
 }
 
+.product-info .price .old-price {
+  text-decoration: line-through;
+  color: #bbb;
+  margin-left: 5px;
+}
+
 /* Reviews */
 .reviews {
   display: flex;

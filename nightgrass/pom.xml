@@ -112,6 +112,7 @@
 	</dependencies>
 
 	<build>
+		<sourceDirectory>src/main/kotlin</sourceDirectory>
 		<plugins>
 			<!-- Kotlin Maven Plugin -->
 			<plugin>
@@ -140,13 +141,9 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<version>3.3.6</version>
 				<configuration>
-					<excludes>
-						<exclude>
-							<groupId>org.projectlombok</groupId>
-							<artifactId>lombok</artifactId>
-						</exclude>
-					</excludes>
+					<mainClass>com.goodfeel.nightgrass.NightgrassApplicationKt</mainClass>
 				</configuration>
 			</plugin>
 		</plugins>

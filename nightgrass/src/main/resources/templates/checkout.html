@@ -55,10 +55,14 @@
       </div>
 
       <!-- Totals and Discount -->
-      <div class="totals">
-        <p><strong>Total:</strong> <span th:text="${order.orderTotal}"></span></p>
-        <p><strong>Discount:</strong> <span th:text="${discount}"></span></p>
-        <p><strong>Total after discount:</strong> <span th:text="${discountedTotal}"></span></p>
+      <div class="totals" th:if="${order.originalTotal > order.discountedTotal}">
+        <p><strong>Original Total:</strong> <span th:text="${order.originalTotal}"></span></p>
+        <p><strong>Discount:</strong> <span th:text="${order.originalTotal - order.discountedTotal}"></span></p>
+        <p><strong>Total after discount:</strong> <span th:text="${order.discountedTotal}"></span></p>
+      </div>
+
+      <div class="totals" th:if="${order.originalTotal == order.discountedTotal}">
+        <p><strong>Total:</strong> <span th:text="${order.originalTotal}"></span></p>
       </div>
 
       <!-- Shipping Section -->
@@ -69,12 +73,12 @@
 
       <!-- Estimated HST -->
       <div class="hst">
-        <p><strong>Estimated HST:</strong> <span th:text="${estimatedHST}"></span></p>
+        <p><strong>Estimated HST:</strong> <span th:text="${order.hst}"></span></p>
       </div>
 
       <!-- Order Total -->
       <div class="order-total">
-        <p><strong>Order Total:</strong> <span th:text="${orderTotalFinal}"></span></p>
+        <p><strong>Order Total:</strong> <span th:text="${order.orderTotal}"></span></p>
       </div>
 
       <!-- Submit Order Button -->

@@ -31,7 +31,7 @@ data class ProductDto(
      * Calculates the discounted price based on discount type and value.
      * Updates the discountedPrice field if discount details are available.
      */
-    fun calculateDiscountedPrice() {
+    fun processProductDto() {
         if (discountType != null && discountValue == null)
             throw IllegalStateException("discountValue is null for discounted product")
         discountedPrice = when (discountType) {

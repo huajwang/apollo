@@ -42,6 +42,19 @@
         flex-direction: column;
     }
 
+    .item-details .price {
+      font-size: 14px;
+      color: #333;
+    }
+
+    .item-details .price .old-price {
+      text-decoration: line-through;
+      color: #bbb;
+      margin-left: 5px;
+    }
+
+
+
     .item-name {
         font-weight: bold;
         font-size: 1.1em;

@@ -25,19 +25,9 @@ class OrderService(
     override fun getOrderById(orderId: Long): Mono<OrderDto> {
         return orderRepository.findById(orderId)
             .map { order ->
-                this.mapToOrderDto(order)
+                order.toDto()
             }
     }
-
-    private fun mapToOrderDto(order: Order) = OrderDto(
-        orderId = order.orderId!!,
-        orderNo = order.orderNo,
-        orderTotal = order.total,
-        userId = order.userId,
-        deliveryAddress = order.deliveryAddress,
-        createdAt = order.createdAt,
-        orderStatus = order.orderStatus
-    )
 
     // Retrieve all items associated with a specific order ID
     override fun getOrderItemsByOrderId(orderId: Long): Flux<OrderItemDto> {

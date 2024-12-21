@@ -14,9 +14,10 @@ class ProductService(
 ) : IProductService {
 
     override fun allProducts(): Flux<ProductDto> {
-        return productRepository.findAll()
-            .map { product ->
-                product.toDto()
+        return productRepository.findAllProducts()
+            .map { productDto ->
+                productDto.processProductDto()
+                productDto
             }
             .onErrorResume { ex ->
                 Flux.error(RuntimeException("Failed to fetch all products: ${ex.message}", ex))
@@ -26,7 +27,7 @@ class ProductService(
     override fun getProductById(id: Long): Mono<ProductDto> {
         return productRepository.findByProductId(id)
             .map { productDto ->
-                productDto.calculateDiscountedPrice()
+                productDto.processProductDto()
                 productDto
             }
             .onErrorResume { ex ->
@@ -53,7 +54,7 @@ class ProductService(
     override fun getTop3BigHits(): Flux<ProductDto> {
         return productRepository.findTop3BigHits()
             .map { productDto ->
-                productDto.calculateDiscountedPrice()
+                productDto.processProductDto()
                 productDto
             }
     }
@@ -61,7 +62,7 @@ class ProductService(
     override fun getTop8PopularOrNewProducts(): Flux<ProductDto> {
         return productRepository.findTop8PopularOrNewProducts()
             .map { productDto ->
-                productDto.calculateDiscountedPrice()
+                productDto.processProductDto()
                 productDto
             }
     }

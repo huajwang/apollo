@@ -7,6 +7,7 @@
 }
 
 .product-card {
+  position: relative;
   background-color: #fff;
   border: 1px solid #ddd;
   border-radius: 5px;
@@ -37,6 +38,27 @@
   font-size: 1.1em;
   color: #0066cc;
   margin: 10px 0;
+}
+
+.product-card .price .old-price {
+  text-decoration: line-through;
+  color: #bbb;
+  margin-left: 5px;
+}
+
+.badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: #f53b2a;
+  color: #fff;
+  font-size: 12px;
+  padding: 5px 10px;
+  border-radius: 5px;
+}
+
+.badge.new {
+  background-color: #1abc9c;
 }
 
 .add-to-cart {

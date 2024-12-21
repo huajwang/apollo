@@ -2,6 +2,7 @@ package com.goodfeel.nightgrass.serviceImpl
 
 import com.goodfeel.nightgrass.data.*
 import com.goodfeel.nightgrass.dto.CartItemDto
+import com.goodfeel.nightgrass.dto.ProductDto
 import com.goodfeel.nightgrass.repo.*
 import com.goodfeel.nightgrass.service.ICartService
 import com.goodfeel.nightgrass.util.OrderStatus
@@ -16,11 +17,10 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.core.publisher.Sinks
 import java.math.BigDecimal
+import java.math.RoundingMode
 import java.text.NumberFormat
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import java.util.*
-import java.util.concurrent.ThreadLocalRandom
 
 @Service
 open class CartService(
@@ -124,8 +124,9 @@ open class CartService(
     private fun findOrAddCartItem(cart: Cart, addCartRequest: AddCartRequest): Mono<Cart> {
         return cartItemRepository.findByCartId(cart.cartId!!)
             .filter { item ->
+                val addCartRequestPropertyMap = addCartRequest.properties ?: emptyMap()
                 item.productId == addCartRequest.productId &&
-                        item.getPropertiesAsMap() == addCartRequest.properties
+                        item.getPropertiesAsMap() == addCartRequestPropertyMap
             }
             .next()
             .flatMap { existingItem ->
@@ -143,7 +144,7 @@ open class CartService(
                         quantity = 1,
                         isSelected = true
                     )
-                    newItem.setPropertiesFromMap(map = addCartRequest.properties?: mapOf())
+                    newItem.setPropertiesFromMap(map = addCartRequest.properties ?: emptyMap())
                     cartItemRepository.save(newItem).thenReturn(cart)
                 }
             )
@@ -182,18 +183,23 @@ open class CartService(
     private fun mapToCartItemDto(cartItem: CartItem): Mono<CartItemDto> {
         // Format price in Canadian dollars
         val currencyFormat = NumberFormat.getCurrencyInstance(Locale.CANADA)
-        return productRepository.findById(cartItem.productId)
-            .map { product: Product ->
+        return productRepository.findByProductId(cartItem.productId)
+            .map { productDto ->
+                productDto.processProductDto()
+                productDto
+            }
+            .map { productDto: ProductDto ->
                 CartItemDto(
                     itemId = cartItem.itemId,
                     productId = cartItem.productId,
-                    imageUrl = product.imageUrl,
-                    productName = product.productName,
-                    description = product.description,
+                    imageUrl = productDto.imageUrl,
+                    productName = productDto.productName,
+                    description = productDto.description,
                     quantity = cartItem.quantity,
                     properties = cartItem.properties,
-                    price = product.price,
-                    formattedPrice = currencyFormat.format(product.price),
+                    price = productDto.price,
+                    discountedPrice = productDto.discountedPrice ?: productDto.price,
+                    formattedPrice = currencyFormat.format(productDto.discountedPrice ?: productDto.price),
                     isSelected = cartItem.isSelected
                 )
             }
@@ -203,9 +209,14 @@ open class CartService(
         return cartItemRepository.findByCartId(cartId) // Fetch all items in the cart
             .filter(CartItem::isSelected) // Only include selected items
             .flatMap { cartItem ->
-                productRepository.findById(cartItem.productId) // Fetch product details
-                    .map { product ->
-                        product.price.multiply(BigDecimal.valueOf(cartItem.quantity.toLong())) // Calculate total for the item
+                productRepository.findByProductId(cartItem.productId) // Fetch product details
+                    .map { productDto ->
+                        productDto.processProductDto()
+                        productDto
+                    }
+                    .map { productDto ->
+                        val salePrice = productDto.discountedPrice ?: productDto.price
+                        salePrice.multiply(BigDecimal.valueOf(cartItem.quantity.toLong())) // Calculate total for the item
                     }
             }
             .reduce(BigDecimal.ZERO, BigDecimal::add) // Sum up all item totals
@@ -243,9 +254,14 @@ open class CartService(
         // Retrieve all items in the cart
         return cartItemRepository.findByCartId(cartId)
             .flatMap { cartItem ->
-                productRepository.findById(cartItem.productId)
-                    .map { product ->
-                        product.price.multiply(BigDecimal.valueOf(cartItem.quantity.toLong()))
+                productRepository.findByProductId(cartItem.productId)
+                    .map { productDto ->
+                        productDto.processProductDto()
+                        productDto
+                    }
+                    .map { productDto ->
+                        val salePrice = productDto.discountedPrice ?: productDto.price
+                        salePrice.multiply(BigDecimal.valueOf(cartItem.quantity.toLong()))
                     }
             }
             .reduce(BigDecimal.ZERO, BigDecimal::add)
@@ -265,9 +281,14 @@ open class CartService(
     private fun updateCartTotalAndNotifyCartUpdate(cart: Cart): Mono<Cart> {
         return cartItemRepository.findByCartId(cart.cartId!!)
             .flatMap { cartItem ->
-                productRepository.findById(cartItem.productId)
-                    .map { product ->
-                        product.price.multiply(BigDecimal.valueOf(cartItem.quantity.toLong()))
+                productRepository.findByProductId(cartItem.productId)
+                    .map { productDto ->
+                        productDto.processProductDto()
+                        productDto
+                    }
+                    .map { productDto ->
+                        val salePrice = productDto.discountedPrice ?: productDto.price
+                        salePrice.multiply(BigDecimal.valueOf(cartItem.quantity.toLong()))
                     }
             }
             .reduce(BigDecimal.ZERO, BigDecimal::add)
@@ -296,10 +317,15 @@ open class CartService(
                 cartItemRepository.save(cartItem)
             }
             .flatMap { cartItem ->
-                productRepository.findById(cartItem.productId)
-                    .map { product: Product ->
+                productRepository.findByProductId(cartItem.productId)
+                    .map { productDto ->
+                        productDto.processProductDto()
+                        productDto
+                    }
+                    .map { productDto: ProductDto ->
+                        val salePrice = productDto.discountedPrice ?: productDto.price
                         val itemTotal: BigDecimal =
-                            product.price.multiply(BigDecimal.valueOf(cartItem.quantity.toLong()))
+                            salePrice.multiply(BigDecimal.valueOf(cartItem.quantity.toLong()))
                         CartTotalUpdate(cartItem.cartId, itemTotal)
                     }
             }
@@ -424,17 +450,22 @@ open class CartService(
 
 
     private fun populateCartItemWithProductInfo(cartItem: CartItem): Mono<CartItemDto> {
-        return productRepository.findById(cartItem.productId)
-            .map { product: Product ->
+        return productRepository.findByProductId(cartItem.productId)
+            .map { productDto ->
+                productDto.processProductDto()
+                productDto
+            }
+            .map { productDto: ProductDto ->
                 CartItemDto(
                     itemId = cartItem.itemId,
                     productId = cartItem.productId,
-                    productName = product.productName,
-                    description = product.description,
-                    imageUrl = product.imageUrl,
+                    productName = productDto.productName,
+                    description = productDto.description,
+                    imageUrl = productDto.imageUrl,
                     quantity = cartItem.quantity,
                     properties = cartItem.properties,
-                    price = product.price
+                    price = productDto.price,
+                    discountedPrice = productDto.discountedPrice ?: productDto.price
                 )
             }
     }
@@ -443,8 +474,15 @@ open class CartService(
         cart: Cart,
         cartItemDtoFlux: Flux<CartItemDto>
     ): Mono<Order> {
-        // Calculate total reactively from Flux<CartItemDto>
-        val totalMono = cartItemDtoFlux
+        // Calculate total reactively
+        val discountedTotalMono = cartItemDtoFlux
+            .map { item: CartItemDto ->
+                val price = item.discountedPrice
+                price.multiply(BigDecimal.valueOf(item.quantity.toLong()))
+            }
+            .reduce(BigDecimal.ZERO, BigDecimal::add)
+
+        val originalTotalMono = cartItemDtoFlux
             .map { item: CartItemDto ->
                 item.price.multiply(BigDecimal.valueOf(item.quantity.toLong()))
             }
@@ -466,24 +504,31 @@ open class CartService(
             throw IllegalArgumentException("Both userId and guestId are null")
         }
 
-        return userMono
-            .zipWith(totalMono) { user: User, total: BigDecimal ->
-                // Create the order
-                val order = Order(
-                    orderNo = Utility.generateOrderNo(),
-                    userId = cart.userId ?: cart.guestId
-                    ?: throw IllegalArgumentException("userId and guestId is null"),
-                    createdAt = LocalDateTime.now(),
-                    orderStatus = OrderStatus.PENDING,
-                    total = total,
-                    // Copy user details to order
-                    contactName = user.customerName,
-                    contactPhone = user.phone,
-                    deliveryAddress = user.address
-                )
-                logger.debug("Creating order for user ${order.userId}, orderNo = ${order.orderNo}, total = ${order.total}")
-                order
-            }
+        return Mono.zip(userMono, discountedTotalMono, originalTotalMono).map { tuple ->
+            val user = tuple.t1
+            val discountedTotal = tuple.t2
+            val originalTotal = tuple.t3
+
+            val estimatedHst = discountedTotal.multiply(BigDecimal.valueOf(0.13))
+                .setScale(2, RoundingMode.HALF_UP)
+            val shippingFee = BigDecimal.ZERO // TODO - calculate shipping fee
+            val finalTotal = discountedTotal.add(estimatedHst).add(shippingFee)
+
+            Order(
+                orderNo = Utility.generateOrderNo(),
+                userId = cart.userId ?: cart.guestId ?: throw IllegalArgumentException("userId and guestId is null"),
+                createdAt = LocalDateTime.now(),
+                orderStatus = OrderStatus.PENDING,
+                originalTotal = originalTotal,
+                discountedTotal = discountedTotal,
+                hst = estimatedHst,
+                shippingFee = BigDecimal.ZERO,
+                finalTotal = finalTotal,
+                contactName = user.customerName,
+                contactPhone = user.phone,
+                deliveryAddress = user.address
+            )
+        }
             .flatMap { order: Order ->  // Save the order and create order items in a reactive chain
                 orderRepository.save(order)
                     .flatMap { savedOrder: Order ->

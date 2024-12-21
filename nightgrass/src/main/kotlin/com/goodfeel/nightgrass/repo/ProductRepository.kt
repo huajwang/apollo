@@ -35,4 +35,12 @@ interface ProductRepository : ReactiveCrudRepository<Product, Long> {
         "ON p.product_id = d.product_id\n" +
         "WHERE p.product_id = :id")
     fun findByProductId(id: Long): Mono<ProductDto>
+
+    @Query("SELECT p.product_id, p.product_name, p.description, p.image_url, p.price, " +
+        "p.additional_info, p.category, d.discount_type, d.discount_value\n" +
+        "FROM e_mall_product p\n" +
+        "LEFT JOIN e_mall_discount d\n" +
+        "ON p.product_id = d.product_id"
+    )
+    fun findAllProducts(): Flux<ProductDto>
 }

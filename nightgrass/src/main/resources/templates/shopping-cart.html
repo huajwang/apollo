@@ -36,7 +36,13 @@
           </ul>
 
           <!-- Price display -->
-          <span class="item-price" th:text="${item.formattedPrice}">Price: $0.00</span>
+          <div class="price" th:if="${item.discountedPrice < item.price}">
+            <span th:text="'$' + ${item.discountedPrice}"></span>
+            <span class="old-price" th:text="'$' + ${item.price}"></span>
+          </div>
+          <div class="price" th:if="${item.discountedPrice == item.price}">
+            <span class="item-price" th:text="${item.formattedPrice}">Price: $0.00</span>
+          </div>
 
           <!-- Quantity controls with event listener for debounced update -->
           <div class="quantity-controls">

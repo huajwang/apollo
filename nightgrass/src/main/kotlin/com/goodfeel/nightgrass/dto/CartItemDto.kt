@@ -14,6 +14,7 @@ data class CartItemDto(
     val properties: String? = null,
     var formattedProperties: Map<String, String> = mapOf(),
     val price: BigDecimal,
+    val discountedPrice: BigDecimal,
     val formattedPrice: String? = null,
     val isSelected: Boolean = true
 ) {

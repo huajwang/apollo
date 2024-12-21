@@ -47,7 +47,7 @@
         console.log("updateTotal() data items: ", this.items);
         this.totalPrice = this.items.reduce((total, item) => {
           if (item.selected) {
-            return total + item.quantity * item.price;
+            return total + item.quantity * item.discountedPrice;
           }
           return total;
         }, 0);

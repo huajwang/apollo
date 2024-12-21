@@ -22,6 +22,8 @@ object Utility {
 
     const val HST = 0.13
 
+    const val REFERRAL_REWARD_RATE = 0.1
+
     // Helper method to generate a human-readable order ID with date/time and a unique suffix
     fun generateOrderNo(): String {
         // Format current date-time to a string

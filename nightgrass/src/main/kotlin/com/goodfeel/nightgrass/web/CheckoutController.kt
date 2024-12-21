@@ -10,7 +10,6 @@ import com.goodfeel.nightgrass.service.IOrderService
 import com.goodfeel.nightgrass.service.UserService
 import com.goodfeel.nightgrass.serviceImpl.GuestService
 import com.goodfeel.nightgrass.serviceImpl.ReferralTrackingService
-import com.goodfeel.nightgrass.util.Constant
 import com.goodfeel.nightgrass.util.ReferralRewardStatus
 import com.goodfeel.nightgrass.web.util.Utility
 import org.slf4j.Logger
@@ -70,36 +69,17 @@ class CheckoutController(
                 val orderItems = tuple.t2
                 val order = tuple.t3
 
-                val originalTotal: BigDecimal = order.orderTotal.setScale(2, RoundingMode.HALF_UP)
-
-                // Apply 10% discount
-                val discount = originalTotal.multiply(BigDecimal.valueOf(0.10))
-                    .setScale(2, RoundingMode.HALF_UP)
-                val discountedTotal = originalTotal.subtract(discount)
-                    .setScale(2, RoundingMode.HALF_UP)
-
-                // Apply 13% HST on the discounted total
-                val estimatedHST = discountedTotal.multiply(BigDecimal.valueOf(Utility.HST))
-                    .setScale(2, RoundingMode.HALF_UP)
-
-                // Calculate final order total
-                val orderTotalFinal = discountedTotal.add(estimatedHST)
-                    .setScale(2, RoundingMode.HALF_UP)
-
                 model.addAttribute("user", user)
                 model.addAttribute("orderItems", orderItems)
                 model.addAttribute("order", order)
-                model.addAttribute("discount", discount)
-                model.addAttribute("discountedTotal", discountedTotal)
                 model.addAttribute("shippingDetails", "Delivery to garage")
-                model.addAttribute("estimatedHST", estimatedHST)
-                model.addAttribute("orderTotalFinal", orderTotalFinal)
                 model.addAttribute("STRIPE_PUBLIC_KEY", stripePublicKey)
                 exchange.session
                     .flatMap { session: WebSession ->
                         val sharerId = session.getAttribute<String>("sharerId")
                         if (sharerId != null) {
-                            val reward = originalTotal.multiply(BigDecimal.valueOf(0.10))
+                            val reward = order.discountedTotal
+                                .multiply(BigDecimal.valueOf(Utility.REFERRAL_REWARD_RATE))
                                 .setScale(2, RoundingMode.HALF_UP)
                             // Persist or process the reward
                             return@flatMap referralTrackingService

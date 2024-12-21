@@ -13,7 +13,23 @@
                     <img th:src="${product.imageUrl}" th:alt="${product.productName}">
                     <h3 th:text="${product.productName}">Product Name</h3>
                     <p th:text="${product.description}">Product description goes here.</p>
-                    <span class="price" th:text="${product.price}">Price</span>
+
+                    <div class="price" th:if="${product.discountedPrice != null}">
+                        <span th:text="'$' + ${product.discountedPrice}"></span>
+                        <span class="old-price" th:text="'$' + ${product.price}"></span>
+                    </div>
+                    <div class="price" th:if="${product.discountedPrice == null}">
+                        <span th:text="'$' + ${product.price}"></span>
+                    </div>
+
+                    <!-- Discount Badge -->
+                    <div th:if="${product.isPercentageDiscounted}"
+                         class="badge"
+                         th:text="'-' + ${product.discountValue.stripTrailingZeros().toPlainString()} + '%'"></div>
+                    <div th:if="${product.isFlatDiscounted}"
+                         class="badge"
+                         th:text="'-$' + ${product.discountValue.stripTrailingZeros().toPlainString()}"></div>
+                    <div th:if="${product.showNewProductBadge}" class="badge new">New</div>
                 </a>
             </div>
         </div>

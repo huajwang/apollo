@@ -43,27 +43,36 @@ class BuyNowController(
     ): Mono<String> {
 
         val userMono = guestService.retrieveUserGuestOrCreate(principal, request, response)
-        val productMono = productService.getProductById(addCartRequest.productId)
-        return userMono.zipWith(productMono) { user, product ->
+        val productDtoMono = productService.getProductById(addCartRequest.productId)
+        return userMono.zipWith(productDtoMono) { user, product ->
+            val productTotal =
+                if (product.discountedPrice != null) product.discountedPrice else product.price
+
+            val estimatedHST = productTotal?.multiply(
+                BigDecimal.valueOf(Utility.HST))?.setScale(2, RoundingMode.HALF_UP)
+                ?: throw IllegalStateException("product total is null")
+
+            val orderTotalFinal = productTotal.add(estimatedHST)
+                .setScale(2, RoundingMode.HALF_UP)
+
             val order = Order(
                 orderNo = Utility.generateOrderNo(),
                 userId = (user.oauthId) ?: (user.guestId)
                 ?: throw IllegalArgumentException("Both userId and guestId is null"),
                 createdAt = LocalDateTime.now(),
                 orderStatus = OrderStatus.PENDING,
-                total = product.price,
+                originalTotal = product.price,
+                discountedTotal =  product.discountedPrice ?: product.price,
+                hst = estimatedHST,
+                shippingFee = BigDecimal.ZERO, // TODO
+                finalTotal = orderTotalFinal,
                 // Copy user details to order
                 contactName = user.customerName,
                 contactPhone = user.phone,
                 deliveryAddress = user.address
             )
-            val estimatedHST = product.price.multiply(BigDecimal.valueOf(Utility.HST))
-                .setScale(2, RoundingMode.HALF_UP)
-            val orderTotalFinal = product.price.add(estimatedHST)
-                .setScale(2, RoundingMode.HALF_UP)
+
             model.addAttribute("user", user)
-            model.addAttribute("estimatedHST", estimatedHST)
-            model.addAttribute("orderTotalFinal", orderTotalFinal)
             Pair(order, product)
         }.flatMap { pair ->
             orderService.updateOrder(pair.first)
@@ -82,9 +91,6 @@ class BuyNowController(
                         orderItem.setPropertiesFromMap(it)
                     }
                     model.addAttribute("orderItems", listOf(orderItem.toDto()))
-                    // TODO
-                    model.addAttribute("discount", BigDecimal.ZERO)
-                    model.addAttribute("discountedTotal", BigDecimal.ZERO)
                     model.addAttribute("shippingDetails", "Delivery to garage")
                     model.addAttribute("STRIPE_PUBLIC_KEY", stripePublicKey)
                     orderService.save(orderItem)

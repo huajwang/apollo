@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import reactor.core.publisher.Mono
 
 @Controller
-@RequestMapping(path = ["/home"])
+@RequestMapping("/")
 class HomeController(
     private val productService: ProductService
 ) {
@@ -23,7 +23,7 @@ class HomeController(
         }
     }
 
-    @GetMapping("/contact")
+    @GetMapping("/home/contact")
     fun contact(): Mono<String> {
         return Mono.just("contact")
     }

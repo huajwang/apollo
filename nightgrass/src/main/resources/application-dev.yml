@@ -1,0 +1,5 @@
+spring:
+  r2dbc:
+    url: r2dbc:mysql://localhost:3306/emall
+    username: smallboy
+    password: abcd1234

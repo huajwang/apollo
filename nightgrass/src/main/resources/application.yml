@@ -2,13 +2,13 @@ spring:
   application:
     name: nightgrass
   profiles:
-      include: secret
+    include: secret
 
   security:
     oauth2:
       resourceserver:
         jwt:
-            secret: ${JWT_SECRET_KEY}
+          secret: ${JWT_SECRET_KEY}
       client:
         registration:
           google:
@@ -46,9 +46,6 @@ spring:
             user-name-attribute: openid
 
   r2dbc:
-    url: r2dbc:mysql://localhost:3306/emall
-    username: smallboy
-    password: abcd1234
     pool:
       enabled: true
       initial-size: 5

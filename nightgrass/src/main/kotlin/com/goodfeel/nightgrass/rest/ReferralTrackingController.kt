@@ -20,7 +20,7 @@ class ReferralTrackingController(private val referralTrackingService: ReferralTr
         return referralTrackingService.trackReferral(referralCode, exchange)
             .then(Mono.defer {
                 exchange.response.statusCode = HttpStatus.FOUND // HTTP 302
-                exchange.response.headers.location = URI.create("/home") // Redirect to the index page
+                exchange.response.headers.location = URI.create("/") // Redirect to the index page
                 Mono.empty()
             })
     }

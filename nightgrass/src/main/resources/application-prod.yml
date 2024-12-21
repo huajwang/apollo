@@ -1,0 +1,6 @@
+spring:
+  r2dbc:
+    url: r2dbc:mysql://${MYSQL_HOSTNAME}:3306/emall
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
+

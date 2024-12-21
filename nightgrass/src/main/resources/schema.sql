@@ -86,9 +86,9 @@ CREATE TABLE IF NOT EXISTS e_mall_order (
     contact_phone VARCHAR(15),
     created_at TIMESTAMP NOT NULL,
     order_status ENUM('PENDING', 'PROCESSING', 'SHIPPING', 'CANCELED', 'COMPLETED') NOT NULL,
-    updated_date TIMESTAMP,
+    updated_date TIMESTAMP NULL DEFAULT NULL,
     logistics_no VARCHAR(30),
-    delivery_date TIMESTAMP,
+    delivery_date TIMESTAMP NULL DEFAULT NULL,
     pay_no VARCHAR(20),
     pay_type VARCHAR(10),
     remark VARCHAR(255)
@@ -154,7 +154,7 @@ CREATE TABLE IF NOT EXISTS e_mall_blog_posts (
     sticky_pin_no INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    published_at TIMESTAMP,
+    published_at TIMESTAMP NULL DEFAULT NULL,
     FOREIGN KEY (author_id) REFERENCES e_mall_user(oauth_id),
     FOREIGN KEY (category_id) REFERENCES e_mall_blog_category(category_id),
     FOREIGN KEY (main_media_id) REFERENCES e_mall_blog_posts_media(media_id)

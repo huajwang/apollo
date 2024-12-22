@@ -113,7 +113,7 @@
     <script th:inline="javascript">
       const stripe = Stripe([[${STRIPE_PUBLIC_KEY}]]);
        // Inject the Thymeleaf variable into JavaScript
-      const orderTotalFinal = /*[[${orderTotalFinal}]]*/ 0;
+      const orderTotalFinal = /*[[${order.orderTotal}]]*/ 0;
       const orderId = /*[[${order.orderId}]]*/ 0; // Set the orderId from the order object
 
       document.getElementById("submit-order-button").addEventListener("click", function () {

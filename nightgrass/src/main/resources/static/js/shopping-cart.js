@@ -12,6 +12,7 @@
       itemCount: 0,
       items: [],
       totalPrice: 0,
+      youSavedTotal: 0,
 
       updateItemCount() {
           this.itemCount = this.items.reduce((total, item) => {
@@ -51,7 +52,16 @@
           }
           return total;
         }, 0);
+
+        this.youSavedTotal = this.items.reduce((savings, item) => {
+          if (item.selected) {
+            return savings + item.quantity * (item.price - item.discountedPrice);
+          }
+          return savings;
+        }, 0);
+
         this.updateTotalUI();
+        this.updateSavingsUI();
       },
 
       // Method to update the total price in the UI
@@ -59,6 +69,18 @@
         const totalElement = document.getElementById("cartTotal");
         if (totalElement) {
           totalElement.textContent = `Total: $${this.totalPrice.toFixed(2)}`;
+        }
+      },
+
+
+      updateSavingsUI() {
+        const savingsElement = document.getElementById("youSavedTotal");
+        if (savingsElement) {
+          savingsElement.style.display = this.youSavedTotal > 0 ? "block" : "none";
+          const savingsSpan = savingsElement.querySelector("span");
+          if (savingsSpan) {
+            savingsSpan.textContent = this.youSavedTotal.toFixed(2);
+          }
         }
       },
 

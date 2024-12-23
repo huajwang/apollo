@@ -57,12 +57,18 @@ class ShoppingCartController(
             cartService.getTotalPriceForCart(cart.cartId!!)
         }
 
-        return Mono.zip(cartItemDtosFlux.collectList(), totalPriceMono)
+        val youSavedTotalMono = cartMono.flatMap { cart ->
+            cartService.getYouSavedTotal(cart.cartId!!)
+        }
+
+        return Mono.zip(cartItemDtosFlux.collectList(), totalPriceMono, youSavedTotalMono)
             .map { tuple ->
                 val cartItems = tuple.t1
                 val cartTotal = tuple.t2
+                val youSavedTotal = tuple.t3
                 model.addAttribute("cartItems", cartItems)
                 model.addAttribute("cartTotal", cartTotal)
+                model.addAttribute("youSavedTotal", youSavedTotal)
                 "shopping-cart" // Return the view name
             }
             .onErrorResume { e ->

@@ -65,6 +65,9 @@
       <!-- Cart footer -->
       <div class="cart-footer" th:style="${#lists.isEmpty(cartItems)} ? 'display: none;' : 'display: block;'">
         <div id="cartTotal" class="cart-total">Total: $<span th:text="${cartTotal}">0.00</span></div>
+        <div id="youSavedTotal" class="cart-total" th:if="${youSavedTotal > 0}">
+          You saved: $<span th:text="${youSavedTotal}">0.00</span>
+        </div>
         <button class="checkout-btn" onclick="handleCheckout()" th:disabled="${#lists.isEmpty(cartItems)}">Checkout</button>
       </div>
 

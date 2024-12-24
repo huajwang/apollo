@@ -222,6 +222,27 @@ open class CartService(
             .reduce(BigDecimal.ZERO, BigDecimal::add) // Sum up all item totals
     }
 
+    override fun getYouSavedTotal(cartId: Long): Mono<BigDecimal> {
+        return cartItemRepository.findByCartId(cartId) // Fetch all items in the cart
+            .filter(CartItem::isSelected) // Only include selected items
+            .flatMap { cartItem ->
+                productRepository.findByProductId(cartItem.productId) // Fetch product details
+                    .map { productDto ->
+                        productDto.processProductDto()
+                        productDto
+                    }
+                    .map { productDto ->
+                        val youSavedPrice = if (productDto.discountedPrice != null) {
+                            productDto.price.subtract(productDto.discountedPrice)
+                        } else {
+                            BigDecimal.ZERO
+                        }
+                        youSavedPrice.multiply(BigDecimal.valueOf(cartItem.quantity.toLong())) // Calculate total saved
+                    }
+            }
+            .reduce(BigDecimal.ZERO, BigDecimal::add)
+    }
+
     /**
      * If cart item with itemID does not exist, emit an error downstream
      */

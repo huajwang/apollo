@@ -10,7 +10,7 @@
         <div class="product-list">
             <div th:each="product : ${products}" class="product-card">
                 <a th:href="@{/product/detail(id=${product.productId})}">
-                    <img th:src="${product.imageUrl}" th:alt="${product.productName}">
+                    <img th:src="${product.imageUrl}" th:alt="${product.productName}" loading="lazy">
                     <h3 th:text="${product.productName}">Product Name</h3>
                     <p th:text="${product.description}">Product description goes here.</p>
 

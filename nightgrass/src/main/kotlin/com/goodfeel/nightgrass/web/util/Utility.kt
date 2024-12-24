@@ -21,8 +21,10 @@ object Utility {
             .doOnNext { logger.debug("The current user is {}", it) }
 
     const val HST = 0.13
-
     const val REFERRAL_REWARD_RATE = 0.1
+    const val APPLICATION_NAME = "yaojiabuy"
+    const val OSS_ENDPOINT = "your-oss-endpoint" // e.g., "oss-cn-hangzhou.aliyuncs.com"
+    const val OSS_BUCKET_NAME = "your-bucket-name"
 
     // Helper method to generate a human-readable order ID with date/time and a unique suffix
     fun generateOrderNo(): String {
@@ -33,4 +35,8 @@ object Utility {
         return dateTimePart + randomSuffix
     }
 
+    fun generateMediaUrl(objectKey: String): String {
+        val bucketUrl = "https://${OSS_BUCKET_NAME}.${OSS_ENDPOINT}"
+        return "$bucketUrl/$objectKey"
+    }
 }

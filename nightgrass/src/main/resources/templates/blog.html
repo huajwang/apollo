@@ -9,7 +9,7 @@
     <section class="blog-hero">
         <div class="overlay">
             <div class="hero-content">
-                <img src="logo-icon.png" alt="Logo" class="hero-logo">
+                <img src="logo-icon.png" alt="Logo" class="hero-logo" loading="lazy">
                 <h1>Blog</h1>
             </div>
         </div>
@@ -21,7 +21,7 @@
             <div class="blog-content">
                 <!-- Blog Post 1 -->
                 <article th:each="blogPost: ${blogPosts}" class="blog-post">
-                    <img th:src="${blogPost.mediaFilePath}" alt="Blog Post 1">
+                    <img th:src="${blogPost.mediaFilePath}" alt="Blog Post 1" loading="lazy">
                     <div class="post-meta">
                         <span>👤 <span th:text="${blogPost.authorName}"></span></span>
                         <span>📅 <span th:text="${#temporals.format(blogPost.publishedAt, 'MMM dd, yyyy')}"></span></span>
@@ -57,7 +57,7 @@
                     <h3>Recent Posts</h3>
                     <ul>
                         <li th:each="recentPost: ${recentPosts}">
-                            <img th:src="${recentPost.thumbnail}" alt="Recent Post 1">
+                            <img th:src="${recentPost.thumbnail}" alt="Recent Post 1" loading="lazy">
                             <div>
                                 <a th:href="@{/blog/post(postId=${recentPost.postId})}" th:text="${recentPost.title}"></a>
                                 <span th:text="${#temporals.format(recentPost.publishedAt, 'MMM dd, yyyy')}"></span>

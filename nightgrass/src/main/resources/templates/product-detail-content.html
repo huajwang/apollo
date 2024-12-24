@@ -7,7 +7,7 @@
     <div class="swiper">
       <div class="swiper-wrapper">
         <div th:each="productPhoto : ${productPhotos}" class="swiper-slide">
-          <img th:src="${productPhoto.photoUrl}" alt="Product Photo">
+          <img th:src="${productPhoto.photoUrl}" alt="Product Photo" loading="lazy">
         </div>
       </div>
     </div>
@@ -91,8 +91,8 @@
       <div id="description" class="tab-content active">
         <p class="description" th:text="${product.description}"></p>
         <div class="images">
-          <img src="/images/lake.jpg" alt="Sofa View 1">
-          <img src="/images/lake.jpg" alt="Sofa View 2">
+          <img src="/images/lake.jpg" alt="Sofa View 1" loading="lazy">
+          <img src="/images/lake.jpg" alt="Sofa View 2" loading="lazy">
         </div>
       </div>
 

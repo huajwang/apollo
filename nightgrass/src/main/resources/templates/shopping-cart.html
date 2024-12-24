@@ -11,7 +11,7 @@
     <div class="cart-container">
       <h1>Shopping Cart</h1>
       <div th:style="${#lists.isEmpty(cartItems)} ? 'display: block;' : 'display: none;'" class="empty-cart">
-        <img src="/images/empty-cart.png" alt="Empty Cart">
+        <img src="/images/empty-cart.png" alt="Empty Cart" loading="lazy">
         <p>Your cart is empty.</p>
         <a href="/product/all">Go Shopping</a>
       </div>
@@ -22,7 +22,7 @@
                th:checked="${item.isSelected}" />
 
         <!-- Item image -->
-        <img th:src="${item.imageUrl}" alt="Product Image" class="item-image" />
+        <img th:src="${item.imageUrl}" alt="Product Image" class="item-image" loading="lazy"/>
 
         <!-- Item details -->
         <div class="item-details">

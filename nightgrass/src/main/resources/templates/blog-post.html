@@ -16,7 +16,7 @@
       </div>
     </header>
 
-    <img th:src="${blogPost.thumbnail}" alt="Blog Thumbnail" class="featured-image">
+    <img th:src="${blogPost.thumbnail}" alt="Blog Thumbnail" class="featured-image" loading="lazy">
 
     <article class="blog-content">
       <p th:utext="${blogPost.content}"></p>

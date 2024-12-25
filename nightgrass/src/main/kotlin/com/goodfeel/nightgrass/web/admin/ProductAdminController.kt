@@ -10,7 +10,6 @@ import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import java.nio.file.Paths
 
 @Controller
 @RequestMapping("/admin/products")
@@ -48,12 +47,6 @@ class ProductAdminController(
         @ModelAttribute adminProductRequest: AdminProductRequest,
         @RequestPart("mediaFiles") files: Flux<FilePart>
     ): Mono<String> {
-        // Process the files
-        val fileProcessing = files.flatMap { filePart ->
-            val targetLocation = Paths.get("uploads", filePart.filename()) // Change "uploads" TODO
-            filePart.transferTo(targetLocation).thenReturn(targetLocation.toString())
-        }.collectList()
-
         return aliyunOssService.uploadMultipleFiles(files)
             .collectList()
             .flatMap { fileUrls ->
@@ -65,8 +58,6 @@ class ProductAdminController(
                 )
             }.thenReturn("redirect:/admin/products")
         }
-
-
 
     }
 

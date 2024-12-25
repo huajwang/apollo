@@ -23,8 +23,8 @@ object Utility {
     const val HST = 0.13
     const val REFERRAL_REWARD_RATE = 0.1
     const val APPLICATION_NAME = "yaojiabuy"
-    const val OSS_ENDPOINT = "your-oss-endpoint" // e.g., "oss-cn-hangzhou.aliyuncs.com"
-    const val OSS_BUCKET_NAME = "your-bucket-name"
+    const val OSS_ENDPOINT = "oss-cn-shenzhen.aliyuncs.com"
+    const val OSS_BUCKET_NAME = "yaojiabuy"
 
     // Helper method to generate a human-readable order ID with date/time and a unique suffix
     fun generateOrderNo(): String {

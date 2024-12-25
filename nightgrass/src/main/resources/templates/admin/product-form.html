@@ -2,39 +2,56 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <title>Product Form</title>
+  <link rel="stylesheet" href="/css/admin/product-form.css">
 </head>
 <body>
-<h1 th:text="${product.productId == null ? 'Add Product' : 'Edit Product'}"></h1>
-<form th:action="@{/admin/products}" method="post" th:object="${product}" enctype="multipart/form-data">
-  <input type="hidden" th:field="*{productId}"/>
-  <label for="productName">Name:</label>
-  <input id="productName" type="text" th:field="*{productName}" placeholder="Product Name" required/>
+<div class="form-container">
+  <h1 th:text="${product.productId == null ? 'Add Product' : 'Edit Product'}" class="form-title"></h1>
+  <form th:action="@{/admin/products}" method="post" th:object="${product}" enctype="multipart/form-data" class="product-form">
+    <input type="hidden" th:field="*{productId}"/>
 
-  <label for="description">Description:</label>
-  <textarea id="description" th:field="*{description}" placeholder="Product Description"></textarea>
+    <div class="form-group">
+      <label for="productName">Name:</label>
+      <input id="productName" type="text" th:field="*{productName}" placeholder="Product Name" required/>
+    </div>
 
-  <label for="price">Price:</label>
-  <input id="price" type="text" th:field="*{price}" placeholder="Product Price" required/>
+    <div class="form-group">
+      <label for="description">Description:</label>
+      <textarea id="description" th:field="*{description}" placeholder="Product Description"></textarea>
+    </div>
 
-  <label for="imageUrl">Name:</label>
-  <input id="imageUrl" type="text" th:field="*{imageUrl}" placeholder="Image URL" required/>
+    <div class="form-group">
+      <label for="price">Price:</label>
+      <input id="price" type="text" th:field="*{price}" placeholder="Product Price" required/>
+    </div>
 
-  <label for="category">Category:</label>
-  <select id="category" th:field="*{category}">
-    <option value="NONE" th:selected="*{category == 'NONE'}">None</option>
-    <option value="BIG_HIT" th:selected="*{category == 'BIG_HIT'}">Big Hit</option>
-    <option value="POPULAR" th:selected="*{category == 'POPULAR'}">Popular</option>
-    <option value="NEW" th:selected="*{category == 'NEW'}">New</option>
-  </select>
+    <div class="form-group">
+      <label for="imageUrl">Upload thumbnail image URL:</label>
+      <input id="imageUrl" type="text" th:field="*{imageUrl}" placeholder="Image URL" required/>
+      <input id="thumbnailFile" type="file" name="thumbnailFile" accept="image/*"/>
+      <p class="hint-text">Select one thumbnail image for this product. Allowed: Images (jpg, png, gif)</p>
+    </div>
 
-  <!-- File upload section -->
-  <label for="mediaFiles">Upload Images/Videos:</label>
-  <input id="mediaFiles" type="file" name="mediaFiles" multiple accept="image/*,video/*"/>
-  <p>Allowed: Images (jpg, png, gif), Videos (mp4, avi, etc.). You can select multiple files.</p>
+    <div class="form-group">
+      <label for="category">Category:</label>
+      <select id="category" th:field="*{category}">
+        <option value="NONE" th:selected="*{category == 'NONE'}">None</option>
+        <option value="BIG_HIT" th:selected="*{category == 'BIG_HIT'}">Big Hit</option>
+        <option value="POPULAR" th:selected="*{category == 'POPULAR'}">Popular</option>
+        <option value="NEW" th:selected="*{category == 'NEW'}">New</option>
+      </select>
+    </div>
 
+    <div class="form-group">
+      <label for="mediaFiles">Upload Images/Videos:</label>
+      <input id="mediaFiles" type="file" name="mediaFiles" multiple accept="image/*,video/*"/>
+      <p class="hint-text">Allowed: Images (jpg, png, gif), Videos (mp4, avi, etc.). You can select multiple files.</p>
+    </div>
 
-  <button type="submit">Save</button>
-</form>
-
+    <div class="form-group">
+      <button type="submit" class="submit-button">Save</button>
+    </div>
+  </form>
+</div>
 </body>
 </html>

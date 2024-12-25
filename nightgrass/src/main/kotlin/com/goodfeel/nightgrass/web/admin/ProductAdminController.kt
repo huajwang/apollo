@@ -4,6 +4,7 @@ import com.goodfeel.nightgrass.dto.admin.AdminProductDto
 import com.goodfeel.nightgrass.dto.admin.AdminProductRequest
 import com.goodfeel.nightgrass.service.AliyunOssService
 import com.goodfeel.nightgrass.service.admin.AdminProductService
+import org.slf4j.LoggerFactory
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
@@ -17,6 +18,8 @@ class ProductAdminController(
     private val adminProductService: AdminProductService,
     private val aliyunOssService: AliyunOssService
 ) {
+
+    private val logger = LoggerFactory.getLogger(ProductAdminController::class.java)
 
     /**
      * Render the list of products for admin view.
@@ -45,18 +48,40 @@ class ProductAdminController(
     @PostMapping
     fun addNewProductOrUpdateProduct(
         @ModelAttribute adminProductRequest: AdminProductRequest,
-        @RequestPart("mediaFiles") files: Flux<FilePart>
+        @RequestPart("mediaFiles", required = false) filePartFlux: Flux<FilePart>,
+        @RequestPart("thumbnailFile", required = false) thumbnailFilePartMono: Mono<FilePart>
     ): Mono<String> {
-        return aliyunOssService.uploadMultipleFiles(files)
-            .collectList()
-            .flatMap { fileUrls ->
-            if (adminProductRequest.productId == null) {
-                adminProductService.createProduct(adminProductRequest, fileUrls)
-            } else {
-                adminProductService.updateProduct(
-                    adminProductRequest.productId, adminProductRequest, fileUrls
-                )
-            }.thenReturn("redirect:/admin/products")
+        val thumbnailFileUrlMono = thumbnailFilePartMono.flatMap {
+            aliyunOssService.uploadSingleFile(thumbnailFilePartMono)
+        }.switchIfEmpty(Mono.just(""))
+
+        return thumbnailFileUrlMono
+        .flatMap { thumbnailFileUrl ->
+            if (thumbnailFileUrl.isNotEmpty()) { // Do not override the existing imageUrl if no thumbnail image is provided
+                adminProductRequest.imageUrl = thumbnailFileUrl
+            }
+            val filePartListMono = filePartFlux
+                .filter { filePart -> filePart.filename().isNotBlank() } // Filter out empty file parts
+                .collectList().flatMap { filePartList ->
+                if (filePartList.isEmpty()) {
+                    Mono.just(emptyList()) // Explicitly return an empty Mono when no files are uploaded
+                } else {
+                    aliyunOssService.uploadMultipleFiles(Flux.fromIterable(filePartList)).collectList()
+                }
+            }
+            filePartListMono
+                .flatMap { fileUrls ->
+                    if (adminProductRequest.productId == null) {
+                        adminProductService.createProduct(adminProductRequest, fileUrls)
+                    } else {
+                        adminProductService.updateProduct(
+                            adminProductRequest.productId, adminProductRequest, fileUrls
+                        )
+                    }.thenReturn("redirect:/admin/products")
+                }
+        }.onErrorResume { ex ->
+            logger.error("Error occurred: ${ex.message}")
+            Mono.just("redirect:/admin-error-page")
         }
 
     }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.goodfeel.nightgrass.util.DiscountType
 import com.goodfeel.nightgrass.util.ProductCategory
+import com.goodfeel.nightgrass.web.util.Utility
 import java.math.BigDecimal
 import java.math.RoundingMode
 
@@ -11,7 +12,7 @@ data class ProductDto(
     val productId: Long,
     val productName: String,
     val description: String,
-    val imageUrl: String,
+    var imageUrl: String,
     val price: BigDecimal,
     var additionalInfo: String? = null,
     var additionalInfoMap: Map<String, String> = emptyMap(),
@@ -30,6 +31,7 @@ data class ProductDto(
     /**
      * Calculates the discounted price based on discount type and value.
      * Updates the discountedPrice field if discount details are available.
+     * Convert imageUrl to full path of OSS imageUrl;
      */
     fun processProductDto() {
         if (discountType != null && discountValue == null)
@@ -54,6 +56,10 @@ data class ProductDto(
         additionalInfoMap = additionalInfo?.let {
             objectMapper.readValue(it, object : TypeReference<Map<String, String>>() {})
         } ?: emptyMap()
+
+        // Prepend Aliyun OSS path
+        imageUrl = Utility.generateMediaUrl(imageUrl)
+
     }
 
 }

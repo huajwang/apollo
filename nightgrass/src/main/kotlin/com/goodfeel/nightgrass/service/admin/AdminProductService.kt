@@ -45,7 +45,11 @@ class AdminProductService(
                         photoUrl = filePath
                     )
                 }
-                photoRepository.saveAll(productPhotos).collectList().thenReturn(savedProduct)
+                if (productPhotos.isEmpty()) {
+                    Mono.just(savedProduct)
+                } else {
+                    photoRepository.saveAll(productPhotos).collectList().thenReturn(savedProduct)
+                }
             }
     }
 
@@ -70,7 +74,12 @@ class AdminProductService(
                         photoUrl = filePath
                     )
                 }
-                photoRepository.saveAll(productPhotos).collectList().thenReturn(savedProduct)
+                if (productPhotos.isNotEmpty()) {
+                    photoRepository.saveAll(productPhotos).collectList().thenReturn(savedProduct)
+                } else {
+                    Mono.just(savedProduct)
+                }
+
             }
     }
 

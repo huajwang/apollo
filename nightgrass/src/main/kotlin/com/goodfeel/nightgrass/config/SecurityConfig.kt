@@ -16,6 +16,7 @@ import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder
 import org.springframework.security.web.server.SecurityWebFilterChain
 import org.springframework.security.web.server.authentication.ServerAuthenticationFailureHandler
 import org.springframework.security.web.server.authentication.ServerAuthenticationSuccessHandler
+import org.springframework.security.web.server.util.matcher.PathPatternParserServerWebExchangeMatcher
 import java.net.URI
 
 @Configuration
@@ -29,6 +30,30 @@ open class SecurityConfig(
     private val adminAuthenticationManager: AdminAuthenticationManager
 ) {
 
+    // Admin Security Configuration
+    @Bean
+    open fun adminSecurityWebFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain {
+        http
+            .securityMatcher(PathPatternParserServerWebExchangeMatcher("/admin/**")) // Matches only admin paths
+            .authorizeExchange { exchange ->
+                exchange
+                    .pathMatchers("/admin/login", "/admin/error").permitAll()
+                    .anyExchange().hasRole("ADMIN")
+            }
+            .formLogin { loginSpec ->
+                loginSpec
+                    .loginPage("/admin/login")
+                    .authenticationManager(adminAuthenticationManager)
+                    .authenticationSuccessHandler(adminSuccessHandler())
+                    .authenticationFailureHandler(adminFailureHandler())
+            }
+            .csrf { it.disable() }
+
+        return http.build()
+    }
+
+
+
     @Bean
     open fun securityWebFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain {
         http
@@ -36,11 +61,9 @@ open class SecurityConfig(
                 exchange
                     .pathMatchers(
                         "/", "/product/**", "/videos/**", "/blog/**", "/buynow", "/pay/**", "/home/**",
-                        "/login", "/admin/login", "/error", "/cart/**", "/checkout", "/update-user-info",
+                        "/login", "/error", "/cart/**", "/checkout", "/update-user-info",
                         "/images/**", "/css/**", "/icons/**", "/js/**", "/webjars/**",
                     ).permitAll()
-                    // Admin paths, restricted to ROLE_ADMIN
-                    .pathMatchers("/admin/**").hasRole("ADMIN")
                     // All other paths require authentication
                     .anyExchange().authenticated()
             }
@@ -51,14 +74,6 @@ open class SecurityConfig(
                         cartService, guestService, orderService, userService))
             }
             .oauth2Client(Customizer.withDefaults<OAuth2ClientSpec>())
-
-            .formLogin {
-                it.loginPage("/admin/login")
-                    .authenticationManager(adminAuthenticationManager)
-                    .authenticationSuccessHandler(adminSuccessHandler()) // Custom success handler
-                    .authenticationFailureHandler(adminFailureHandler()) // Custom failure handler
-            }
-
             // Enable JWT validation for incoming requests
             .oauth2ResourceServer { resourceServer ->
                 resourceServer.jwt { jwtConfigurer ->
@@ -89,5 +104,4 @@ open class SecurityConfig(
             response.setComplete()
         }
     }
-
 }

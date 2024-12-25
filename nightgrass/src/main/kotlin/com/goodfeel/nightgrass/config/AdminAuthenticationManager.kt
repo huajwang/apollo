@@ -5,15 +5,16 @@ import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.authentication.ReactiveAuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
-import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 
 @Component
 class AdminAuthenticationManager(
-    private val adminDetailsService: AdminDetailsService,
-    private val passwordEncoder: PasswordEncoder
+    private val adminDetailsService: AdminDetailsService
 ) : ReactiveAuthenticationManager {
+
+    private val passwordEncoder = BCryptPasswordEncoder()
 
     override fun authenticate(authentication: Authentication): Mono<Authentication> {
         val username = authentication.name

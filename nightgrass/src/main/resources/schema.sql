@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS e_mall_admin (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL, -- Store hashed password
-    role VARCHAR(50) DEFAULT 'ROLE_ADMIN'
+    role VARCHAR(50) DEFAULT 'ADMIN'
 );
 
 CREATE TABLE IF NOT EXISTS e_mall_product_photo (

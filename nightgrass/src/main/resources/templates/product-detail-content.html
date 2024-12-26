@@ -114,7 +114,7 @@
 
     <!-- Action Buttons Section -->
     <div class="action-buttons">
-      <div class="half">
+      <div>
         <form th:action="@{/cart/add}" method="post" id="add-to-cart-form">
           <input type="hidden" name="productId" th:value="${product.productId}">
           <!-- Dynamic properties -->
@@ -128,7 +128,7 @@
         </form>
       </div>
 
-      <div class="half">
+      <div>
         <form th:action="@{/buynow}" method="post" id="buy-now-form">
           <input type="hidden" name="productId" th:value="${product.productId}">
           <!-- Dynamic properties -->

@@ -14,20 +14,22 @@
   <!--  <script th:src="@{/js/cart-update.js}" defer></script>-->
 </head>
 <body x-data="globalState">
-<header class="header">
-  <div class="logo">Yaojia Buy</div>
-  <nav class="navbar">
-    <a href="/blog">Blog</a>
-    <a href="#about">About</a>
-    <a href="/home/contact">Contact</a>
-    <a href="#cart" class="cart-icon">🛒 Cart (0)</a>
-  </nav>
-</header>
+  <div class="wrapper">
+    <header class="header">
+      <div class="logo">Yaojia Buy</div>
+      <nav class="navbar">
+        <a href="/blog">Blog</a>
+        <a href="#about">About</a>
+        <a href="/home/contact">Contact</a>
+        <a href="#cart" class="cart-icon">🛒 Cart (0)</a>
+      </nav>
+    </header>
+    <main>
+      <div th:insert="${pageContent}"></div>
+    </main>
+    <footer th:insert="nav :: bottom-nav"></footer>
+  </div>
 
-<main>
-  <div th:insert="${pageContent}"></div>
-</main>
 <script th:if="${pageJs}" th:src="${pageJs}" defer></script>
-<footer th:insert="nav :: bottom-nav"></footer>
 </body>
 </html>

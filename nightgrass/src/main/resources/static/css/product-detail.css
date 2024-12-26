@@ -103,26 +103,18 @@
 /* Action Buttons styling */
 .action-buttons {
     position: fixed; /* Fixes the container at the bottom */
-    bottom: 70px; /* Keeps the buttons above the bottom navigation bar */
+    bottom: 90px; /* Keeps the buttons above the bottom navigation bar */
     left: 50%; /* Start positioning from the middle of the screen */
     transform: translateX(-50%); /* Center the container horizontally */
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    justify-content: center;
+    gap: 150px;
     padding: 5px; /* Padding around the container */
     background-color: transparent; /* White background for visibility */
     z-index: 900; /* Ensures buttons stay above other content */
     width: 100%;
-    max-width: 500px;
+    max-width: 1200px;
 }
-
-.action-buttons .half {
-    flex: 1; /* Each section takes up half of the container */
-    display: flex;
-    justify-content: center; /* Center the button horizontally */
-}
-
-
 
 /* Individual Buttons */
 .action-buttons button {
@@ -132,7 +124,7 @@
     cursor: pointer; /* Pointer cursor for buttons */
     border: none; /* Removes default borders */
     color: white; /* White text */
-    border-radius: 5px; /* Slightly rounded corners */
+    border-radius: 15px; /* Slightly rounded corners */
 }
 
 
@@ -268,4 +260,20 @@
   width: 45%;
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* For medium-sized screens (Tablet) */
+@media (max-width: 768px) {
+    .action-buttons {
+        bottom: 90px; /* Increased spacing for smaller devices */
+        gap: 70px;
+    }
+}
+
+/* For small screens (Phones) */
+@media (max-width: 480px) {
+    .action-buttons {
+        bottom: 70px; /* Even more spacing for the smallest devices */
+        gap: 50px;
+    }
 }

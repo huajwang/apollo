@@ -1,14 +1,17 @@
 * {
     box-sizing: border-box;
-    max-width: 1200px;
     padding: 0;
     font-family: Arial, sans-serif;
 }
 
 body {
-    background-color: #f5f5f5;
-    color: #333;
-    margin: 0;
+    max-width: 1200px;
+    margin: 0 auto; /* Centers body on the viewport */
+}
+
+.wrapper {
+    max-width: 1200px;
+    margin: 0 auto; /* Centers content horizontally */
 }
 
 /* Header */
@@ -53,16 +56,18 @@ footer nav {
     position: fixed;
     bottom: 0;
     width: 100%;
+    max-width: 1200px;
     background-color: #ffffff; /* Adjust color as needed */
     box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2); /* Optional: adds a slight shadow effect */
     z-index: 1000; /* Ensures nav sits above other content */
+    border-radius: 10px;
 }
 
 /* Styling the list items */
 footer nav ul {
     display: flex;
     justify-content: space-around; /* Distributes items evenly */
-    padding: 10px 0;
+    padding: 10px 0 0;
     margin: 0;
     list-style-type: none;
 }
@@ -87,7 +92,7 @@ footer nav a {
 /* Optional styling for text */
 .cat_name {
     font-size: 12px; /* Adjust size as needed */
-    margin-top: 5px;
+    margin-top: 0;
 }
 
 .cat_icon {
@@ -139,7 +144,23 @@ footer nav a {
         text-align: center;
     }
 
-    .navbar a {
-        margin: 10px 0;
+    .header .logo {
+        font-size: 20px;
     }
+
+    .navbar {
+        display: flex;
+        justify-content: space-between; /* Distribute menus evenly across the width */
+        flex-wrap: wrap; /* Allow wrapping if necessary */
+        width: 100%; /* Ensure navbar spans the full width of the header */
+        padding: 0 10px; /* Add slight padding for aesthetic */
+    }
+
+    .navbar a {
+        flex: 1; /* Make each menu item take equal width */
+        margin: 0; /* Remove vertical margins */
+        text-align: center; /* Center-align the text */
+        padding: 10px 0; /* Add some padding for better usability */
+    }
+
 }

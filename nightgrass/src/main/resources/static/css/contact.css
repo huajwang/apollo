@@ -8,7 +8,6 @@
   display: flex;
   flex-wrap: wrap;
   gap: 30px;
-  max-width: 1200px;
   margin: 0 auto;
 }
 
@@ -117,7 +116,6 @@
   display: flex;
   justify-content: space-between;
   gap: 20px;
-  max-width: 1200px;
   margin: 0 auto;
   flex-wrap: wrap;
 }

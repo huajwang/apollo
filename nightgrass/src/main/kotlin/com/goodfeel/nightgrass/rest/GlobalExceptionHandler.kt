@@ -10,7 +10,6 @@ class GlobalExceptionHandler {
 
     @ExceptionHandler(ServerWebInputException::class)
     fun handleServerWebInputException(ex: ServerWebInputException): ResponseEntity<Map<String, Any>> {
-        println("Deserialization error: ${ex.message}")
         return ResponseEntity.badRequest().body(
             mapOf("error" to "Invalid input", "details" to (ex.message ?: "Unknown error"))
         )

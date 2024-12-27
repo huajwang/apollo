@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout (
+          pageContent=~{:: pageContent},
+          pageTitle='Error'
+      )}">
+
+<div th:fragment="pageContent">
+    <h1>Error:</h1>
+    <p>${error}</p>
+    <a href="/">Go back to the home page</a>
+</div>
+</html>

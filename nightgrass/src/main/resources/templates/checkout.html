@@ -47,38 +47,25 @@
         <label><input type="radio" name="paymentMethod" value="ApplePay"> Apple Pay</label>
       </div>
 
-      <!-- Apply Coupon Code -->
-      <div class="apply-coupon">
-        <label>Apply coupon code</label>
-        <input type="text" name="couponCode"/>
-        <button type="button">></button>
-      </div>
-
       <!-- Totals and Discount -->
       <div class="totals" th:if="${order.originalTotal > order.discountedTotal}">
-        <p><strong>Subtotal:</strong> <span th:text="${order.originalTotal}"></span></p>
-        <p><strong>Savings:</strong> <span th:text="${order.originalTotal - order.discountedTotal}"></span></p>
-        <p><strong>Total after discount:</strong> <span th:text="${order.discountedTotal}"></span></p>
+        <p>Subtotal: <span class="old-price" th:text="'$' + ${order.originalTotal}"></span></p>
+        <p><strong>Savings: </strong> <span th:text="'$' + ${order.originalTotal - order.discountedTotal}"></span></p>
+        <p>Total after discount: <span th:text="'$' + ${order.discountedTotal}"></span></p>
       </div>
 
       <div class="totals" th:if="${order.originalTotal == order.discountedTotal}">
-        <p><strong>Total:</strong> <span th:text="${order.originalTotal}"></span></p>
-      </div>
-
-      <!-- Shipping Section -->
-      <div class="shipping">
-        <h3>Shipping</h3>
-        <p th:text="${shippingDetails}"></p>
+        <p>Subtotal: <span th:text="'$' + ${order.originalTotal}"></span></p>
       </div>
 
       <!-- Estimated HST -->
       <div class="hst">
-        <p><strong>Estimated HST:</strong> <span th:text="${order.hst}"></span></p>
+        <p>Estimated HST: $<span th:text="${order.hst}"></span></p>
       </div>
 
       <!-- Order Total -->
       <div class="order-total">
-        <p><strong>Order Total:</strong> <span th:text="${order.orderTotal}"></span></p>
+        <p>Order Total: <strong><span th:text="'$' + ${order.orderTotal}"></span></strong></p>
       </div>
 
       <!-- Submit Order Button -->

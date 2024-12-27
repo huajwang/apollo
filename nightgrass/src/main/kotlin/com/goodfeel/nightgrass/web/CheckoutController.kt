@@ -72,7 +72,6 @@ class CheckoutController(
                 model.addAttribute("user", user)
                 model.addAttribute("orderItems", orderItems)
                 model.addAttribute("order", order)
-                model.addAttribute("shippingDetails", "Delivery to garage")
                 model.addAttribute("STRIPE_PUBLIC_KEY", stripePublicKey)
                 exchange.session
                     .flatMap { session: WebSession ->

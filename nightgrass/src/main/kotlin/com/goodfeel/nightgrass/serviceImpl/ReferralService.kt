@@ -30,7 +30,7 @@ class ReferralService(
                     ).doOnNext { logger.debug("Saved referral from user: ${it.sharerId}") }
                 }
             )
-            .map { "${Constant.baseUrl}/referral/${it.referralCode}" }
+            .map { "${Constant.SERVER_BASE_URL}/referral/${it.referralCode}" }
     }
 
     fun getRewardsForSharer(sharerId: String): Flux<ReferralReward> {

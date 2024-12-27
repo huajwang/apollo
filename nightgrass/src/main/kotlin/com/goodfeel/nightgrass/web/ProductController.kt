@@ -62,9 +62,9 @@ class ProductController(
                 "product-detail"
             }
             .onErrorResume { e ->
-                model.addAttribute("errorMessage",
+                model.addAttribute("error",
                     "An error occurred while loading product details: ${e.message}")
-                Mono.just("/error")
+                Mono.just("/error/error-page")
             }
     }
 

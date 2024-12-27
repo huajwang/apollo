@@ -91,7 +91,6 @@ class BuyNowController(
                         orderItem.setPropertiesFromMap(it)
                     }
                     model.addAttribute("orderItems", listOf(orderItem.toDto()))
-                    model.addAttribute("shippingDetails", "Delivery to garage")
                     model.addAttribute("STRIPE_PUBLIC_KEY", stripePublicKey)
                     orderService.save(orderItem)
                 }

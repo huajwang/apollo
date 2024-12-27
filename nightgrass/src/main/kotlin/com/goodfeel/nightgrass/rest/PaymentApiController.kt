@@ -19,8 +19,8 @@ class PaymentApiController(private val orderService: OrderService, private val s
 
     @PostMapping("/create-checkout-session")
     fun createCheckoutSession(@ModelAttribute checkoutRequest: CheckoutRequest): Mono<String> {
-        val successUrl = "${Constant.baseUrl}/pay/success?orderId=${checkoutRequest.orderId}"
-        val cancelUrl = "${Constant.baseUrl}/pay/cancel?orderId=${checkoutRequest.orderId}"
+        val successUrl = "${Constant.SERVER_BASE_URL}/pay/success?orderId=${checkoutRequest.orderId}"
+        val cancelUrl = "${Constant.SERVER_BASE_URL}/pay/cancel?orderId=${checkoutRequest.orderId}"
 
         logger.debug("The amount = {}", checkoutRequest.amount)
         return orderService.findOrderById(checkoutRequest.orderId)

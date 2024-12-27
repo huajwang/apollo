@@ -5,8 +5,14 @@
     font-family: Arial, sans-serif;
 }
 
-.customer-info, .order-items, .payment-options, .apply-coupon, .totals, .shipping, .hst, .order-total, .submit-order {
+.customer-info, .order-items, .payment-options, .totals, .shipping, .hst, .order-total, .submit-order {
     margin-bottom: 20px;
+}
+
+.old-price {
+  text-decoration: line-through;
+  color: #bbb;
+  margin-left: 5px;
 }
 
 /* Dashed Line Separator */
@@ -15,15 +21,12 @@
     margin: 20px 0;
 }
 
-.apply-coupon {
-    display: flex;
-    justify-content: space-between;
-}
-
 .submit-order button {
     width: 100%;
     padding: 10px;
-    background-color: #4CAF50;
+    background-color: #ff9800; /* Orange */
+    border-radius: 15px;
+    border: none;
     color: white;
     font-size: 1.2em;
 }

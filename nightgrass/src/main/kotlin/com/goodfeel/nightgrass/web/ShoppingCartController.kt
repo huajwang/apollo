@@ -78,7 +78,7 @@ class ShoppingCartController(
             .onErrorResume { e ->
                 logger.error("Error retrieving cart: ${e.message}", e)
                 model.addAttribute("error", "Failed to load cart")
-                Mono.just("error")
+                Mono.just("error/error-page")
             }
     }
 

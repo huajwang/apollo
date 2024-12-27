@@ -2,7 +2,6 @@ package com.goodfeel.nightgrass.repo
 
 import com.goodfeel.nightgrass.data.Product
 import com.goodfeel.nightgrass.dto.ProductDto
-import com.goodfeel.nightgrass.util.ProductCategory
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.reactive.ReactiveCrudRepository
 import reactor.core.publisher.Flux

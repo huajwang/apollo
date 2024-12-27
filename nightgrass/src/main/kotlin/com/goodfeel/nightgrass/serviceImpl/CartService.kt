@@ -5,6 +5,7 @@ import com.goodfeel.nightgrass.dto.CartItemDto
 import com.goodfeel.nightgrass.dto.ProductDto
 import com.goodfeel.nightgrass.repo.*
 import com.goodfeel.nightgrass.service.ICartService
+import com.goodfeel.nightgrass.service.ProcessedProductService
 import com.goodfeel.nightgrass.util.OrderStatus
 import com.goodfeel.nightgrass.web.util.AddCartRequest
 import com.goodfeel.nightgrass.web.util.Utility
@@ -29,7 +30,8 @@ open class CartService(
     private val productRepository: ProductRepository,
     private val orderRepository: OrderRepository,
     private val orderItemRepository: OrderItemRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val processedProductService: ProcessedProductService
 ) : ICartService {
 
     companion object {
@@ -187,11 +189,7 @@ open class CartService(
     private fun mapToCartItemDto(cartItem: CartItem): Mono<CartItemDto> {
         // Format price in Canadian dollars
         val currencyFormat = NumberFormat.getCurrencyInstance(Locale.CANADA)
-        return productRepository.findByProductId(cartItem.productId)
-            .map { productDto ->
-                productDto.processProductDto()
-                productDto
-            }
+        return processedProductService.findAndProcessProductByProductId(cartItem.productId)
             .map { productDto: ProductDto ->
                 CartItemDto(
                     itemId = cartItem.itemId,
@@ -249,9 +247,8 @@ open class CartService(
         return cartItemRepository.findByCartId(cartId) // Fetch all items in the cart
             .filter(CartItem::isSelected) // Only include selected items
             .flatMap { cartItem ->
-                productRepository.findByProductId(cartItem.productId) // Fetch product details
+                processedProductService.findAndProcessProductByProductId(cartItem.productId)
                     .map { productDto ->
-                        productDto.processProductDto()
                         calculation(productDto, cartItem)
                     }
             }
@@ -290,11 +287,7 @@ open class CartService(
         // Retrieve all items in the cart
         return cartItemRepository.findByCartId(cartId)
             .flatMap { cartItem ->
-                productRepository.findByProductId(cartItem.productId)
-                    .map { productDto ->
-                        productDto.processProductDto()
-                        productDto
-                    }
+                processedProductService.findAndProcessProductByProductId(cartItem.productId)
                     .map { productDto ->
                         val salePrice = productDto.discountedPrice ?: productDto.price
                         salePrice.multiply(BigDecimal.valueOf(cartItem.quantity.toLong()))
@@ -317,11 +310,7 @@ open class CartService(
     private fun updateCartTotalAndNotifyCartUpdate(cart: Cart): Mono<Cart> {
         return cartItemRepository.findByCartId(cart.cartId!!)
             .flatMap { cartItem ->
-                productRepository.findByProductId(cartItem.productId)
-                    .map { productDto ->
-                        productDto.processProductDto()
-                        productDto
-                    }
+                processedProductService.findAndProcessProductByProductId(cartItem.productId)
                     .map { productDto ->
                         val salePrice = productDto.discountedPrice ?: productDto.price
                         salePrice.multiply(BigDecimal.valueOf(cartItem.quantity.toLong()))
@@ -353,11 +342,7 @@ open class CartService(
                 cartItemRepository.save(cartItem)
             }
             .flatMap { cartItem ->
-                productRepository.findByProductId(cartItem.productId)
-                    .map { productDto ->
-                        productDto.processProductDto()
-                        productDto
-                    }
+                processedProductService.findAndProcessProductByProductId(cartItem.productId)
                     .map { productDto: ProductDto ->
                         val salePrice = productDto.discountedPrice ?: productDto.price
                         val itemTotal: BigDecimal =
@@ -486,11 +471,7 @@ open class CartService(
 
 
     private fun populateCartItemWithProductInfo(cartItem: CartItem): Mono<CartItemDto> {
-        return productRepository.findByProductId(cartItem.productId)
-            .map { productDto ->
-                productDto.processProductDto()
-                productDto
-            }
+        return processedProductService.findAndProcessProductByProductId(cartItem.productId)
             .map { productDto: ProductDto ->
                 CartItemDto(
                     itemId = cartItem.itemId,

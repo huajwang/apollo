@@ -4,32 +4,26 @@ import com.goodfeel.nightgrass.data.Product
 import com.goodfeel.nightgrass.dto.ProductDto
 import com.goodfeel.nightgrass.repo.ProductRepository
 import com.goodfeel.nightgrass.service.IProductService
+import com.goodfeel.nightgrass.service.ProcessedProductService
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 @Service
 class ProductService(
-    private val productRepository: ProductRepository
+    private val productRepository: ProductRepository,
+    private val processedProductService: ProcessedProductService
 ) : IProductService {
 
     override fun allProducts(): Flux<ProductDto> {
-        return productRepository.findAllProducts()
-            .map { productDto ->
-                productDto.processProductDto()
-                productDto
-            }
+        return processedProductService.findAllAndProcessProducts()
             .onErrorResume { ex ->
                 Flux.error(RuntimeException("Failed to fetch all products: ${ex.message}", ex))
             }
     }
 
     override fun getProductById(id: Long): Mono<ProductDto> {
-        return productRepository.findByProductId(id)
-            .map { productDto ->
-                productDto.processProductDto()
-                productDto
-            }
+        return processedProductService.findAndProcessProductByProductId(id)
             .onErrorResume { ex ->
                 Mono.error(RuntimeException("Error fetching product with ID $id: ${ex.message}", ex))
             }
@@ -52,30 +46,10 @@ class ProductService(
     }
 
     override fun getTop3BigHits(): Flux<ProductDto> {
-        return productRepository.findTop3BigHits()
-            .map { productDto ->
-                productDto.processProductDto()
-                productDto
-            }
+        return processedProductService.findTop3BigHits()
     }
 
-    override fun getTop8PopularOrNewProducts(): Flux<ProductDto> {
-        return productRepository.findTop8PopularOrNewProducts()
-            .map { productDto ->
-                productDto.processProductDto()
-                productDto
-            }
-    }
+    override fun getTop8PopularOrNewProducts(): Flux<ProductDto> =
+        processedProductService.findTop8PopularOrNewProducts()
 
-    private fun Product.toDto(): ProductDto {
-        return ProductDto(
-            productId = this.productId ?: throw IllegalArgumentException("Product ID cannot be null"),
-            productName = this.productName,
-            description = this.description,
-            imageUrl = this.imageUrl,
-            price = this.price,
-            additionalInfoMap = this.getAdditionalInfoAsMap(),
-            category = this.category
-        )
-    }
 }

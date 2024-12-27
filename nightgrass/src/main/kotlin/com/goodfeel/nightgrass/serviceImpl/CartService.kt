@@ -132,6 +132,11 @@ open class CartService(
             .flatMap { existingItem ->
                 logger.debug("Updating quantity for existing item in cart: ${cart.cartId}")
                 existingItem.quantity += 1
+                // if the added cart item is currently unchecked at shopping cart, make it checked
+                if (!existingItem.isSelected) {
+                    logger.debug("Make the unselected cart item selected since user add it to cart again")
+                    existingItem.isSelected = true
+                }
                 cartItemRepository.save(existingItem).thenReturn(cart)
             }
             .switchIfEmpty(
@@ -163,7 +168,6 @@ open class CartService(
             .switchIfEmpty(Mono.just(0))
 
     }
-
 
     override fun removeCartItemFromCart(itemId: Long): Mono<Long> {
         return cartItemRepository.findById(itemId)
@@ -206,56 +210,49 @@ open class CartService(
     }
 
     override fun getSubtotal(cartId: Long): Mono<BigDecimal> {
-        return cartItemRepository.findByCartId(cartId) // Fetch all items in the cart
-            .filter(CartItem::isSelected) // Only include selected items
-            .flatMap { cartItem ->
-                productRepository.findByProductId(cartItem.productId) // Fetch product details
-                    .map { productDto ->
-                        productDto.processProductDto()
-                        productDto
-                    }
-                    .map { productDto ->
-                        val price = productDto.price
-                        price.multiply(BigDecimal.valueOf(cartItem.quantity.toLong()))
-                    }
-            }
-            .reduce(BigDecimal.ZERO, BigDecimal::add) // Sum up all item totals
+        return calculateCartValue(cartId) { productDto, cartItem ->
+            val price = productDto.price
+            price.multiply(BigDecimal.valueOf(cartItem.quantity.toLong()))
+        }
     }
-
 
     override fun getTotalAfterDiscount(cartId: Long): Mono<BigDecimal> {
-        return cartItemRepository.findByCartId(cartId) // Fetch all items in the cart
-            .filter(CartItem::isSelected) // Only include selected items
-            .flatMap { cartItem ->
-                productRepository.findByProductId(cartItem.productId) // Fetch product details
-                    .map { productDto ->
-                        productDto.processProductDto()
-                        productDto
-                    }
-                    .map { productDto ->
-                        val salePrice = productDto.discountedPrice ?: productDto.price
-                        salePrice.multiply(BigDecimal.valueOf(cartItem.quantity.toLong())) // Calculate total for the item
-                    }
-            }
-            .reduce(BigDecimal.ZERO, BigDecimal::add) // Sum up all item totals
+        return calculateCartValue(cartId) { productDto, cartItem ->
+            val salePrice = productDto.discountedPrice ?: productDto.price
+            salePrice.multiply(BigDecimal.valueOf(cartItem.quantity.toLong()))
+        }
     }
 
+    /**
+     * productDto.price is the original price;
+     * productDto.discountedPrice is not null if there is no discount associated with this product;
+     */
     override fun getSavings(cartId: Long): Mono<BigDecimal> {
+        return calculateCartValue(cartId) { productDto, cartItem ->
+            val savings = if (productDto.discountedPrice != null) {
+                productDto.price.subtract(productDto.discountedPrice)
+            } else {
+                BigDecimal.ZERO
+            }
+            savings.multiply(BigDecimal.valueOf(cartItem.quantity.toLong())) // Calculate total saved
+        }
+    }
+
+    /**
+     * The 2nd parameter of this function is a lambda. The caller of this function passes its own
+     * implementation of the lambda to achieve its specific calculation.
+     */
+    private fun calculateCartValue(
+        cartId: Long,
+        calculation: (productDto: ProductDto, cartItem: CartItem) -> BigDecimal
+    ): Mono<BigDecimal> {
         return cartItemRepository.findByCartId(cartId) // Fetch all items in the cart
             .filter(CartItem::isSelected) // Only include selected items
             .flatMap { cartItem ->
                 productRepository.findByProductId(cartItem.productId) // Fetch product details
                     .map { productDto ->
                         productDto.processProductDto()
-                        productDto
-                    }
-                    .map { productDto ->
-                        val youSavedPrice = if (productDto.discountedPrice != null) {
-                            productDto.price.subtract(productDto.discountedPrice)
-                        } else {
-                            BigDecimal.ZERO
-                        }
-                        youSavedPrice.multiply(BigDecimal.valueOf(cartItem.quantity.toLong())) // Calculate total saved
+                        calculation(productDto, cartItem)
                     }
             }
             .reduce(BigDecimal.ZERO, BigDecimal::add)

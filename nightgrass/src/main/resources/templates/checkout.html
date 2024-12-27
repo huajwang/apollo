@@ -56,8 +56,8 @@
 
       <!-- Totals and Discount -->
       <div class="totals" th:if="${order.originalTotal > order.discountedTotal}">
-        <p><strong>Original Total:</strong> <span th:text="${order.originalTotal}"></span></p>
-        <p><strong>Discount:</strong> <span th:text="${order.originalTotal - order.discountedTotal}"></span></p>
+        <p><strong>Subtotal:</strong> <span th:text="${order.originalTotal}"></span></p>
+        <p><strong>Savings:</strong> <span th:text="${order.originalTotal - order.discountedTotal}"></span></p>
         <p><strong>Total after discount:</strong> <span th:text="${order.discountedTotal}"></span></p>
       </div>
 

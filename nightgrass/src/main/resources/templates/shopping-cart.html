@@ -64,10 +64,14 @@
 
       <!-- Cart footer -->
       <div class="cart-footer" th:style="${#lists.isEmpty(cartItems)} ? 'display: none;' : 'display: block;'">
-        <div id="subtotal" class="subtotal">Subtotal: $<span th:text="${subtotal}">0.00</span></div>
-        <div id="savings" class="cart-total" th:style="${#lists.isEmpty(cartItems)} ? 'display: none;' : 'display: block;'">
+        <div id="subtotal" class="subtotal">
+          Subtotal: $<span id="subtotalValue" th:text="${subtotal}">0.00</span>
+        </div>
+
+        <div id="savings" class="savings" th:style="${#lists.isEmpty(cartItems)} ? 'display: none;' : 'display: block;'">
           Saving: $<span th:text="${savings ?: 0}">0.00</span>
         </div>
+
         <div id="cartTotal" class="cart-total" th:style="${#lists.isEmpty(cartItems)} ? 'display: none;' : 'display: block;'">
           Total After Discount: $<span th:text="${cartTotal ?: 0}">0.00</span>
         </div>

@@ -74,10 +74,20 @@
 
       updateSubtotalUI() {
         const subtotalElement = document.getElementById("subtotal");
-        if (subtotalElement) {
-          const subtotalSpan = subtotalElement.querySelector("span");
-          if (subtotalSpan) {
-            subtotalSpan.textContent = this.subtotal.toFixed(2);
+        const subtotalSpan = document.getElementById("subtotalValue");
+        if (subtotalElement && subtotalSpan) {
+          subtotalSpan.textContent = this.subtotal.toFixed(2);
+
+          // Apply style conditionally if savings > 0
+          if (this.savings > 0) {
+            subtotalSpan.style.textDecoration = "line-through";
+            subtotalSpan.style.color = "#bbb";
+            subtotalSpan.style.marginLeft = "5px";
+          } else {
+            // Reset style when savings <= 0
+            subtotalSpan.style.textDecoration = "none";
+            subtotalSpan.style.color = "inherit";
+            subtotalSpan.style.marginLeft = "0";
           }
         }
       },

@@ -17,10 +17,8 @@ import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Mono
-import reactor.util.retry.Retry
 import java.math.BigDecimal
 import java.security.Principal
-import java.time.Duration
 
 @Controller
 @RequestMapping("/cart")
@@ -53,22 +51,28 @@ class ShoppingCartController(
                 }
         }
 
-        val totalPriceMono = cartMono.flatMap { cart ->
-            cartService.getTotalPriceForCart(cart.cartId!!)
+        val subTotalMono = cartMono.flatMap { cart ->
+            cartService.getSubtotal(cart.cartId!!)
         }
 
-        val youSavedTotalMono = cartMono.flatMap { cart ->
-            cartService.getYouSavedTotal(cart.cartId!!)
+        val savingsMono = cartMono.flatMap { cart ->
+            cartService.getSavings(cart.cartId!!)
         }
 
-        return Mono.zip(cartItemDtosFlux.collectList(), totalPriceMono, youSavedTotalMono)
+        val totalAfterDiscountMono = cartMono.flatMap { cart ->
+            cartService.getTotalAfterDiscount(cart.cartId!!)
+        }
+
+        return Mono.zip(cartItemDtosFlux.collectList(), subTotalMono, savingsMono, totalAfterDiscountMono)
             .map { tuple ->
                 val cartItems = tuple.t1
-                val cartTotal = tuple.t2
-                val youSavedTotal = tuple.t3
+                val subtotal = tuple.t2
+                val savings = tuple.t3
+                val totalAfterDiscount = tuple.t4
                 model.addAttribute("cartItems", cartItems)
-                model.addAttribute("cartTotal", cartTotal)
-                model.addAttribute("youSavedTotal", youSavedTotal)
+                model.addAttribute("subtotal", subtotal)
+                model.addAttribute("savings", savings)
+                model.addAttribute("cartTotal", totalAfterDiscount)
                 "shopping-cart" // Return the view name
             }
             .onErrorResume { e ->
@@ -219,7 +223,7 @@ class ShoppingCartController(
         return userMono.flatMap { user ->
             cartService.getCartForUserOrGuest(user)
                 .flatMap { cart ->
-                    cartService.getTotalPriceForCart(cart.cartId!!)
+                    cartService.getTotalAfterDiscount(cart.cartId!!)
                         .map { body -> ResponseEntity.ok(body) }
                         .defaultIfEmpty(ResponseEntity.status(HttpStatus.NOT_FOUND).body(BigDecimal.ZERO))
                 }

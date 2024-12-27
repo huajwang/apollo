@@ -205,7 +205,25 @@ open class CartService(
             }
     }
 
-    override fun getTotalPriceForCart(cartId: Long): Mono<BigDecimal> {
+    override fun getSubtotal(cartId: Long): Mono<BigDecimal> {
+        return cartItemRepository.findByCartId(cartId) // Fetch all items in the cart
+            .filter(CartItem::isSelected) // Only include selected items
+            .flatMap { cartItem ->
+                productRepository.findByProductId(cartItem.productId) // Fetch product details
+                    .map { productDto ->
+                        productDto.processProductDto()
+                        productDto
+                    }
+                    .map { productDto ->
+                        val price = productDto.price
+                        price.multiply(BigDecimal.valueOf(cartItem.quantity.toLong()))
+                    }
+            }
+            .reduce(BigDecimal.ZERO, BigDecimal::add) // Sum up all item totals
+    }
+
+
+    override fun getTotalAfterDiscount(cartId: Long): Mono<BigDecimal> {
         return cartItemRepository.findByCartId(cartId) // Fetch all items in the cart
             .filter(CartItem::isSelected) // Only include selected items
             .flatMap { cartItem ->
@@ -222,7 +240,7 @@ open class CartService(
             .reduce(BigDecimal.ZERO, BigDecimal::add) // Sum up all item totals
     }
 
-    override fun getYouSavedTotal(cartId: Long): Mono<BigDecimal> {
+    override fun getSavings(cartId: Long): Mono<BigDecimal> {
         return cartItemRepository.findByCartId(cartId) // Fetch all items in the cart
             .filter(CartItem::isSelected) // Only include selected items
             .flatMap { cartItem ->
@@ -429,7 +447,7 @@ open class CartService(
                             }
                     )
                     .then(
-                        getTotalPriceForCart(userCart.cartId!!).flatMap { cartTotal ->
+                        getTotalAfterDiscount(userCart.cartId!!).flatMap { cartTotal ->
                             cartRepository.updateTotal(userCart.cartId, cartTotal)
                         }
                     )

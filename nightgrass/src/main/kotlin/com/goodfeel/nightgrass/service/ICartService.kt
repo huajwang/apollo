@@ -15,7 +15,8 @@ interface ICartService {
 
     fun removeCartItemFromCart(itemId: Long): Mono<Long>
     fun getCartItemsForCart(cartId: Long): Flux<CartItemDto>
-    fun getTotalPriceForCart(cartId: Long): Mono<BigDecimal>
-    fun getYouSavedTotal(cartId: Long): Mono<BigDecimal>
+    fun getSubtotal(cartId: Long): Mono<BigDecimal>
+    fun getTotalAfterDiscount(cartId: Long): Mono<BigDecimal>
+    fun getSavings(cartId: Long): Mono<BigDecimal>
     fun mergeCart(userId: String, guestId: String): Mono<Void>
 }

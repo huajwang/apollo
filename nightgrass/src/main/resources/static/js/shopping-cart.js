@@ -11,8 +11,9 @@
     const cart = {
       itemCount: 0,
       items: [],
-      totalPrice: 0,
-      youSavedTotal: 0,
+      subtotal: 0,
+      savings: 0,
+      totalAfterDiscount: 0,
 
       updateItemCount() {
           this.itemCount = this.items.reduce((total, item) => {
@@ -43,43 +44,63 @@
         }
       },
 
-      // Method to update total price dynamically
+      // Method to update subtotal, savings and totalAfterDiscount dynamically
       updateTotal() {
         console.log("updateTotal() data items: ", this.items);
-        this.totalPrice = this.items.reduce((total, item) => {
+        this.subtotal = this.items.reduce((st, item) => {
+          if (item.selected) {
+            return st + item.quantity * item.price;
+          }
+          return st;
+        }, 0);
+
+        this.savings = this.items.reduce((svs, item) => {
+          if (item.selected) {
+            return svs + item.quantity * (item.price - item.discountedPrice);
+          }
+          return svs;
+        }, 0);
+
+        this.totalAfterDiscount = this.items.reduce((total, item) => {
           if (item.selected) {
             return total + item.quantity * item.discountedPrice;
           }
           return total;
         }, 0);
-
-        this.youSavedTotal = this.items.reduce((savings, item) => {
-          if (item.selected) {
-            return savings + item.quantity * (item.price - item.discountedPrice);
-          }
-          return savings;
-        }, 0);
-
-        this.updateTotalUI();
+        this.updateSubtotalUI();
         this.updateSavingsUI();
+        this.updateTotalAfterDiscountUI();
       },
 
-      // Method to update the total price in the UI
-      updateTotalUI() {
-        const totalElement = document.getElementById("cartTotal");
-        if (totalElement) {
-          totalElement.textContent = `Total: $${this.totalPrice.toFixed(2)}`;
+      updateSubtotalUI() {
+        const subtotalElement = document.getElementById("subtotal");
+        if (subtotalElement) {
+          const subtotalSpan = subtotalElement.querySelector("span");
+          if (subtotalSpan) {
+            subtotalSpan.textContent = this.subtotal.toFixed(2);
+          }
         }
       },
 
-
       updateSavingsUI() {
-        const savingsElement = document.getElementById("youSavedTotal");
+        const savingsElement = document.getElementById("savings");
         if (savingsElement) {
-          savingsElement.style.display = this.youSavedTotal > 0 ? "block" : "none";
+          savingsElement.style.display = this.savings > 0 ? "block" : "none";
           const savingsSpan = savingsElement.querySelector("span");
           if (savingsSpan) {
-            savingsSpan.textContent = this.youSavedTotal.toFixed(2);
+            savingsSpan.textContent = this.savings.toFixed(2);
+          }
+        }
+      },
+
+      // Method to update the cart total in the UI
+      updateTotalAfterDiscountUI() {
+        const cartTotalElement = document.getElementById("cartTotal");
+        if (cartTotalElement) {
+          cartTotalElement.style.display = this.savings > 0 ? "block" : "none";
+          const cartTotalSpan = cartTotalElement.querySelector("span");
+          if (cartTotalSpan) {
+            cartTotalSpan.textContent = this.totalAfterDiscount.toFixed(2);
           }
         }
       },
@@ -93,7 +114,7 @@
         }
       },
 
-      // Method to toggle an item's checked status
+      // Toggle an item's checked status locally
       toggleItemChecked(itemId, isChecked) {
         const item = this.items.find(item => item.id === itemId);
         if (item) {
@@ -104,8 +125,8 @@
     };
 
     const handleQuantityChange = debounce((itemId, quantity) => {
-      // Optimistically update locally
       const previousQuantity = cart.items.find(item => item.id === itemId)?.quantity || 0;
+      // Optimistically update locally
       cart.updateItemQuantity(itemId, quantity);
 
       fetch('/cart/update-quantity', {
@@ -145,7 +166,6 @@
     const handleCheckboxChange = (itemId, isChecked) => {
       // Update the local cart state optimistically
       cart.toggleItemChecked(itemId, isChecked);
-      cart.updateTotal();
 
       fetch('/cart/update-total-on-checkbox', {
         method: 'POST',
@@ -160,7 +180,6 @@
             console.error('Error updating cart total on checkbox change:', data.message);
             // Revert the local changes if the backend operation fails
             cart.toggleItemChecked(itemId, !isChecked);
-            cart.updateTotal();
             alert('An error occurred while updating the cart. Please try again.');
           } else {
             // sync the cart state with the backend
@@ -174,7 +193,6 @@
           console.error('Error updating cart total on checkbox change:', error);
           // Revert the local changes in case of an unexpected error
           cart.toggleItemChecked(itemId, !isChecked);
-          cart.updateTotal();
           alert('An unexpected error occurred. Please try again.');
         });
     };

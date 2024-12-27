@@ -54,7 +54,7 @@ class CartControllerTest {
         `when`(guestService.retrieveUserGuestOrCreate(principal, request, response)).thenReturn(Mono.just(user))
         `when`(cartService.getCartForUserOrGuest(user)).thenReturn(Mono.just(cart))
         `when`(cartService.getCartItemsForCart(cart.cartId!!)).thenReturn(Flux.fromIterable(cartItems))
-        `when`(cartService.getTotalPriceForCart(cartId)).thenReturn(Mono.just(totalPrice))
+        `when`(cartService.getTotalAfterDiscount(cartId)).thenReturn(Mono.just(totalPrice))
 
         val result = cartController.viewCart(model, principal, request, response)
 
@@ -69,7 +69,7 @@ class CartControllerTest {
         verify(guestService).retrieveUserGuestOrCreate(principal, request, response)
         // verify(cartService).getCartForUserOrGuest(user)
         verify(cartService).getCartItemsForCart(cartId)
-        verify(cartService).getTotalPriceForCart(cartId)
+        verify(cartService).getTotalAfterDiscount(cartId)
     }
 
     @Test
@@ -94,7 +94,7 @@ class CartControllerTest {
         verify(guestService).retrieveUserGuestOrCreate(principal, request, response)
         verify(cartService, never()).getCartForUserOrGuest(user)
         verify(cartService, never()).getCartItemsForCart(anyLong())
-        verify(cartService, never()).getTotalPriceForCart(anyLong())
+        verify(cartService, never()).getTotalAfterDiscount(anyLong())
     }
 
     @Test

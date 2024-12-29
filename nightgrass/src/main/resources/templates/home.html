@@ -10,10 +10,22 @@
   <!-- Hero Section -->
   <section class="hero">
     <div class="hero-container">
-      <div class="hero-text">
-        <h1>Discover</h1>
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut elit tellus, luctus nec ullamcorper mattis.</p>
-        <button class="hero-btn">Buy Now</button>
+      <div class="hero-text" th:if="${heroCard.type == 1}">
+        <h1 th:text="${heroCard.title}">Drone Workshops</h1>
+        <p th:text="${heroCard.description}"></p>
+        <p>Reserve your spot today or ask questions to learn more!</p>
+        <a href="/workshop/incoming-workshop">
+          <button class="hero-btn">Sign Up Now</button>
+        </a>
+      </div>
+
+      <div class="hero-text" th:if="${heroCard.type == 2}">
+        <img th:src="${heroCard.blogPostThumbnail}">
+        <h1 th:text="${heroCard.title}">Blog Post</h1>
+        <p th:text="${heroCard.description}"></p>
+        <a th:href="@{/blog/post(postId=${heroCard.blogPostId})}">
+          <button class="hero-btn">Read More</button>
+        </a>
       </div>
     </div>
   </section>

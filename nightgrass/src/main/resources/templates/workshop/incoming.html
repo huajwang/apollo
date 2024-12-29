@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout (
+          pageContent=~{:: pageContent},
+          pageTitle='Drone Event',
+          pageCss=@{/css/home/event.css}
+      )}">
+
+    <div th:fragment="pageContent">
+        <section class="workshop-details">
+            <div class="container">
+                <h1 th:text="${workshop.title}">Drone Workshop</h1>
+                <p th:text="${workshop.description}"></p>
+                <ul>
+                    <li><strong>Date:</strong><span th:text="${workshop.date}"></span></li>
+                    <li><strong>Location:</strong><span th:text="${workshop.location}"></span></li>
+                    <li><strong>Time:</strong>
+                        <span th:text="${workshop.timeStart}"></span> -
+                        <span th:text="${workshop.timeEnd}"></span>
+                    </li>
+                    <li><strong>Activities:</strong><span th:text="${workshop.activities}"></span></li>
+                </ul>
+
+            </div>
+        </section>
+
+        <section class="registration-form">
+            <div class="container">
+                <h2>Register for the Drone Workshop</h2>
+                <p>Fill out the form below to reserve your spot or ask questions about the event.</p>
+
+                <form th:action="@{/event/signup}" method="post">
+                    <div class="form-group">
+                        <label for="name">Full Name:</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email Address:</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone Number:</label>
+                        <input type="tel" id="phone" name="phone">
+                    </div>
+                    <div class="form-group">
+                        <label for="question">Questions or Comments:</label>
+                        <textarea id="question" name="question" rows="4"></textarea>
+                    </div>
+                    <button type="submit" class="btn">Submit</button>
+                </form>
+            </div>
+        </section>
+    </div>
+</html>

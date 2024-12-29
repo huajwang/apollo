@@ -53,6 +53,22 @@ CREATE TABLE IF NOT EXISTS e_mall_admin (
     role VARCHAR(50) DEFAULT 'ADMIN'
 );
 
+CREATE TABLE IF NOT EXISTS e_mall_workshops (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL,
+    date DATE NOT NULL,
+    time_start TIME NOT NULL,
+    time_end TIME NOT NULL,
+    location VARCHAR(255) NOT NULL,
+    activities TEXT,
+    show_on_homepage TINYINT(1) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+
+
 CREATE TABLE IF NOT EXISTS e_mall_product_photo (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     product_id BIGINT NOT NULL,
@@ -158,7 +174,8 @@ CREATE TABLE IF NOT EXISTS e_mall_blog_posts (
     status ENUM('DRAFT', 'PUBLISHED', 'ARCHIVED') DEFAULT 'DRAFT',
     thumbnail VARCHAR(255) NOT NULL,
     main_media_id INT NOT NULL,
-    sticky_pin_no INT DEFAULT 0,
+    sticky_pin_no INT DEFAULT 0, -- If greater than 0 then show on blog home page
+    show_on_homepage TINYINT(1) DEFAULT 0, -- If no workshop/event, a chosen blog post will be shown
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     published_at TIMESTAMP NULL DEFAULT NULL,

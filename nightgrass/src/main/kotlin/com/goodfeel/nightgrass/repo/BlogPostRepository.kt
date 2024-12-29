@@ -36,4 +36,6 @@ interface BlogPostRepository : ReactiveCrudRepository<BlogPost, Int> {
     fun findRecentPosts(): Flux<RecentBlogPostDto>
 
     fun findByPostId(postId: Int): Mono<BlogPost>
+
+    fun findByShowOnHomepage(showOnHomepage: Boolean): Flux<BlogPost>
 }

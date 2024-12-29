@@ -61,7 +61,7 @@ open class SecurityConfig(
                 exchange
                     .pathMatchers(
                         "/", "/product/**", "/videos/**", "/blog/**", "/buynow", "/pay/**", "/home/**",
-                        "/login", "/error", "/cart/**", "/checkout", "/update-user-info",
+                        "/login", "/error", "/cart/**", "/checkout", "/update-user-info", "/workshop/**",
                         "/images/**", "/css/**", "/icons/**", "/js/**", "/webjars/**",
                     ).permitAll()
                     // All other paths require authentication

@@ -17,6 +17,7 @@ data class BlogPost(
     val thumbnail: String,
     val mainMediaId: Int,
     val stickyPinNo: Int = 0, // 0 not pin on top
+    val showOnHomepage: Boolean = false,
     val createdAt: LocalDateTime = LocalDateTime.now(),
     val updatedAt: LocalDateTime? = null,
     val publishedAt: LocalDateTime? = null,

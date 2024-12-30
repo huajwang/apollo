@@ -3,6 +3,7 @@ package com.goodfeel.nightgrass.service
 import com.aliyun.oss.OSS
 import com.aliyun.oss.OSSClientBuilder
 import com.goodfeel.nightgrass.web.util.Utility
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.buffer.DataBufferUtils
 import org.springframework.http.codec.multipart.FilePart
@@ -15,13 +16,11 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 @Service
-class AliyunOssService {
-
-    @Value("\${OSS_ACCESS_KEY_ID}")
-    private lateinit var accessKeyId: String
-
-    @Value("\${OSS_ACCESS_KEY_SECRET}")
-    private lateinit var accessKeySecret: String
+class AliyunOssService(
+    @Value("\${aliyun.oss_access_key_id}") private val accessKeyId: String,
+    @Value("\${aliyun.oss_access_key_secret}") private val accessKeySecret: String
+) {
+    private val logger = LoggerFactory.getLogger(AliyunOssService::class.java)
 
     private val ossClient: OSS = OSSClientBuilder().build(
         Utility.OSS_ENDPOINT, accessKeyId, accessKeySecret)
@@ -35,11 +34,24 @@ class AliyunOssService {
             objectName
         }.doOnTerminate {
             inputStream.close()
+        }.doOnError {
+            logger.error("Error upload file to Aliyun OSS. Error: ${it.message}")
         }
     }
 
     fun uploadMultipleFiles(files: Flux<FilePart>): Flux<String> {
         return files.flatMap { filePart ->
+            convertToInputStream(filePart).flatMap { inputStream ->
+                uploadFile(inputStream, filePart.filename())
+            }
+        }.onErrorContinue { ex, obj ->
+            // Log the error and continue with other files
+            logger.error("Failed to upload file: $obj, Error: $ex")
+        }
+    }
+
+    fun uploadSingleFile(filePartMono: Mono<FilePart>): Mono<String> {
+        return filePartMono.flatMap { filePart ->
             convertToInputStream(filePart).flatMap { inputStream ->
                 uploadFile(inputStream, filePart.filename())
             }

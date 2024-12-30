@@ -8,6 +8,8 @@ import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import reactor.core.publisher.Mono
+import java.time.LocalDate
+import java.time.LocalTime
 
 @Controller
 @RequestMapping("/")
@@ -24,7 +26,11 @@ class HomeController(
             .map {
                 HeroCard(
                     title = it.title,
-                    description = it.description
+                    description = it.description,
+                    location = it.location,
+                    timeStart = it.timeStart,
+                    timeEnd = it.timeEnd,
+                    eventDate = it.date
                 )
             }.switchIfEmpty(
                 blogPostService.findByShowOnHomepage().map {
@@ -58,6 +64,11 @@ class HomeController(
         val type: Int = 1, // 1 workshop or event; 2 blog post
         val title: String,
         val description: String,
+        val eventDate: LocalDate? = null,
+        val timeStart: LocalTime? = null,
+        val timeEnd: LocalTime?= null,
+        val location: String? = null,
+
         val blogPostId: Int? = null,
         val blogPostThumbnail: String? = null
     )

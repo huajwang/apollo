@@ -12,6 +12,15 @@
     <div class="hero-container">
       <div class="hero-text" th:if="${heroCard.type == 1}">
         <h1 th:text="${heroCard.title}">Drone Workshops</h1>
+        <p>
+          <strong>
+            <span th:text="${heroCard.timeStart}"></span> -
+            <span th:text="${heroCard.timeEnd}"></span>
+            <span th:text="${heroCard.eventDate}"></span>
+            <span th:text="${heroCard.location}"></span>
+          </strong>
+
+        </p>
         <p th:text="${heroCard.description}"></p>
         <p>Reserve your spot today or ask questions to learn more!</p>
         <a href="/workshop/incoming-workshop">
@@ -20,7 +29,7 @@
       </div>
 
       <div class="hero-text" th:if="${heroCard.type == 2}">
-        <img th:src="${heroCard.blogPostThumbnail}">
+<!--        <img th:src="${heroCard.blogPostThumbnail}">-->
         <h1 th:text="${heroCard.title}">Blog Post</h1>
         <p th:text="${heroCard.description}"></p>
         <a th:href="@{/blog/post(postId=${heroCard.blogPostId})}">

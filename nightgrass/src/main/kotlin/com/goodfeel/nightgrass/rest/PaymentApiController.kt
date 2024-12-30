@@ -14,7 +14,10 @@ import reactor.core.publisher.Mono
 
 @RestController
 @RequestMapping("/pay")
-class PaymentApiController(private val orderService: OrderService, private val stripeService: StripeService) {
+class PaymentApiController(
+    private val orderService: OrderService,
+    private val stripeService: StripeService)
+{
     private val logger: Logger = LoggerFactory.getLogger(PaymentApiController::class.java)
 
     @PostMapping("/create-checkout-session")
@@ -25,6 +28,10 @@ class PaymentApiController(private val orderService: OrderService, private val s
         logger.debug("The amount = {}", checkoutRequest.amount)
         return orderService.findOrderById(checkoutRequest.orderId)
             .flatMap { order: Order ->
+                order.contactName = checkoutRequest.contactName
+                order.contactPhone = checkoutRequest.contactPhone
+                order.deliveryAddress = checkoutRequest.deliveryAddress
+
                 order.finalTotal = checkoutRequest.amount
                 order.orderStatus = OrderStatus.PENDING
                 orderService.updateOrder(order)

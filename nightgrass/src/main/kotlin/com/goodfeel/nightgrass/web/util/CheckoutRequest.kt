@@ -4,5 +4,8 @@ import java.math.BigDecimal
 
 data class CheckoutRequest(
     val orderId: Long,
-    var amount: BigDecimal
+    val amount: BigDecimal,
+    val contactName: String,
+    val contactPhone: String,
+    val deliveryAddress: String
 )

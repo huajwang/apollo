@@ -14,7 +14,6 @@ import com.goodfeel.nightgrass.util.ReferralRewardStatus
 import com.goodfeel.nightgrass.web.util.Utility
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.ResponseEntity
 import org.springframework.http.server.reactive.ServerHttpRequest
 import org.springframework.http.server.reactive.ServerHttpResponse
@@ -40,9 +39,6 @@ class CheckoutController(
     private val guestService: GuestService
 ) {
     private val logger: Logger = LoggerFactory.getLogger(CheckoutController::class.java)
-
-    @Value("\${STRIPE_PUBLIC_KEY}")
-    private val stripePublicKey: String? = null
 
     @GetMapping("/checkout")
     fun processOrder(
@@ -72,7 +68,6 @@ class CheckoutController(
                 model.addAttribute("user", user)
                 model.addAttribute("orderItems", orderItems)
                 model.addAttribute("order", order)
-                model.addAttribute("STRIPE_PUBLIC_KEY", stripePublicKey)
                 exchange.session
                     .flatMap { session: WebSession ->
                         val sharerId = session.getAttribute<String>("sharerId")

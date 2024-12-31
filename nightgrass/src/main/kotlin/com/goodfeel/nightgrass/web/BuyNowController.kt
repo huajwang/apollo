@@ -8,7 +8,6 @@ import com.goodfeel.nightgrass.serviceImpl.ProductService
 import com.goodfeel.nightgrass.util.OrderStatus
 import com.goodfeel.nightgrass.web.util.AddCartRequest
 import com.goodfeel.nightgrass.web.util.Utility
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.server.reactive.ServerHttpRequest
 import org.springframework.http.server.reactive.ServerHttpResponse
 import org.springframework.stereotype.Controller
@@ -29,9 +28,6 @@ class BuyNowController(
     private val guestService: GuestService,
     private val productService: ProductService
     ) {
-
-    @Value("\${STRIPE_PUBLIC_KEY}")
-    private val stripePublicKey: String? = null
 
     @PostMapping
     fun buyNow(
@@ -91,7 +87,6 @@ class BuyNowController(
                         orderItem.setPropertiesFromMap(it)
                     }
                     model.addAttribute("orderItems", listOf(orderItem.toDto()))
-                    model.addAttribute("STRIPE_PUBLIC_KEY", stripePublicKey)
                     orderService.save(orderItem)
                 }
         }.thenReturn("checkout")

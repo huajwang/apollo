@@ -9,17 +9,21 @@
     margin-bottom: 20px;
 }
 
-/* Style for each form group (label + input) */
 .form-group {
-    margin-bottom: 15px; /* Space between fields */
+    margin-bottom: 12px;
+    font-family: "Arial", sans-serif; /* Match the font */
+    font-size: 1rem; /* Standard font size */
+    color: #333; /* Default text color */
 }
 
-/* Label styling */
 .form-group label {
-    display: block;
     font-weight: bold;
-    margin-bottom: 5px;
-    color: #333; /* Darker color for contrast */
+    display: block;
+}
+
+.form-control:focus {
+    border-color: #007BFF;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
 }
 
 /* Input and textarea styling */
@@ -27,7 +31,7 @@
 .form-group textarea {
     width: 100%; /* Full width */
     padding: 10px; /* Internal padding for better usability */
-    font-size: 16px;
+    font-size: 14px;
     border: 1px solid #ccc; /* Light border */
     border-radius: 4px; /* Slightly rounded corners */
     box-sizing: border-box; /* Prevent padding from exceeding width */
@@ -49,6 +53,26 @@
     min-height: 100px; /* Minimum height */
 }
 
+/* Style for the orange asterisk */
+.required {
+    color: #ff9800; /* Orange color for the asterisk */
+    font-size: 1.2em; /* Slightly larger than text */
+    margin-left: 5px;
+}
+
+/* Highlight invalid fields */
+.invalid {
+    border-color: red;
+    box-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+}
+
+/* Error message styling */
+.error-message {
+    color: red;
+    font-size: 0.9em;
+    margin-top: 5px;
+}
+
 .old-price {
   text-decoration: line-through;
   color: #bbb;
@@ -57,10 +81,25 @@
 
 /* Dashed Line Separator */
 .dashed-line {
-    border-top: 2px dashed #bbb;
+    width: 100%;
     margin: 20px 0;
+    height: 5px; /* Adjust height for thicker dashes */
+    background: repeating-linear-gradient(
+        to right,
+        red 0,
+        red 10px,
+        white 10px,
+        white 15px,
+        blue 15px,
+        blue 25px,
+        white 25px,
+        white 30px
+    );
 }
 
+
+
+/* Base style for the button */
 .submit-order button {
     width: 100%;
     padding: 10px;
@@ -69,4 +108,28 @@
     border: none;
     color: white;
     font-size: 1.2em;
+    cursor: pointer; /* Pointer cursor for interactive buttons */
+    transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth transitions */
 }
+
+/* Hover effect for enabled button */
+.submit-order button:hover {
+    background-color: #e68900; /* Slightly darker orange */
+    transform: scale(1.02); /* Subtle scaling effect */
+}
+
+/* Active state for button when clicked */
+.submit-order button:active {
+    background-color: #cc7700; /* Even darker orange */
+    transform: scale(0.98); /* Slightly smaller for active state */
+}
+
+/* Disabled state for the button */
+.submit-order button:disabled {
+    background-color: #ccc; /* Light gray background */
+    color: #666; /* Gray text */
+    cursor: not-allowed; /* "Not allowed" cursor for disabled state */
+    opacity: 0.7; /* Slightly transparent */
+    transform: none; /* No scaling effects */
+}
+

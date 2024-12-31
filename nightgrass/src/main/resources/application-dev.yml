@@ -3,3 +3,6 @@ spring:
     url: r2dbc:mysql://localhost:3306/emall
     username: smallboy
     password: abcd1234
+
+server:
+  port: 8080

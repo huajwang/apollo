@@ -244,10 +244,15 @@ open class CartService(
         cartId: Long,
         calculation: (productDto: ProductDto, cartItem: CartItem) -> BigDecimal
     ): Mono<BigDecimal> {
-        return cartItemRepository.findByCartId(cartId) // Fetch all items in the cart
+        // Fetch all cart items once and share the result
+        val cartItemsMono = cartItemRepository.findByCartId(cartId) // Fetch all items in the cart
             .filter(CartItem::isSelected) // Only include selected items
+            .cache() // catch the steam to prevent duplicate database queries
+
+        return cartItemsMono
             .flatMap { cartItem ->
                 processedProductService.findAndProcessProductByProductId(cartItem.productId)
+                    .cache() // Cache the result for the same product ID
                     .map { productDto ->
                         calculation(productDto, cartItem)
                     }

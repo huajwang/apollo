@@ -38,6 +38,7 @@
       <div class="product-info">
         <!-- Product Name -->
         <h1 th:text="${product.productName}">Product Name</h1>
+        <div id="fly-animation" style="display: none; position: absolute; pointer-events: none;"></div>
 
         <!-- Product Price -->
         <div class="price" th:if="${product.discountedPrice != null}">

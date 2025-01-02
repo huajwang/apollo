@@ -29,6 +29,11 @@ body {
     font-weight: bold;
 }
 
+.cart-icon {
+    position: relative;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
 .navbar a {
     color: white;
     text-decoration: none;
@@ -82,6 +87,10 @@ footer nav a {
     color: #333; /* Adjust color as needed */
 }
 
+.cat_icon {
+    position: relative; /* Make the icon the positioning reference for the badge */
+}
+
 /* Optional styling for icons */
 .cat_icon img {
     width: 24px; /* Set a size for the icons */
@@ -95,18 +104,28 @@ footer nav a {
     margin-top: 0;
 }
 
-.cat_icon {
-    position: relative; /* Make the icon the positioning reference for the badge */
+.top-cart-count {
+    position: absolute;
+    top: -10px; /* Adjust as needed to position the badge over the icon */
+    right: -12px; /* Adjust to fine-tune horizontal position */
+    background-color: #ff0000; /* Red for visibility */
+    color: white;
+    font-size: 10px;
+    padding: 3px 3px;
+    border-radius: 50%; /* Makes it circular */
+    font-weight: bold;
+    min-width: 18px; /* Ensure badge is round even with single-digit numbers */
+    text-align: center;
 }
 
 .cart-count {
     position: absolute;
-    top: -5px; /* Adjust as needed to position the badge over the icon */
-    right: -5px; /* Adjust to fine-tune horizontal position */
+    top: -8px; /* Adjust as needed to position the badge over the icon */
+    right: -7px; /* Adjust to fine-tune horizontal position */
     background-color: #ff0000; /* Red for visibility */
     color: white;
-    font-size: 12px;
-    padding: 3px 6px;
+    font-size: 10px;
+    padding: 3px 3px;
     border-radius: 50%; /* Makes it circular */
     font-weight: bold;
     min-width: 18px; /* Ensure badge is round even with single-digit numbers */

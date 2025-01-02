@@ -42,6 +42,8 @@ document.addEventListener("DOMContentLoaded", function () {
         .then((data) => {
             // Update the cart count with the server-provided value
             Alpine.store("cart").count = data.cartItemCount;
+            // Trigger the Fly-to-Cart animation
+            triggerFlyToCartAnimation(addToCartForm.querySelector('.add-to-cart'));
         })
         .catch((error) => {
             // Revert the optimistic update if there's an error
@@ -49,6 +51,44 @@ document.addEventListener("DOMContentLoaded", function () {
             alert('Error while adding product to cart. Please try again later. Error: ', error);
         });
     });
+
+    function triggerFlyToCartAnimation(button) {
+        const cartIcon = document.querySelector('.cart-icon');
+        const rect = button.getBoundingClientRect();
+
+        // Access the reusable animation element
+        const flyingElement = document.getElementById('fly-animation');
+        flyingElement.style.display = 'block'; // Make it visible
+        flyingElement.style.top = `${rect.top}px`;
+        flyingElement.style.left = `${rect.left}px`;
+        flyingElement.style.width = '10px'; // Use a consistent size
+        flyingElement.style.height = '10px'; // Customize as needed
+        flyingElement.style.backgroundColor = '#ff6347'; // Tomato color or use a product image
+        flyingElement.style.borderRadius = '50%'; // Make it circular
+        flyingElement.style.transition = 'all 0.7s ease-in-out';
+        flyingElement.style.zIndex = '1000';
+        //flyingElement.style.backgroundImage = `url('/images/lake.jpg')`;
+
+        // Calculate cart position
+        const cartRect = cartIcon.getBoundingClientRect();
+        const xOffset = cartRect.left + cartRect.width / 2 - rect.left - 10; // Center the "flying" element
+        const yOffset = cartRect.top + cartRect.height / 2 - rect.top - 10;
+
+        // Start animation
+        setTimeout(() => {
+            flyingElement.style.transform = `translate(${xOffset}px, ${yOffset}px)`;
+            flyingElement.style.opacity = '0.5';
+        }, 50);
+
+        // Cleanup after animation
+        setTimeout(() => {
+            flyingElement.style.display = 'none'; // Hide it after animation
+            flyingElement.style.transform = 'none'; // Reset position for the next animation
+            flyingElement.style.opacity = '1'; // Reset opacity
+            // Optional: Highlight the cart icon
+            highlightCartIcon();
+        }, 750);
+    }
 
     // Handle video modal interactions
     const videoLinks = document.querySelectorAll(".video-icon a");

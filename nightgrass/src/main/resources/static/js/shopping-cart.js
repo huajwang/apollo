@@ -25,7 +25,7 @@
       // Method to update the item count in the UI
       updateItemCountUI() {
         const itemCountElement = document.getElementById("cartItemCount"); // bottom nav cart
-        const itemCountElement2 = document.getElementById("cartItemCount2"); // top left cart
+        const itemCountElement2 = document.getElementById("topCartItemCount"); // top left cart
         if (itemCountElement) {
           itemCountElement.textContent = this.itemCount;
         };

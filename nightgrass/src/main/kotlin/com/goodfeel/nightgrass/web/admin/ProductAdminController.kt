@@ -4,6 +4,7 @@ import com.goodfeel.nightgrass.dto.admin.AdminProductDto
 import com.goodfeel.nightgrass.dto.admin.AdminProductRequest
 import com.goodfeel.nightgrass.service.AliyunOssService
 import com.goodfeel.nightgrass.service.admin.AdminProductService
+import com.goodfeel.nightgrass.web.util.Utility
 import org.slf4j.LoggerFactory
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Controller
@@ -51,6 +52,7 @@ class ProductAdminController(
         @RequestPart("mediaFiles", required = false) filePartFlux: Flux<FilePart>,
         @RequestPart("thumbnailFile", required = false) thumbnailFilePartMono: Mono<FilePart>
     ): Mono<String> {
+        // TODO - Also need to delete the old thumbnail on Aliyun OSS
         val thumbnailFileUrlMono = thumbnailFilePartMono.flatMap {
             aliyunOssService.uploadSingleFile(thumbnailFilePartMono)
         }.switchIfEmpty(Mono.just(""))
@@ -105,6 +107,7 @@ class ProductAdminController(
             }
             .flatMap { productDto ->
                 model.addAttribute("product", productDto)
+                model.addAttribute("ossPrefix", Utility.getOssPrefix())
                 adminProductService.getPhotoUrlsByProductId(productDto.productId!!)
                     .collectList()
                     .doOnNext {

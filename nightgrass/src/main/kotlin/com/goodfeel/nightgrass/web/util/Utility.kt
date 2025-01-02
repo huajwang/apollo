@@ -50,6 +50,8 @@ object Utility : ApplicationContextAware {
         return dateTimePart + randomSuffix
     }
 
+    fun getOssPrefix() = "https://${OSS_BUCKET_NAME}.${OSS_ENDPOINT}/"
+
     fun generateMediaUrl(objectKey: String): String {
         val bucketUrl = "https://${OSS_BUCKET_NAME}.${OSS_ENDPOINT}"
         return "$bucketUrl/$objectKey"

@@ -26,6 +26,11 @@
     </div>
 
     <div class="form-group">
+      <h3>Current Thumbnail:</h3>
+      <img th:src="${ossPrefix} + ${product.imageUrl}" alt="Thumbnail" class="photo-thumbnail"/>
+    </div>
+
+    <div class="form-group">
       <label for="imageUrl">Upload thumbnail image URL:</label>
       <input id="imageUrl" type="text" th:field="*{imageUrl}" placeholder="Image URL" required/>
       <input id="thumbnailFile" type="file" name="thumbnailFile" accept="image/*"/>
@@ -41,9 +46,6 @@
         <option value="NEW" th:selected="*{category == 'NEW'}">New</option>
       </select>
     </div>
-
-    <p th:text="${product.productId}">Product ID:</p>
-
 
     <div class="form-group">
       <h2>Product Photos</h2>

@@ -166,13 +166,16 @@ function openTab(event, tabId) {
     event.currentTarget.classList.add('active');
 }
 
-
-const swiper = new Swiper('.swiper', {
-  loop: true, // Optional: Enable infinite looping
-  slidesPerView: 1, // One slide visible at a time
-  spaceBetween: 10, // Optional: Space between slides
-  pagination: {
-    el: '.swiper-pagination',
-    clickable: true, // Enables clickable pagination dots
-  },
+document.addEventListener("DOMContentLoaded", function () {
+    const swiper = new Swiper('.swiper', {
+        loop: true, // Optional: Enable infinite looping
+        slidesPerView: 1, // One slide visible at a time
+        spaceBetween: 10, // Optional: Space between slides
+        pagination: {
+            el: '.swiper-pagination',
+            clickable: true, // Enables clickable pagination dots
+        },
+    });
 });
+
+

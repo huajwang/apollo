@@ -75,4 +75,11 @@ class MemberController(
     fun getCompletedOrders() =
         orderService.getOrderByOrderStatus(OrderStatus.COMPLETED)
 
+
+
+    @GetMapping("/create/blogPost")
+    fun createBlogPost() : Mono<String> {
+        return Mono.just("/blog/blog-editor")
+    }
+
 }

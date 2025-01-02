@@ -103,9 +103,15 @@ class ProductAdminController(
                     category = adminProduct.category
                 )
             }
-            .doOnNext { productDto ->
+            .flatMap { productDto ->
                 model.addAttribute("product", productDto)
+                adminProductService.getPhotoUrlsByProductId(productDto.productId!!)
+                    .collectList()
+                    .doOnNext {
+                        model.addAttribute("photoUrls", it)
+                    }
             }
             .thenReturn("admin/product-form")
     }
+
 }

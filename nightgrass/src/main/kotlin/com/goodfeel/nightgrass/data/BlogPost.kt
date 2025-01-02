@@ -1,11 +1,13 @@
 package com.goodfeel.nightgrass.data
 
 import com.goodfeel.nightgrass.util.BlogPostStatus
+import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalDateTime
 
 @Table("e_mall_blog_posts")
 data class BlogPost(
+    @Id
     val postId: Int? = null,
     val authorId: String,
     val title: String,

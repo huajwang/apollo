@@ -2,6 +2,7 @@ package com.goodfeel.nightgrass.service
 
 import com.aliyun.oss.OSS
 import com.aliyun.oss.OSSClientBuilder
+import com.aliyun.oss.model.DeleteObjectsRequest
 import com.goodfeel.nightgrass.web.util.Utility
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -66,6 +67,44 @@ class AliyunOssService(
                 DataBufferUtils.release(dataBuffer) // Important to release the buffer
                 ByteArrayInputStream(byteArray)
             }
+    }
+
+    fun deletePhotoOnOss(objectName: String): Mono<Void> {
+        return Mono.fromCallable {
+            try {
+                ossClient.deleteObject(Utility.OSS_BUCKET_NAME, objectName)
+                logger.debug("Successfully deleted object from OSS: $objectName")
+            } catch (ex: Exception) {
+                logger.error("Failed to delete object from OSS: $objectName. Error: ${ex.message}")
+                throw ex
+            }
+        }.then()
+    }
+
+
+    /**
+     * Delete files from OSS bucket in batch
+     */
+    fun deletePhotosOnOss(objectNames: List<String>): Mono<Void> {
+        return Mono.fromCallable {
+            val shortObjectNames = Utility.removeOssPrefix(objectNames)
+
+            try {
+                if (objectNames.isNotEmpty()) {
+                    val deleteObjectsRequest = DeleteObjectsRequest(Utility.OSS_BUCKET_NAME)
+                        .withKeys(shortObjectNames)
+                        .withQuiet(true) // Suppresses detailed response for large batches
+
+                    val deleteObjectsResult = ossClient.deleteObjects(deleteObjectsRequest)
+                    logger.info("Deleted objects from OSS: ${deleteObjectsResult.deletedObjects}")
+                } else {
+                    logger.info("No objects to delete from OSS.")
+                }
+            } catch (ex: Exception) {
+                logger.error("Failed to delete objects from OSS. Error: ${ex.message}")
+                throw ex
+            }
+        }.then()
     }
 
 }

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Write a Blog Post</title>
+  <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+  <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+</head>
+<body>
+<h1>Write a Blog Post</h1>
+<form id="blogForm" th:action="@{/api/blog}" th:method="post">
+  <label for="title">Title</label><br>
+  <input type="text" id="title" name="title" required><br><br>
+
+  <label for="content">Content</label><br>
+  <div id="editor" style="height: 300px;"></div>
+  <input type="hidden" id="content" name="content">
+
+  <button type="submit">Save Post</button>
+</form>
+
+<script>
+  const quill = new Quill('#editor', {
+      theme: 'snow'
+  });
+
+  const form = document.getElementById('blogForm');
+  form.onsubmit = function () {
+      const contentInput = document.getElementById('content');
+      contentInput.value = quill.root.innerHTML;
+  };
+</script>
+</body>
+</html>

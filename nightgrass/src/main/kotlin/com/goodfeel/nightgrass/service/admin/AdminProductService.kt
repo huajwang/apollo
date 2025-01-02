@@ -7,6 +7,8 @@ import com.goodfeel.nightgrass.repo.ProductPhotoRepository
 import com.goodfeel.nightgrass.repo.ProductPropertyRepository
 import com.goodfeel.nightgrass.repo.admin.DiscountRepository
 import com.goodfeel.nightgrass.repo.admin.AdminProductRepository
+import com.goodfeel.nightgrass.service.AliyunOssService
+import com.goodfeel.nightgrass.web.util.Utility
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -16,12 +18,19 @@ class AdminProductService(
     private val adminProductRepository: AdminProductRepository,
     private val discountRepository: DiscountRepository,
     private val propertyRepository: ProductPropertyRepository,
-    private val photoRepository: ProductPhotoRepository
+    private val photoRepository: ProductPhotoRepository,
+    private val aliyunOssService: AliyunOssService
 ) {
 
     fun getAllProducts(): Flux<AdminProduct> = adminProductRepository.findAll()
 
     fun getProductById(id: Long): Mono<AdminProduct> = adminProductRepository.findById(id)
+
+    fun getPhotoUrlsByProductId(productId: Long): Flux<String> {
+        return photoRepository.findAllByProductId(productId).map {
+            Utility.generateMediaUrl(it.photoUrl)
+        }
+    }
 
     fun createProduct(
         adminProductRequest: AdminProductRequest,
@@ -83,5 +92,7 @@ class AdminProductService(
             }
     }
 
-    fun deleteProduct(id: Long): Mono<Void> = adminProductRepository.deleteById(id)
+    fun deletePhotosFromDb(productId: Long, photoUrls: List<String>): Mono<Void> =
+        photoRepository.deletePhotoUrls(productId, photoUrls)
+
 }

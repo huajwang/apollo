@@ -3,6 +3,29 @@
     padding: 1px;
 }
 
+/* Swiper container adjustments */
+.swiper {
+  width: 100%;
+  height: auto;
+  overflow: hidden;
+}
+
+/* Swiper slide adjustments */
+.swiper-slide {
+  display: flex; /* Center content */
+  justify-content: center;
+  align-items: center;
+  width: 100%; /* Ensure it spans the full width */
+}
+
+/* Image adjustments */
+.swiper-slide img {
+  max-width: 100%; /* Scale down if the image is too wide */
+  max-height: 100%; /* Scale down if the image is too tall */
+  object-fit: contain; /* Ensure the whole image is visible */
+  display: block; /* Prevent inline spacing issues */
+}
+
 .video-icons {
   display: flex;
   justify-content: center;

@@ -1,8 +1,11 @@
 spring:
   r2dbc:
-    url: r2dbc:mysql://localhost:3306/emall
+    url: r2dbc:mysql://localhost:3306/emall?characterEncoding=UTF-8&useUnicode=true
     username: smallboy
     password: abcd1234
 
 server:
   port: 8080
+
+oss:
+  bucket-name: "yaojiabuy-dev"

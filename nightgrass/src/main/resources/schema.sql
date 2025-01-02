@@ -182,4 +182,4 @@ CREATE TABLE IF NOT EXISTS e_mall_blog_posts (
     FOREIGN KEY (author_id) REFERENCES e_mall_user(oauth_id),
     FOREIGN KEY (category_id) REFERENCES e_mall_blog_category(category_id),
     FOREIGN KEY (main_media_id) REFERENCES e_mall_blog_posts_media(media_id)
-);
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

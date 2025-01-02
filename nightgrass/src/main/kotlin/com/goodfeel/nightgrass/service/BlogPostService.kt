@@ -26,4 +26,7 @@ class BlogPostService(
 
     fun findByShowOnHomepage(): Mono<BlogPost> =
         blogPostRepository.findByShowOnHomepage(true).next()
+
+    fun saveBlogPost(blogPost: BlogPost): Mono<BlogPost> =
+        blogPostRepository.save(blogPost)
 }

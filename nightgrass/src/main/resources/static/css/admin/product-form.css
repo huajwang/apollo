@@ -68,6 +68,35 @@ select:focus {
   margin-top: 5px;
 }
 
+.photo-list {
+    display: flex; /* Display the list items in a row */
+    flex-wrap: wrap; /* Allow wrapping for smaller screens */
+    gap: 10px; /* Add spacing between items */
+    list-style-type: none; /* Remove default list styling */
+    padding: 0; /* Remove padding */
+    margin: 0; /* Remove margin */
+}
+
+.photo-list li {
+    display: flex; /* Align checkbox and image together */
+    flex-direction: column; /* Stack elements vertically */
+    align-items: center; /* Center align the content */
+    max-width: 150px; /* Optional: Constrain list item width */
+}
+
+.photo-thumbnail {
+    max-width: 100px; /* Set a maximum width for the image */
+    max-height: 100px; /* Set a maximum height for the image */
+    object-fit: cover; /* Ensure the image scales and crops proportionally */
+    border-radius: 5px; /* Optional: Add rounded corners for aesthetics */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional: Add a subtle shadow */
+    margin-top: 5px; /* Add some spacing above the image */
+}
+
+.photo-checkbox {
+    margin-bottom: 5px; /* Add spacing below the checkbox */
+}
+
 .submit-button {
   background-color: #4caf50;
   color: #ffffff;

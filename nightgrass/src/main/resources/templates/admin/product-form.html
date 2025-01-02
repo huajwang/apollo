@@ -42,6 +42,22 @@
       </select>
     </div>
 
+    <p th:text="${product.productId}">Product ID:</p>
+
+
+    <div class="form-group">
+      <h2>Product Photos</h2>
+      <ul class="photo-list">
+        <li th:each="photoUrl, iterStat : ${photoUrls}">
+          <input type="checkbox" name="selectedPhotoUrls" th:value="${photoUrl}" th:id="${'photoUrl_' + iterStat.index}" class="photo-checkbox"/>
+          <label th:for="${'photoUrl_' + iterStat.index}">
+            <img th:src="${photoUrl}" alt="Photo" class="photo-thumbnail"/>
+          </label>
+        </li>
+      </ul>
+      <button type="button" id="deleteSelectedPhotosButton" class="delete-button">Delete Selected Photos</button>
+    </div>
+
     <div class="form-group">
       <label for="mediaFiles">Upload Images/Videos:</label>
       <input id="mediaFiles" type="file" name="mediaFiles" multiple accept="image/*,video/*"/>
@@ -53,5 +69,38 @@
     </div>
   </form>
 </div>
+
+<script>
+  document.getElementById('deleteSelectedPhotosButton').addEventListener('click', function () {
+    // Pass productId from server-side using Thymeleaf
+    const productId = [[${product.productId}]];
+    const selectedPhotos = Array.from(document.querySelectorAll('.photo-checkbox:checked'))
+      .map(checkbox => checkbox.value);
+
+    if (selectedPhotos.length === 0) {
+      alert('Please select at least one photo to delete.');
+      return;
+    }
+
+    fetch('/api/admin/products/photos/delete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productId: productId, photoUrls: selectedPhotos })
+    })
+    .then(response => {
+      if (response.ok) {
+        alert('Selected photos deleted successfully.');
+        location.reload(); // Reload the page to refresh the photo list
+      } else {
+        alert('Failed to delete selected photos.');
+      }
+    })
+    .catch(error => {
+      console.error('Error deleting photos:', error);
+      alert('An error occurred while deleting photos.');
+    });
+  });
+</script>
+
 </body>
 </html>

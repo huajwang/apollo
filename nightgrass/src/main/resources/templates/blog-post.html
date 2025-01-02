@@ -8,7 +8,7 @@
 <div th:fragment="pageContent">
   <div class="blog-post">
     <header class="blog-header">
-      <h1 th:text="${blogPost.title}"></h1>
+      <h1 th:utext="${blogPost.title}"></h1>
       <div class="meta">
         <span>📅 <span th:text="${#temporals.format(blogPost.publishedAt, 'MMM dd, yyyy')}"></span></span>
 <!--        <span>👤 <span th:text="${blogPost.authorName}"></span></span>-->

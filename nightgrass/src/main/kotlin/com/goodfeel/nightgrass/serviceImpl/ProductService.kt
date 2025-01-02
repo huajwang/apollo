@@ -2,6 +2,7 @@ package com.goodfeel.nightgrass.serviceImpl
 
 import com.goodfeel.nightgrass.data.Product
 import com.goodfeel.nightgrass.dto.ProductDto
+import com.goodfeel.nightgrass.exception.ForeignKeyConstraintViolationException
 import com.goodfeel.nightgrass.repo.ProductRepository
 import com.goodfeel.nightgrass.service.IProductService
 import com.goodfeel.nightgrass.service.ProcessedProductService
@@ -40,8 +41,13 @@ class ProductService(
 
     override fun deleteProduct(id: Long): Mono<Void> {
         return productRepository.deleteById(id)
-            .onErrorResume { ex ->
-                Mono.error(RuntimeException("Failed to delete product with ID $id: ${ex.message}", ex))
+            .onErrorMap { ex ->
+                if (ex.message?.contains("foreign key") == true) {
+                    ForeignKeyConstraintViolationException(ex.message!!)
+                } else {
+                    RuntimeException("Failed to delete product with ID $id: ${ex.message}", ex)
+                }
+
             }
     }
 

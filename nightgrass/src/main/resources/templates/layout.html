@@ -16,17 +16,21 @@
 <body x-data="globalState">
   <div class="wrapper">
     <header class="header">
+      <button class="menu-toggle" aria-label="Toggle Menu">☰</button>
       <div class="logo">Yaojia Buy</div>
       <nav class="navbar">
         <a href="/blog">Blog</a>
         <a href="#about">About</a>
         <a href="/home/contact">Contact</a>
+      </nav>
+      <div class="icons">
+        <a href="/search" class="search-icon">🔍</a>
         <a href="/cart" class="cart-icon">🛒
           <span id="topCartItemCount" class="top-cart-count" x-text="$store.cart.count">0</span>
         </a>
-
-      </nav>
+      </div>
     </header>
+
     <main>
       <div th:insert="${pageContent}"></div>
     </main>

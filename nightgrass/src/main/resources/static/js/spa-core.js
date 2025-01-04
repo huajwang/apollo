@@ -4,38 +4,6 @@ window.globalState = function () {
         eventSource: null,
         isSSEConnected: false, // Prevent duplicate SSE connections
 
-//        init() {
-//            console.log("Global state initialized");
-//
-//            if (!this.isSSEConnected) {
-//                this.connectToSSE();
-//                this.isSSEConnected = true;
-//            }
-//        },
-
-//        connectToSSE() {
-//            if (this.eventSource) {
-//                this.eventSource.close();
-//            }
-//
-//            this.eventSource = new EventSource("/cart/updates");
-//            console.log("SSE connection established.");
-//
-//            this.eventSource.addEventListener("cart-update", (event) => {
-//                const data = JSON.parse(event.data);
-//                console.log("(spa-core JS) Receive cart item count SSE event: ", data);
-//                this.cartCount = data;
-//                Alpine.store("cart").count = data; // Sync with Alpine.js store
-//            });
-//
-//            this.eventSource.addEventListener("error", () => {
-//                console.error("SSE connection error, reconnecting...");
-//                this.isSSEConnected = false; // Reset flag on error
-//                setTimeout(() => this.connectToSSE(), 5000);
-//            });
-//        },
-
-// TODO - what the below is for?
         navigate(url) {
             fetch(url, { headers: { "X-Requested-With": "XMLHttpRequest" } })
                 .then(response => {
@@ -74,3 +42,23 @@ document.addEventListener("alpine:init", () => {
             console.error("Error fetching cart count:", error);
         });
 });
+
+document.addEventListener("DOMContentLoaded", function () {
+    const menuToggle = document.querySelector('.menu-toggle');
+    const navbar = document.querySelector('.navbar');
+
+    // Toggle the menu when the toggle button is clicked
+    menuToggle.addEventListener('click', function (event) {
+        event.stopPropagation(); // Prevent click from propagating to document
+        navbar.classList.toggle('open');
+    });
+
+    // Close the menu when clicking outside of it
+    document.addEventListener('click', function (event) {
+        // Check if the click is outside the navbar or menu toggle
+        if (!navbar.contains(event.target) && !menuToggle.contains(event.target)) {
+            navbar.classList.remove('open');
+        }
+    });
+});
+

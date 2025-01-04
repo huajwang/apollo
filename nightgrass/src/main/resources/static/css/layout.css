@@ -18,30 +18,72 @@ body {
 .header {
     background-color: #333;
     color: white;
-    padding: 15px 20px;
+    padding: 10px 25px 10px 15px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    position: relative;
 }
 
 .header .logo {
     font-size: 24px;
     font-weight: bold;
+    text-align: center;
+    flex-grow: 1;
 }
 
-.cart-icon {
-    position: relative;
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+.navbar {
+    display: none;
+    flex-direction: column;
+    background-color: #444;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    z-index: 100;
+    padding: 10px 0;
+}
+
+.navbar.open {
+    display: flex; /* Visible when toggled */
 }
 
 .navbar a {
     color: white;
     text-decoration: none;
-    margin-left: 15px;
+    padding: 10px 20px;
+    display: block;
 }
 
 .navbar a:hover {
+    background-color: #555;
     color: #f53b2a;
+}
+
+.icons {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.cart-icon {
+    position: relative;
+}
+
+.search-icon {
+    color: white;
+    text-decoration: none;
+}
+
+/* Menu toggle button */
+.menu-toggle {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
 }
 
 main {
@@ -145,6 +187,10 @@ footer nav a {
 }
 
 @media (max-width: 480px) {
+    .header {
+        padding: 10px 22px 10px 12px;
+    }
+
     .hero-content h1 {
         font-size: 24px;
     }
@@ -158,28 +204,12 @@ footer nav a {
         padding: 8px 16px;
     }
 
-    .header {
-        flex-direction: column;
-        text-align: center;
-    }
-
     .header .logo {
         font-size: 20px;
     }
 
-    .navbar {
-        display: flex;
-        justify-content: space-between; /* Distribute menus evenly across the width */
-        flex-wrap: wrap; /* Allow wrapping if necessary */
-        width: 100%; /* Ensure navbar spans the full width of the header */
-        padding: 0 10px; /* Add slight padding for aesthetic */
+    .logo {
+        text-align: center;
+        flex-grow: 1;
     }
-
-    .navbar a {
-        flex: 1; /* Make each menu item take equal width */
-        margin: 0; /* Remove vertical margins */
-        text-align: center; /* Center-align the text */
-        padding: 10px 0; /* Add some padding for better usability */
-    }
-
 }

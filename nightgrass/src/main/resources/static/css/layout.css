@@ -22,7 +22,9 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    position: relative;
+    position: sticky;
+    top: 0; /* Sticks to the top */
+    z-index: 1000; /* Ensures the header stays above other content */
 }
 
 .header .logo {

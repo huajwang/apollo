@@ -93,9 +93,13 @@
 
       <div id="description" class="tab-content active">
         <p class="description" th:text="${product.description}"></p>
-        <div class="images">
-          <img src="/images/lake.jpg" alt="Sofa View 1" loading="lazy">
-          <img src="/images/lake.jpg" alt="Sofa View 2" loading="lazy">
+        <div class="videos">
+          <div th:each="videoUrl : ${productVideos}" class="video-container">
+            <video controls width="100%" height="auto" loading="lazy">
+              <source th:src="${videoUrl}" type="video/mp4">
+              Your browser does not support the video tag.
+            </video>
+          </div>
         </div>
       </div>
 

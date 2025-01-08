@@ -31,23 +31,30 @@
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.video-icons {
+.videos {
   display: flex;
-  justify-content: center;
-  gap: 10px; /* Space between icons */
+  flex-direction: column;
+  gap: 20px; /* Adds space between videos */
   margin-top: 20px;
 }
 
-.video-icon-image {
-  width: 40px;
-  height: 40px;
-  cursor: pointer;
-  transition: transform 0.2s;
+.video-container {
+  position: relative;
+  width: 100%; /* Full width of the parent container */
+  max-width: 600px; /* Optional: Limit the video size */
+  margin: 0 auto; /* Center the video */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+  border-radius: 10px; /* Optional: Round the corners */
+  overflow: hidden; /* Clip content to rounded corners */
 }
 
-.video-icon-image:hover {
-  transform: scale(1.1); /* Slight zoom on hover */
+video {
+  width: 100%; /* Ensure the video takes up the full width */
+  height: auto; /* Maintain aspect ratio */
+  display: block; /* Remove any inline spacing */
 }
+
+
 
 .modal {
   position: fixed;

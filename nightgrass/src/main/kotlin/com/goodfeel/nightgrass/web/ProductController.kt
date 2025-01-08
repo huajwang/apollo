@@ -1,6 +1,5 @@
 package com.goodfeel.nightgrass.web
 
-import com.goodfeel.nightgrass.dto.ProductVideo
 import com.goodfeel.nightgrass.service.ReviewService
 import com.goodfeel.nightgrass.serviceImpl.ProductPhotoService
 import com.goodfeel.nightgrass.serviceImpl.ProductPropertyService
@@ -31,9 +30,8 @@ class ProductController(
     @GetMapping("/detail")
     fun productDetail(@RequestParam("id") productId: Long, model: Model): Mono<String> {
         val productVideos = listOf(
-            ProductVideo("e88.mp4"),
-            ProductVideo("E99K3-china.mp4"),
-            ProductVideo("E99K3-eng.mp4")
+            // "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+            "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4"
         )
 
         val productDtoMono = productService.getProductById(productId)

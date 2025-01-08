@@ -1,3 +1,6 @@
+a {
+  text-decoration: none;
+}
 
 /* Hero Section */
 .hero {
@@ -85,6 +88,7 @@
   justify-content: center;
   gap: 10px; /* Reduce gap to fit 3 cards on small screens */
   flex-wrap: nowrap; /* Prevent wrapping to a new row */
+  padding: 0 10px; /* Optional: Add padding to the container */
 }
 
 .card {
@@ -93,8 +97,8 @@
   overflow: hidden;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
   text-align: center;
-  flex: 1 1 30%; /* Make cards evenly distribute in the row */
-  max-width: 30%; /* Ensure each card takes about 1/3 of the row */
+  flex: 1 1 33%; /* Make cards evenly distribute in the row */
+  /* max-width: 30%; Ensure each card takes about 1/3 of the row */
 }
 
 .card img {
@@ -107,22 +111,6 @@
   font-size: 18px;
   color: #d4a200; /* Golden color for the text */
   margin: 15px 0;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .range-cards {
-    gap: 5px; /* Reduce spacing even further on mobile */
-  }
-
-  .card {
-    flex: 1 1 30%; /* Each card still takes 1/3 of the row */
-    max-width: 30%;
-  }
-
-  .card h3 {
-    font-size: 14px; /* Slightly smaller text for mobile */
-  }
 }
 
 /* Products Section */
@@ -140,7 +128,7 @@
 .product-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr); /* 4 columns */
-  gap: 20px; /* Space between product cards */
+  gap: 30px; /* Space between product cards */
 }
 
 .product-card {
@@ -307,4 +295,29 @@
 
 .carousel-indicators .indicator.active {
   background-color: #d4a200;
+}
+
+/* For medium-sized screens (Tablet) */
+@media (max-width: 768px) {
+    .browse-range {
+        padding: 10px 1px;
+    }
+
+    .product-grid {
+      gap: 5px; /* Space between product cards */
+    }
+}
+
+/* For small screens (Phones) */
+@media (max-width: 480px) {
+    .range-cards {
+      padding: 5px 5px; /* Optional: Add padding to the container */
+    }
+    .products {
+      padding: 15px 5px;
+    }
+    .product-grid {
+      grid-template-columns: repeat(2, 1fr); /* 4 columns */
+      gap: 3px; /* Space between product cards */
+    }
 }

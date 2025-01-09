@@ -31,7 +31,7 @@
 
           <ul>
             <li th:each="entry : ${item.formattedProperties}">
-              <strong th:text="${entry.key}"></strong>: <span th:text="${entry.value}"></span>
+              <span th:text="${entry.key}"></span>: <span th:text="${entry.value}"></span>
             </li>
           </ul>
 
@@ -46,16 +46,17 @@
 
           <!-- Quantity controls with event listener for debounced update -->
           <div class="quantity-controls">
-            <button type="button" class="quantity-btn increment" th:onclick="'updateQuantity(' + ${item.itemId} + ', -1)'">-</button>
+            <button type="button" class="quantity-btn increment" th:onclick="'updateQuantity(' + ${item.itemId} + ', -1)'">&#8722;</button>
             <span class="quantity-display" id="quantity_${item.itemId}" th:id="'quantity_' + ${item.itemId}" th:text="${item.quantity}"></span>
-            <button type="button" class="quantity-btn increment" th:onclick="'updateQuantity(' + ${item.itemId} + ', 1)'">+</button>
-
+            <button type="button" class="quantity-btn increment" th:onclick="'updateQuantity(' + ${item.itemId} + ', 1)'">&#43;</button>
           </div>
         </div>
-
         <button type="button" class="delete-btn"
-                th:attr="onclick=|handleRemoveItem(${item.itemId})|">
-          Delete
+                th:attr="onclick=|handleRemoveItem(${item.itemId})|"
+                aria-label="Delete">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+            <path d="M3 6h18v2H3V6zm2 4h14l-1.333 10.667c-.067.533-.533.933-1.067.933H7.4c-.533 0-1-.4-1.067-.933L5 10zm6-6h2v1H9V4c0-.533.467-1 1-1h4c.533 0 1 .467 1 1v1h-4V4z"/>
+          </svg>
         </button>
       </div>
 

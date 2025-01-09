@@ -53,10 +53,8 @@
       margin-left: 5px;
     }
 
-
-
     .item-name {
-        font-weight: bold;
+        color: #d4a200;
         font-size: 1.1em;
         margin-bottom: 5px;
     }
@@ -73,54 +71,77 @@
         margin-bottom: 10px;
     }
 
-
     .quantity-controls {
-      display: flex;
+      display: inline-flex;
       align-items: center;
-      gap: 10px;
+      border: 1px solid #ccc; /* Unified border around the entire control */
+      border-radius: 5px; /* Slightly rounded corners */
+      overflow: hidden; /* Prevents overflow of child elements */
+      font-family: Arial, sans-serif;
+      width: fit-content; /* Shrink to fit content */
     }
 
     .quantity-btn {
-      width: 30px;
-      height: 30px;
-      background-color: #333;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      font-size: 18px;
+      background-color: white; /* White background for buttons */
+      color: #333; /* Neutral text color */
+      border: none; /* No button border */
+      padding: 0; /* Remove default padding */
+      width: 40px; /* Fixed size for buttons */
+      height: 20px; /* Ensure buttons have the same height as the display */
+      font-size: 20px; /* Font size for the symbols */
       cursor: pointer;
       display: flex;
       justify-content: center;
       align-items: center;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .quantity-btn:last-child {
+      border-left: 1px solid #ccc; /* Add a border between the display and the "+" button */
     }
 
     .quantity-btn:hover {
-      background-color: #555;
+      background-color: #f0f0f0; /* Light gray on hover */
     }
 
     .quantity-display {
-      min-width: 30px;
+      width: 50px; /* Fixed width for the number display */
       text-align: center;
-      font-size: 16px;
-      font-weight: bold;
+      font-size: 13px;
+      color: #333;
+      background-color: white; /* Same as button background */
+      height: 20px; /* Same height as buttons */
+      line-height: 20px; /* Vertically center the text */
+      border-left: 1px solid #ccc; /* Divider between buttons and display */
+      border-right: 1px solid #ccc; /* Divider between buttons and display */
     }
 
     /* Delete button */
     .delete-btn {
-        background-color: #ff6b6b;
-        color: #fff;
-        border: none;
-        padding: 8px 12px;
-        font-size: 0.9em;
-        border-radius: 4px;
-        cursor: pointer;
-        transition: background-color 0.2s ease;
+      background-color: transparent; /* Remove background */
+      border: none; /* Remove border */
+      padding: 0; /* Remove extra padding */
+      cursor: pointer; /* Pointer cursor for interactivity */
+      display: inline-flex; /* Align icon properly */
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s ease; /* Add slight hover effect */
     }
 
     .delete-btn:hover {
-        background-color: #ff4a4a;
+      transform: scale(1.1); /* Slight zoom on hover */
     }
 
+    .delete-btn svg {
+      width: 16px; /* Icon size */
+      height: 16px;
+      fill: #ff6b6b; /* Trash icon color */
+      transition: fill 0.2s ease; /* Smooth color change on hover */
+    }
+
+    .delete-btn:hover svg {
+      fill: #ff4a4a; /* Darker red on hover */
+    }
 
      /* Cart total and checkout button styling */
     .cart-footer {

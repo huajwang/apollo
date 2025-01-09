@@ -46,13 +46,10 @@
 
           <!-- Quantity controls with event listener for debounced update -->
           <div class="quantity-controls">
-            <label th:for="'quantity_' + ${item.itemId}">Qty:</label>
-            <input type="number"
-                   th:id="'quantity_' + ${item.itemId}"
-                   th:name="'quantity_' + ${item.itemId}"
-                   th:value="${item.quantity}"
-                   min="1"
-                   th:attr="onchange=|handleQuantityChange(${item.itemId}, this.value)|" />
+            <button type="button" class="quantity-btn increment" th:onclick="'updateQuantity(' + ${item.itemId} + ', -1)'">-</button>
+            <span class="quantity-display" id="quantity_${item.itemId}" th:id="'quantity_' + ${item.itemId}" th:text="${item.quantity}"></span>
+            <button type="button" class="quantity-btn increment" th:onclick="'updateQuantity(' + ${item.itemId} + ', 1)'">+</button>
+
           </div>
         </div>
 

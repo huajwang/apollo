@@ -211,6 +211,18 @@
         });
     };
 
+    function updateQuantity(itemId, delta) {
+      const quantityElement = document.getElementById(`quantity_${itemId}`);
+      const previousQuantity = parseInt(quantityElement.textContent, 10);
+      const newQuantity = Math.max(previousQuantity + delta, 1); // Ensure minimum quantity is 1
+
+      // Optimistically update the UI
+      quantityElement.textContent = newQuantity;
+
+      // Update cart state and debounce the server update
+      handleQuantityChange(itemId, newQuantity);
+    }
+
     // Function to handle checkout
     function handleCheckout() {
       fetch('/cart/checkout', {

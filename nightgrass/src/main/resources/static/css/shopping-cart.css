@@ -10,6 +10,7 @@
 
     /* Cart item styling */
     .cart-item {
+        position: relative; /* Ensure the container is a positioning context */
         display: flex;
         align-items: center;
         background-color: #fff;
@@ -72,6 +73,9 @@
     }
 
     .quantity-controls {
+      position: absolute;
+      bottom: 10px; /* Adjust the top margin as needed */
+      right: 10px; /* Adjust the right margin as needed */
       display: inline-flex;
       align-items: center;
       border: 1px solid #ccc; /* Unified border around the entire control */
@@ -114,6 +118,12 @@
       line-height: 20px; /* Vertically center the text */
       border-left: 1px solid #ccc; /* Divider between buttons and display */
       border-right: 1px solid #ccc; /* Divider between buttons and display */
+    }
+
+    .delete-btn-container {
+      position: absolute;
+      top: 10px; /* Adjust the top margin as needed */
+      right: 10px; /* Adjust the right margin as needed */
     }
 
     /* Delete button */

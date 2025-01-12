@@ -79,7 +79,7 @@ body {
 
 .search-input {
     width: 100%;
-    padding: 8px;
+    padding: 2px;
     border: 1px solid #ccc;
     border-radius: 4px;
 }
@@ -107,12 +107,22 @@ body {
 
 .search-results li a {
     text-decoration: none;
-    color: #333;
+    color: #007BFF; /* Default text color (e.g., blue) */
+    font-size: 12px; /* Adjust font size */
+    font-weight: 500; /* Adjust font weight */
+    transition: color 0.3s ease, text-shadow 0.3s ease; /* Smooth hover effect */
 }
 
 .search-results li a:hover {
-    text-decoration: underline;
+    text-decoration: none;
+    color: #0056b3; /* Change color on hover (darker blue) */
+    text-shadow: 0 0 4px rgba(0, 123, 255, 0.5); /* Add a subtle glow effect */
 }
+
+.search-results a:active {
+  color: #003366; /* Even darker color when clicked */
+}
+
 
 
 

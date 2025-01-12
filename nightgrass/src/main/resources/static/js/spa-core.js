@@ -2,33 +2,12 @@ window.globalState = function () {
     return {
         cartCount: 0,
         eventSource: null,
-        isSSEConnected: false, // Prevent duplicate SSE connections
-
-        navigate(url) {
-            fetch(url, { headers: { "X-Requested-With": "XMLHttpRequest" } })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error("Failed to load content.");
-                    }
-                    return response.text();
-                })
-                .then(html => {
-                    document.getElementById("pageContent").innerHTML = html;
-
-                    if (window.Alpine) {
-                        window.Alpine.initTree(document.getElementById("pageContent"));
-                    }
-                })
-                .catch(error => {
-                    console.error("Navigation error:", error);
-                });
-        }
     };
 };
 
 document.addEventListener("alpine:init", () => {
     Alpine.store("cart", {
-        count: 0
+        count: null
     });
 
      // Fetch the current cart count from the server
@@ -40,6 +19,7 @@ document.addEventListener("alpine:init", () => {
         })
         .catch((error) => {
             console.error("Error fetching cart count:", error);
+            Alpine.store("cart").count = 0; // Fallback
         });
 });
 
@@ -61,4 +41,5 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 });
+
 

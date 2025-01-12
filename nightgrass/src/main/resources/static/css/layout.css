@@ -77,6 +77,50 @@ body {
     text-decoration: none;
 }
 
+.search-input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.search-results {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #fff;
+    position: absolute;
+    z-index: 1000;
+    width: 100%;
+}
+
+.search-results li {
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+}
+
+.search-results li:last-child {
+    border-bottom: none;
+}
+
+.search-results li a {
+    text-decoration: none;
+    color: #333;
+}
+
+.search-results li a:hover {
+    text-decoration: underline;
+}
+
+
+
+
+
+
+
+
 /* Menu toggle button */
 .menu-toggle {
     background: none;

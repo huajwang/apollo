@@ -58,4 +58,8 @@ class ProductService(
     override fun getTop8PopularOrNewProducts(): Flux<ProductDto> =
         processedProductService.findTop8PopularOrNewProducts()
 
+    override fun findByNameContainingIgnoreCase(query: String): Flux<Product> {
+        return productRepository.findByProductNameContainingIgnoreCase(query)
+    }
+
 }

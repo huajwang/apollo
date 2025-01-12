@@ -12,4 +12,5 @@ interface IProductService {
     fun deleteProduct(id: Long): Mono<Void>
     fun getTop3BigHits(): Flux<ProductDto>
     fun getTop8PopularOrNewProducts(): Flux<ProductDto>
+    fun findByNameContainingIgnoreCase(query: String): Flux<Product>
 }

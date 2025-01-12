@@ -27,7 +27,9 @@
         <div class="cat_icon">
           <img src="/images/old/cart.png" style="opacity: 1; transition: opacity 0.3s;" loading="lazy">
           <!-- Cart item count badge -->
-          <span id="cartItemCount" class="cart-count" x-text="$store.cart.count">0</span>
+          <template x-if="Alpine.store('cart').count !== null">
+            <span id="cartItemCount" class="cart-count" x-text="$store.cart.count">0</span>
+          </template>
         </div>
         <p class="cat_name">购物车</p>
         </a>

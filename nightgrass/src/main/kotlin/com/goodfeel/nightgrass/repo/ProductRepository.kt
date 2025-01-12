@@ -42,4 +42,6 @@ interface ProductRepository : ReactiveCrudRepository<Product, Long> {
         "ON p.product_id = d.product_id"
     )
     fun findAllProducts(): Flux<ProductDto>
+
+    fun findByProductNameContainingIgnoreCase(name: String): Flux<Product>
 }

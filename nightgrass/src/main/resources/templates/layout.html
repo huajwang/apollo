@@ -24,9 +24,27 @@
         <a href="/home/contact">Contact</a>
       </nav>
       <div class="icons">
-        <a href="/search" class="search-icon">🔍</a>
+        <div x-data="searchProduct()">
+          <input
+                  type="text"
+                  placeholder="Search for products..."
+                  x-model="query"
+                  @input.debounce.500ms="performSearch"
+                  class="search-input"
+          />
+          <ul x-show="results.length > 0" class="search-results">
+            <template x-for="result in results" :key="result.productId">
+              <li>
+                <a :href="`/product/detail?id=${result.productId}`" x-text="result.productName"></a>
+              </li>
+            </template>
+          </ul>
+        </div>
+
         <a href="/cart" class="cart-icon">🛒
-          <span id="topCartItemCount" class="top-cart-count" x-text="$store.cart.count">0</span>
+          <template x-if="Alpine.store('cart').count !== null">
+            <span id="topCartItemCount" class="top-cart-count" x-text="$store.cart.count">0</span>
+          </template>
         </a>
       </div>
     </header>
@@ -38,5 +56,38 @@
   </div>
 
 <script th:if="${pageJs}" th:src="${pageJs}" defer></script>
+  <script>
+    function searchProduct() {
+        return {
+            query: '', // The search query entered by the user
+            results: [], // The search results
+            performSearch() {
+                // Avoid searching for empty queries
+                if (this.query.trim() === '') {
+                    this.results = [];
+                    return;
+                }
+
+                // Fetch search results from the server
+                fetch(`/search?query=${encodeURIComponent(this.query)}`)
+                    .then((response) => {
+                      console.log('Response headers:', response.headers.get('Content-Type')); // Log Content-Type
+                      console.log('Response status:', response.status); // Log status code
+                      if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                      }
+                      return response.json(); // Parse the JSON response
+                    })
+                    .then((data) => {
+                        this.results = data; // Update the results with the server response
+                    })
+                    .catch((error) => {
+                        console.error('Error fetching search results:', error);
+                        this.results = []; // Clear results on error
+                    });
+            },
+        };
+    }
+  </script>
 </body>
 </html>

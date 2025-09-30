@@ -41,11 +41,19 @@
 .video-container {
   position: relative;
   width: 100%; /* Full width of the parent container */
-  max-width: 600px; /* Optional: Limit the video size */
   margin: 0 auto; /* Center the video */
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
   border-radius: 10px; /* Optional: Round the corners */
   overflow: hidden; /* Clip content to rounded corners */
+}
+
+.video-container iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 1; /* Remove border */
 }
 
 video {
@@ -53,8 +61,6 @@ video {
   height: auto; /* Maintain aspect ratio */
   display: block; /* Remove any inline spacing */
 }
-
-
 
 .modal {
   position: fixed;

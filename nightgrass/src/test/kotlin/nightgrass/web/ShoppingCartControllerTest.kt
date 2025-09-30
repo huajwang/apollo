@@ -25,13 +25,14 @@ class CartControllerTest {
     private lateinit var model: Model
 
     @BeforeEach
-    fun setup() {
+    fun setUp() {
         guestService = mock(GuestService::class.java)
         cartService = mock(CartService::class.java)
         model = mock(Model::class.java)
         cartController = ShoppingCartController(cartService, guestService)
     }
 
+    // why this unit test is not working?
     @Test
     fun `viewCart should return shopping-cart view with cart items and total price`() {
         val principal = mock(Principal::class.java)
@@ -44,10 +45,10 @@ class CartControllerTest {
         val cartItems = listOf(
             CartItemDto(productId = 1L, quantity = 2, productName = "e88",
                 description = "goody", imageUrl = "", price = BigDecimal.valueOf(10),
-                properties = ""),
+                properties = "", discountedPrice = BigDecimal.ZERO),
             CartItemDto(productId = 2L, quantity = 1, productName = "e99",
                 description = "not bad", imageUrl = "", price = BigDecimal.valueOf(30),
-                properties = "")
+                properties = "", discountedPrice = BigDecimal.ZERO)
         )
         val totalPrice = BigDecimal.valueOf(50)
 

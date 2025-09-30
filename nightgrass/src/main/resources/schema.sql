@@ -35,6 +35,15 @@ CREATE TABLE IF NOT EXISTS e_mall_product_property (
     FOREIGN KEY (product_id) REFERENCES e_mall_product(product_id)
 );
 
+CREATE TABLE IF NOT EXISTS e_mall_product_video (
+    video_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    product_id BIGINT NOT NULL,
+    video_type ENUM('FILE', 'YOUTUBE', 'VIMEO') NOT NULL DEFAULT 'FILE',
+    video_url VARCHAR(255) NOT NULL,
+    order_index INT NOT NULL DEFAULT 0, -- Order of the video
+    FOREIGN KEY (product_id) REFERENCES e_mall_product(product_id) ON DELETE CASCADE
+);
+
 CREATE TABLE IF NOT EXISTS e_mall_user (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     oauth_id VARCHAR(255) UNIQUE,

@@ -25,6 +25,7 @@ class CustomReactiveOAuth2UserService(private val userRepository: UserRepository
                     "google" -> oAuth2User.getAttribute<String>("sub")
                     "facebook" -> oAuth2User.getAttribute<String>("id")
                     "wechat" -> oAuth2User.getAttribute<String>("openid")
+                    "tiktok" -> oAuth2User.getAttribute("open_id")
                     else -> throw IllegalArgumentException("Unsupported OAuth2 provider: $registrationId")
                 } ?: throw RuntimeException("OAuth ID is null for provider: $registrationId")
 

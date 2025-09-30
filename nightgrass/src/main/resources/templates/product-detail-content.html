@@ -94,11 +94,36 @@
       <div id="description" class="tab-content active">
         <p class="description" th:text="${product.description}"></p>
         <div class="videos">
-          <div th:each="videoUrl : ${productVideos}" class="video-container">
+          <div th:each="videoUrl : ${vimeoVideos}" class="video-container">
+            <iframe
+                    th:src="'https://player.vimeo.com/video/' + ${videoUrl.substring(videoUrl.lastIndexOf('/') + 1)}"
+                    width="100%"
+                    height="auto"
+                    frameborder="0"
+                    allow="autoplay; fullscreen; picture-in-picture"
+                    allowfullscreen>
+            </iframe>
+          </div>
+        </div>
+        <div class="videos">
+          <div th:each="videoUrl : ${fileVideos}" class="video-container">
             <video controls width="100%" height="auto" loading="lazy">
               <source th:src="${videoUrl}" type="video/mp4">
               Your browser does not support the video tag.
             </video>
+          </div>
+        </div>
+        <div class="videos">
+          <div th:each="videoUrl : ${youtubeVideos}" class="video-container">
+            <iframe
+                    th:src="'https://www.youtube.com/embed/' + ${videoUrl.substring(videoUrl.lastIndexOf('/') + 1)}"
+                    width="100%"
+                    height="auto"
+                    loading="lazy"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen>
+            </iframe>
           </div>
         </div>
       </div>

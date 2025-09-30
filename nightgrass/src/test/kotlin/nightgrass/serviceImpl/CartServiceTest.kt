@@ -2,6 +2,7 @@ package com.goodfeel.nightgrass.serviceImpl
 
 import com.goodfeel.nightgrass.data.*
 import com.goodfeel.nightgrass.repo.*
+import com.goodfeel.nightgrass.service.ProcessedProductService
 import com.goodfeel.nightgrass.web.util.AddCartRequest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -10,6 +11,7 @@ import reactor.core.publisher.Mono
 import reactor.core.publisher.Flux
 import reactor.test.StepVerifier
 import java.math.BigDecimal
+
 
 class CartServiceTest {
 
@@ -20,6 +22,7 @@ class CartServiceTest {
     private lateinit var orderItemRepository: OrderItemRepository
     private lateinit var userRepository: UserRepository
     private lateinit var cartService: CartService
+    private lateinit var processedProductService: ProcessedProductService
 
     @BeforeEach
     fun setup() {
@@ -29,6 +32,7 @@ class CartServiceTest {
         orderRepository = mock(OrderRepository::class.java)
         orderItemRepository = mock(OrderItemRepository::class.java)
         userRepository = mock(UserRepository::class.java)
+        processedProductService = mock(ProcessedProductService::class.java)
 
         cartService = CartService(
             cartRepository,
@@ -36,7 +40,8 @@ class CartServiceTest {
             productRepository,
             orderRepository,
             orderItemRepository,
-            userRepository
+            userRepository,
+            processedProductService
         )
     }
 
@@ -266,5 +271,7 @@ class CartServiceTest {
         // verify that save() method is not invoked on cartItemRepository
         verify(cartItemRepository, never()).save(any())
     }
+
+
 
 }

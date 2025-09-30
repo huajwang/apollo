@@ -12,6 +12,7 @@ import org.springframework.security.config.Customizer
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
 import org.springframework.security.config.web.server.ServerHttpSecurity
 import org.springframework.security.config.web.server.ServerHttpSecurity.*
+import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository
 import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder
 import org.springframework.security.web.server.SecurityWebFilterChain
 import org.springframework.security.web.server.authentication.ServerAuthenticationFailureHandler
@@ -22,6 +23,7 @@ import java.net.URI
 @Configuration
 @EnableWebFluxSecurity
 open class SecurityConfig(
+    private val clientRegistrationRepository: ReactiveClientRegistrationRepository,
     private val cartService: CartService,
     private val guestService: GuestService,
     private val orderService: OrderService,
@@ -61,13 +63,18 @@ open class SecurityConfig(
                 exchange
                     .pathMatchers(
                         "/", "/product/**", "/videos/**", "/blog/**", "/buynow", "/pay/**", "/home/**", "/search/**",
-                        "/login", "/error", "/cart/**", "/checkout", "/update-user-info", "/workshop/**",
+                        "/login", "/error", "/cart/**", "/checkout", "/update-user-info", "/workshop/**", "/legal/**",
                         "/images/**", "/css/**", "/icons/**", "/js/**", "/webjars/**",
                     ).permitAll()
                     // All other paths require authentication
                     .anyExchange().authenticated()
             }
             .oauth2Login{
+                // Use the custom WeChat resolver
+                it.authorizationRequestResolver(
+                    ReactiveWeChatAuthorizationRequestResolver(clientRegistrationRepository)
+                )
+
                 // Use custom handler
                 it.authenticationSuccessHandler(
                     MergeAuthenticationSuccessHandler(

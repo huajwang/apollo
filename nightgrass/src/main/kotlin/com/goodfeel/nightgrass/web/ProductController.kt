@@ -1,9 +1,11 @@
 package com.goodfeel.nightgrass.web
 
+import com.goodfeel.nightgrass.data.VideoType
 import com.goodfeel.nightgrass.service.ReviewService
 import com.goodfeel.nightgrass.serviceImpl.ProductPhotoService
 import com.goodfeel.nightgrass.serviceImpl.ProductPropertyService
 import com.goodfeel.nightgrass.serviceImpl.ProductService
+import com.goodfeel.nightgrass.serviceImpl.ProductVideoService
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
@@ -17,6 +19,7 @@ class ProductController(
     private val productService: ProductService,
     private val productPhotoService: ProductPhotoService,
     private val productPropertyService: ProductPropertyService,
+    private val productVideoService: ProductVideoService,
     private val reviewService: ReviewService
 ) {
 
@@ -29,32 +32,54 @@ class ProductController(
 
     @GetMapping("/detail")
     fun productDetail(@RequestParam("id") productId: Long, model: Model): Mono<String> {
-        val productVideos = listOf(
-            // "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
-            "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4"
-        )
-
         val productDtoMono = productService.getProductById(productId)
         val productPhotosFlux = productPhotoService.findProductImg(productId)
         val productPropertyFlux = productPropertyService.getProductProperties(productId)
+
+        val productVideoFlux = productVideoService.getProductVideos(productId).cache()
+        // Categorize videos into "playable" and "iframe-embed" types
+        val fileVideosFlux = productVideoFlux.filter {
+            it.videoType == VideoType.FILE || it.videoUrl.endsWith(".mp4")
+        }.map {
+            it.videoUrl
+        }
+        val youtubeVideosFlux = productVideoFlux.filter {
+            it.videoType == VideoType.YOUTUBE
+                    || it.videoUrl.contains("youtu.be") || it.videoUrl.contains("youtube.com")
+        }.map {
+            it.videoUrl
+        }
+
+        val vimeoVideosFlux = productVideoFlux.filter {
+            it.videoType == VideoType.VIMEO || it.videoUrl.contains("vimeo.com")
+        }.map {
+            it.videoUrl
+        }
+
         val reviews = reviewService.getProductReview(productId).collectList()
 
         return Mono.zip(productDtoMono,
             productPhotosFlux.collectList(),
             productPropertyFlux.collectList(),
+            fileVideosFlux.collectList(),
+            youtubeVideosFlux.collectList(),
+            vimeoVideosFlux.collectList(),
             reviews)
             .map { tuple ->
-                // Explicitly access Tuple3 components
                 val productDto = tuple.t1
                 val productPhotos = tuple.t2
                 val productProperties = tuple.t3
-                val productReviews = tuple.t4
+                val fileVideos = tuple.t4
+                val youtubeVideos = tuple.t5
+                val vimeoVideos = tuple.t6
+                val productReviews = tuple.t7
 
-                // Add attributes to the model
                 model.addAttribute("product", productDto)
                 model.addAttribute("productPhotos", productPhotos)
-                model.addAttribute("productVideos", productVideos)
                 model.addAttribute("productProperties", productProperties)
+                model.addAttribute("fileVideos", fileVideos)
+                model.addAttribute("youtubeVideos", youtubeVideos)
+                model.addAttribute("vimeoVideos", vimeoVideos)
                 model.addAttribute("reviews", productReviews)
 
                 "product-detail"

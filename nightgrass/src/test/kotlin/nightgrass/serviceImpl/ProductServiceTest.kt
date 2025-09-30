@@ -2,10 +2,10 @@ package com.goodfeel.nightgrass.serviceImpl
 
 import com.goodfeel.nightgrass.data.Product
 import com.goodfeel.nightgrass.repo.ProductRepository
+import com.goodfeel.nightgrass.service.ProcessedProductService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.*
-import org.springframework.dao.DataAccessException
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
@@ -14,12 +14,14 @@ import java.math.BigDecimal
 class ProductServiceTest {
 
     private lateinit var productRepository: ProductRepository
+    private lateinit var processedProductService: ProcessedProductService
     private lateinit var productService: ProductService
 
     @BeforeEach
     fun setUp() {
         productRepository = mock(ProductRepository::class.java)
-        productService = ProductService(productRepository)
+        processedProductService = mock(ProcessedProductService::class.java)
+        productService = ProductService(productRepository, processedProductService)
     }
 
     @Test

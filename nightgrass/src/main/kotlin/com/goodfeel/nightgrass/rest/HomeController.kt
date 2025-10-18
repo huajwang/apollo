@@ -1,25 +1,24 @@
-package com.goodfeel.nightgrass.web
+package com.goodfeel.nightgrass.rest
 
 import com.goodfeel.nightgrass.service.BlogPostService
 import com.goodfeel.nightgrass.service.workshop.WorkshopService
 import com.goodfeel.nightgrass.serviceImpl.ProductService
-import org.springframework.stereotype.Controller
-import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Mono
 import java.time.LocalDate
 import java.time.LocalTime
 
-@Controller("webHomeController")
-@RequestMapping("/")
+@RestController("restHomeController")
+@RequestMapping("/api")
 class HomeController(
     private val productService: ProductService,
     private val workshopService: WorkshopService,
     private val blogPostService: BlogPostService
 ) {
     @GetMapping
-    fun home(model: Model): Mono<String> {
+    fun home(): Mono<HomeResponse> {
         val bigHitsMono = productService.getTop3BigHits().collectList()
         val popularsMono = productService.getTop8PopularOrNewProducts().collectList()
         val heroCardMono =  workshopService.getHomePageWorkshop()
@@ -45,20 +44,19 @@ class HomeController(
             ) // TODO - make sure at least one workshop or one blog post for showing on home page hero card
 
         return Mono.zip(bigHitsMono, popularsMono, heroCardMono).map { tuple ->
-            val bigHits = tuple.t1
-            val populars = tuple.t2
-            val heroCard = tuple.t3
-            model.addAttribute("bigHits", bigHits)
-            model.addAttribute("populars", populars)
-            model.addAttribute("heroCard", heroCard)
-            "home"
+            HomeResponse(
+                bigHits = tuple.t1,
+                populars = tuple.t2,
+                heroCard = tuple.t3
+            )
         }
     }
 
-    @GetMapping("/home/contact")
-    fun contact(): Mono<String> {
-        return Mono.just("contact")
-    }
+    data class HomeResponse(
+        val bigHits: List<Any>,
+        val populars: List<Any>,
+        val heroCard: HeroCard
+    )
 
     data class HeroCard(
         val type: Int = 1, // 1 workshop or event; 2 blog post
@@ -72,5 +70,4 @@ class HomeController(
         val blogPostId: Int? = null,
         val blogPostThumbnail: String? = null
     )
-
 }

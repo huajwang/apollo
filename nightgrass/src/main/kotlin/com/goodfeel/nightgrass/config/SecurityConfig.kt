@@ -64,11 +64,13 @@ open class SecurityConfig(
                     .pathMatchers(
                         "/", "/product/**", "/videos/**", "/blog/**", "/buynow", "/pay/**", "/home/**", "/search/**",
                         "/login", "/error", "/cart/**", "/checkout", "/update-user-info", "/workshop/**", "/legal/**",
+                        "/api/**", // TODO: remove
                         "/images/**", "/css/**", "/icons/**", "/js/**", "/webjars/**",
                     ).permitAll()
                     // All other paths require authentication
                     .anyExchange().authenticated()
             }
+            .cors(Customizer.withDefaults())   // <- add this line so Security picks up the reactive CORS bean
             .oauth2Login{
                 // Use the custom WeChat resolver
                 it.authorizationRequestResolver(

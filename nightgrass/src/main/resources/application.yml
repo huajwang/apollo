@@ -51,9 +51,9 @@ spring:
             user-info-uri: https://api.weixin.qq.com/sns/userinfo
             user-name-attribute: openid
           tiktok:
-            authorization-uri: https://www.tiktok.com/auth/authorize/
-            token-uri: https://open-api.tiktok.com/oauth/access_token/
-            user-info-uri: https://open-api.tiktok.com/user/info/
+            authorization-uri: https://www.tiktok.com/auth/authorize
+            token-uri: https://open-api.tiktok.com/oauth/access_token
+            user-info-uri: https://open-api.tiktok.com/user/info
             user-name-attribute: open_id
   r2dbc:
     pool:

@@ -11,10 +11,21 @@ import { HousingService } from '../service/housing-service';
 })
 export class Home {
   housingLocationList: HousingLocationInfo[] = [];
+  filteredLocationList: HousingLocationInfo[] = [];
 
   housingService = inject(HousingService);
 
+  filterResults(searchText: string) {
+    this.filteredLocationList = this.housingLocationList.filter((location: HousingLocationInfo) => {
+      const searchTextLower = searchText.toLowerCase();
+      return location.name.toLowerCase().includes(searchTextLower) ||
+             location.city.toLowerCase().includes(searchTextLower) ||
+             location.state.toLowerCase().includes(searchTextLower);
+    });
+  }
+
   constructor() {
     this.housingLocationList = this.housingService.getAllHousingLocations();
+    this.filteredLocationList = this.housingLocationList;
   }
 }

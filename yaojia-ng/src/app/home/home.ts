@@ -1,4 +1,5 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { HousingLocation } from '../housing-location/housing-location';
 import { HousingLocationInfo } from '../housinglocation';
 import { HousingService } from '../service/housing-service';
@@ -9,7 +10,10 @@ import { HousingService } from '../service/housing-service';
   templateUrl: './home.html',
   styleUrl: './home.scss'
 })
-export class Home {
+export class Home implements OnInit, OnDestroy {
+
+  private subscription = new Subscription();
+
   housingLocationList: HousingLocationInfo[] = [];
   filteredLocationList: HousingLocationInfo[] = [];
 
@@ -24,8 +28,23 @@ export class Home {
     });
   }
 
-  constructor() {
-    this.housingLocationList = this.housingService.getAllHousingLocations();
-    this.filteredLocationList = this.housingLocationList;
+  ngOnInit() {
+    this.subscription.add(
+      this.housingService.getAllHousingLocations2().subscribe({
+        next: (housingLocations) => {
+          this.housingLocationList = housingLocations;
+          this.filteredLocationList = this.housingLocationList;
+        },
+        error: (err) => {
+          console.error('Error fetching housing locations:', err);
+        }
+      })
+    )
   }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
+  }
+  
 }
+

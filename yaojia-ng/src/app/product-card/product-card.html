@@ -1,1 +1,11 @@
-<p>product-card works!</p>
+<section class="listing">
+    <a [routerLink]="['/product/detail', product().productId]">Learn More</a>
+    <img 
+        class="listing-photo"
+        [src]="product().imageUrl"
+        alt="Photo of {{ product().productName }}"
+        crossorigin
+    />
+    <h2 class="listing-header">{{ product().productName }}</h2>
+    <p class="listing-product">{{ product().price }}, {{ product().description }} </p>
+</section>

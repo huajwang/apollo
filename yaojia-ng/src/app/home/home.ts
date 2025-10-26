@@ -1,12 +1,12 @@
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { HousingLocation } from '../housing-location/housing-location';
-import { HousingLocationInfo } from '../housinglocation';
-import { HousingService } from '../service/housing-service';
+import { Product } from '../model/product';
+import { ProductService } from '../service/product-service';
+import { ProductCard } from '../product-card/product-card';
 
 @Component({
   selector: 'app-home',
-  imports: [HousingLocation],
+  imports: [ProductCard],
   templateUrl: './home.html',
   styleUrl: './home.scss'
 })
@@ -14,26 +14,26 @@ export class Home implements OnInit, OnDestroy {
 
   private subscription = new Subscription();
 
-  housingLocationList: HousingLocationInfo[] = [];
-  filteredLocationList: HousingLocationInfo[] = [];
+  products: Product[] = [];
+  filteredProducts: Product[] = [];
 
-  housingService = inject(HousingService);
+  productService = inject(ProductService);
 
   filterResults(searchText: string) {
-    this.filteredLocationList = this.housingLocationList.filter((location: HousingLocationInfo) => {
+    this.filteredProducts = this.products.filter((product: Product) => {
       const searchTextLower = searchText.toLowerCase();
-      return location.name.toLowerCase().includes(searchTextLower) ||
-             location.city.toLowerCase().includes(searchTextLower) ||
-             location.state.toLowerCase().includes(searchTextLower);
+      return product.productName.toLowerCase().includes(searchTextLower) ||
+             product.description.toLowerCase().includes(searchTextLower) ||
+             product.category.toLowerCase().includes(searchTextLower);
     });
   }
 
   ngOnInit() {
     this.subscription.add(
-      this.housingService.getAllHousingLocations2().subscribe({
-        next: (housingLocations) => {
-          this.housingLocationList = housingLocations;
-          this.filteredLocationList = this.housingLocationList;
+      this.productService.getAllProducts().subscribe({
+        next: (products) => {
+          this.products = products;
+          this.filteredProducts = this.products;
         },
         error: (err) => {
           console.error('Error fetching housing locations:', err);

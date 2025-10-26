@@ -1,12 +1,11 @@
 <section>
   <form>
-    <input type="text" placeholder="Filter by city" #filter />
+    <input type="text" placeholder="Filter by name, description or category" #filter />
     <button class="primary" type="button" (click)="filterResults(filter.value)">Search</button>
   </form>
 </section>
 <section class="results">
-  @for(housingLocation of filteredLocationList; track $index) {
-    <app-housing-location [housingLocation]="housingLocation"></app-housing-location>
+  @for(product of products; track $index) {
+    <product-card [product]="product"></product-card>
   }
-
 </section>

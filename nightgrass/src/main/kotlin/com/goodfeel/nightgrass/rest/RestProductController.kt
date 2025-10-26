@@ -6,6 +6,7 @@ import com.goodfeel.nightgrass.serviceImpl.ProductPhotoService
 import com.goodfeel.nightgrass.serviceImpl.ProductPropertyService
 import com.goodfeel.nightgrass.serviceImpl.ProductService
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
@@ -26,8 +27,8 @@ class RestProductController(
         return productService.allProducts()
     }
 
-    @GetMapping("/detail")
-    fun productDetail(@RequestParam("id") productId: Long): Mono<Map<String, Any>> {
+    @GetMapping("/detail/{id}")
+    fun productDetail(@PathVariable("id") productId: Long): Mono<Map<String, Any>> {
         val productDtoMono = productService.getProductById(productId)
         val productPhotosFlux = productPhotoService.findProductImg(productId)
         val productPropertyFlux = productPropertyService.getProductProperties(productId)

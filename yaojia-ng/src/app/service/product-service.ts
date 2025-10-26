@@ -9,7 +9,7 @@ export class ProductService {
 
   private http = inject(HttpClient)
 
-  readonly url = 'https://yaojiabuy.com/api';
+  readonly url = '/api';
 
   getAllProducts() {
     return this.http.get<Product[]>(`${this.url}/product/all`);

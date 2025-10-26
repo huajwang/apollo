@@ -36,7 +36,7 @@ export class Home implements OnInit, OnDestroy {
           this.filteredProducts = this.products;
         },
         error: (err) => {
-          console.error('Error fetching housing locations:', err);
+          console.error('Error fetching products:', err);
         }
       })
     )

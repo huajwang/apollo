@@ -5,7 +5,7 @@
   </form>
 </section>
 <section class="results">
-  @for(product of products; track $index) {
+  @for(product of filteredProducts; track $index) {
     <product-card [product]="product"></product-card>
   }
 </section>

@@ -3,7 +3,6 @@ package com.goodfeel.nightgrass.config
 import com.goodfeel.nightgrass.util.CustomJwtEncoder
 import com.nimbusds.jose.JWSAlgorithm
 import com.nimbusds.jose.jwk.*
-import jakarta.annotation.PostConstruct
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

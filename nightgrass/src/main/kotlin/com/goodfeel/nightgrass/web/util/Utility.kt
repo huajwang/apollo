@@ -26,6 +26,10 @@ object Utility : ApplicationContextAware {
         get() = applicationContext.environment.getProperty("oss.bucket-name")
             ?: throw IllegalStateException("oss.bucket-name property is not set")
 
+    val FRONTEND_URL : String
+        get() = applicationContext.environment.getProperty("frontend.url",
+            "https://yaojiabuy.com")
+
     val currentUserId: Mono<String>
         get() = ReactiveSecurityContextHolder.getContext()
             .flatMap { ctx ->

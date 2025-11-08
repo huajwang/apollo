@@ -4,6 +4,8 @@ import com.goodfeel.nightgrass.service.OrderService
 import com.goodfeel.nightgrass.service.UserService
 import com.goodfeel.nightgrass.serviceImpl.CartService
 import com.goodfeel.nightgrass.serviceImpl.GuestService
+import com.goodfeel.nightgrass.serviceImpl.JwtService
+import com.goodfeel.nightgrass.util.AuthenticationSuccessHandler
 import com.goodfeel.nightgrass.web.MergeAuthenticationSuccessHandler
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -24,10 +26,7 @@ import java.net.URI
 @EnableWebFluxSecurity
 open class SecurityConfig(
     private val clientRegistrationRepository: ReactiveClientRegistrationRepository,
-    private val cartService: CartService,
-    private val guestService: GuestService,
-    private val orderService: OrderService,
-    private val userService: UserService,
+    private val jwtService: JwtService,
     private val reactiveJwtDecoder: ReactiveJwtDecoder,
     private val adminAuthenticationManager: AdminAuthenticationManager
 ) {
@@ -71,6 +70,7 @@ open class SecurityConfig(
                     .anyExchange().authenticated()
             }
             .cors(Customizer.withDefaults())   // <- add this line so Security picks up the reactive CORS bean
+            // .csrf(ServerCsrfSpec::disable) // Disable CSRF protection for simplicity TODO: review this later
             .oauth2Login{
                 // Use the custom WeChat resolver
                 it.authorizationRequestResolver(
@@ -78,9 +78,7 @@ open class SecurityConfig(
                 )
 
                 // Use custom handler
-                it.authenticationSuccessHandler(
-                    MergeAuthenticationSuccessHandler(
-                        cartService, guestService, orderService, userService))
+                it.authenticationSuccessHandler(AuthenticationSuccessHandler(jwtService))
             }
             .oauth2Client(Customizer.withDefaults<OAuth2ClientSpec>())
             // Enable JWT validation for incoming requests

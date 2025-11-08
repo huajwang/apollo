@@ -14,7 +14,7 @@ class CartApiController(private val cartService: CartService) {
 
     private val logger = LoggerFactory.getLogger(CartApiController::class.java)
 
-    @GetMapping("/cart/updates", produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
+    @GetMapping("/api/cart/updates", produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
     fun streamCartUpdates(): Flux<ServerSentEvent<Int>> {
         val heartbeat = Flux.interval(Duration.ofSeconds(15))
             .map { ServerSentEvent.builder<Int>().event("heartbeat").data(0).build() }
@@ -32,6 +32,12 @@ class CartApiController(private val cartService: CartService) {
             .doOnCancel { logger.debug("SSE connection closed") }
             .doOnComplete { logger.debug("SSE connection completed") }
             .doOnError { error -> logger.error("SSE error occurred: ${error.message}", error) }
+
+    }
+
+    @GetMapping("/api/cart/my-cart")
+    fun myCart() {
+        // Implementation for retrieving the user's cart
 
     }
 

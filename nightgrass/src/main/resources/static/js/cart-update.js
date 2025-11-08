@@ -3,7 +3,7 @@ let eventSource;
 // Function to initialize Server-Sent Events
 function initializeCartUpdates() {
     if (!eventSource) {
-        eventSource = new EventSource("/cart/updates");
+        eventSource = new EventSource("/api/cart/updates");
 
         eventSource.addEventListener("cart-update", function (event) {
             const data = JSON.parse(event.data);
@@ -25,7 +25,7 @@ function initializeCartUpdates() {
 
             setTimeout(() => {
                 eventSource.close();
-                eventSource = new EventSource("/cart/updates");
+                eventSource = new EventSource("/api/cart/updates");
             }, 5000);
         };
 

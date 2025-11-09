@@ -1,1 +1,15 @@
-<p>login-component works!</p>
+<div>
+    <button (click)="loginWith('wechat')" [disabled]="loading">
+        Continue with WeChat
+    </button>
+    <button (click)="loginWith('tiktok')" [disabled]="loading">
+        Continue with Tiktok
+    </button>
+
+    <button (click)="loginWith('google')" [disabled]="loading">
+        Continue with Google
+    </button>
+    <button (click)="loginWith('facebook')" [disabled]="loading">
+        Continue with Facebook
+    </button>
+</div>

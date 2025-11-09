@@ -17,6 +17,8 @@ data class UserInfo(
     val provider: String?
 )
 
+data class ValidationResponse(val valid: Boolean)
+
 @RestController
 @RequestMapping("/api/auth")
 class AuthApiController(private val jwtService: JwtService) {
@@ -40,8 +42,20 @@ class AuthApiController(private val jwtService: JwtService) {
             }.switchIfEmpty(Mono.just(ResponseEntity.status(401).build()))
     }
 
+    @GetMapping("/verify")
+    fun verifyToken(exchange: ServerWebExchange): Mono<ResponseEntity<ValidationResponse>> {
+        return extractTokenFromRequest(exchange)
+            .flatMap { token ->
+                jwtService.validateToken(token)
+                    .map {
+                        ResponseEntity.ok(ValidationResponse(valid = true))
+                    }
+            }.switchIfEmpty(Mono.just(ResponseEntity.status(401).build()))
+    }
+
     private fun extractTokenFromRequest(exchange: ServerWebExchange): Mono<String> {
         val token = exchange.request.headers.getFirst("Authorization")
+        logger.debug("Authorization header token: {}", token)
         if (token != null) {
             return token.takeIf { it.startsWith("Bearer ") }
                 ?.substringAfter("Bearer ")

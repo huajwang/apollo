@@ -56,8 +56,8 @@ class JwtService(
     private fun generateToken(
         userId: String,
         userName: String,
-        userEmail: String?,
-        userAvatarUrl: String?,
+        userEmail: String,
+        userAvatarUrl: String,
         provider: String): String {
         val now = Date()
         val expiryDate = Date(now.time + 3600 * 1000) // 1 hour expiration
@@ -109,22 +109,22 @@ class JwtService(
         }
     }
 
-    private fun getUserEmail(oauth2User: OAuth2User): String? {
+    private fun getUserEmail(oauth2User: OAuth2User): String {
         val attributes = oauth2User.attributes
         return when {
             attributes.containsKey("email") -> attributes["email"].toString()
             attributes.containsKey("email_address") -> attributes["email_address"].toString()
-            else -> null // Email not available
+            else -> "" // Email not available
         }
     }
 
-    private fun getUserAvatarUrl(oauth2User: OAuth2User): String? {
+    private fun getUserAvatarUrl(oauth2User: OAuth2User): String {
         val attributes = oauth2User.attributes
         return when {
             attributes.containsKey("picture") -> attributes["picture"].toString() // Google, Facebook
             attributes.containsKey("avatar_url") -> attributes["avatar_url"].toString() // TikTok
             attributes.containsKey("headimgurl") -> attributes["headimgurl"].toString() // WeChat
-            else -> null // Avatar URL not available
+            else -> "" // Avatar URL not available
         }
     }
 

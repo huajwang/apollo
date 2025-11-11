@@ -103,16 +103,6 @@ export class AuthService {
     );
   }
 
-  /**
-   * Get authorization headers
-   */
-  getAuthHeaders(): HttpHeaders {
-    const token = this.getToken();
-    return token
-      ? new HttpHeaders().set('Authorization', `Bearer ${token}`)
-      : new HttpHeaders();
-  }
-
   getToken(): string | null {
     return this.getAccessToken();
   }
@@ -122,9 +112,7 @@ export class AuthService {
   }
 
   private logout(): Observable<any> {
-    return this.http.post(`${this.apiUrl}/auth/logout`, {}, {
-      headers: this.getAuthHeaders()
-    }).pipe(
+    return this.http.post(`${this.apiUrl}/auth/logout`, {}).pipe(
       tap(() => {
         this.setAccessToken(null);
         this.setUser(null);
@@ -142,6 +130,7 @@ export class AuthService {
 
   ensureValidToken(): Observable<string | null> {
     const currentToken = this.getAccessToken();
+    console.log('locally stored token:', currentToken);
     if (currentToken) {
       return this.verifyToken(currentToken).pipe(
         catchError(() => {
@@ -152,13 +141,13 @@ export class AuthService {
   }
 
   private verifyToken(token: string): Observable<string> {
-    return this.http.get<{valid: boolean}>(`${this.apiUrl}/auth/verify`, { // TODO implement backend API
-      headers: new HttpHeaders().set('Authorization', 'Bearer $token') // TODO needed it or authInteceptor will set the header?
-    }).pipe(
+    console.log('verify token with backend:', token);
+    return this.http.get<{valid: boolean}>(`${this.apiUrl}/auth/verify`).pipe(
       tap(response => {
         if (!response.valid) {
           throw new Error('Token invalid');
         }
+        console.log('token verified:', response.valid);
       }),
       catchError(() => {
         throw new Error('Token verification failed');

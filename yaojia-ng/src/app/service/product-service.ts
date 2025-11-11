@@ -10,13 +10,13 @@ export class ProductService {
 
   private http = inject(HttpClient)
 
-  readonly url = environment.apiUrl;
+  readonly API_URL = environment.apiUrl;
 
   getAllProducts() {
-    return this.http.get<Product[]>(`${this.url}/product/all`);
+    return this.http.get<Product[]>(`${this.API_URL}/product/all`);
   }
 
   getProductById(id: number) {
-    return this.http.get<Product>(`${this.url}/product/detail/${id}`);
+    return this.http.get<Product>(`${this.API_URL}/product/detail/${id}`);
   }
 }

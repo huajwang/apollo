@@ -1,10 +1,11 @@
 import { HttpInterceptorFn } from "@angular/common/http";
 import { inject } from "@angular/core";
 import { AuthService } from "../service/auth-service";
-import { catchError, switchMap } from "rxjs";
+import { catchError, switchMap, throwError } from "rxjs";
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
     const authService = inject(AuthService);
+    const token = authService.getAccessToken();
     const publicEndpoints = [
         '/oauth2', '/login', '/api/product',
     ];
@@ -14,20 +15,20 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
     if (isPublicEndpoint) return next(req);
 
-    return authService.ensureValidToken().pipe(
-        switchMap(token => {
-            if (token) {
-                // Clone request with authorization header
-                const authReq = req.clone({ setHeaders: { Authorization: `Bearer ${token}` } });
-                return next(authReq);
-            } else {
-                // No token available
-                return next(req);
-            }
-        }),
+    // If request already has Authrization header, don't override it
+    if (req.headers.has('Authorization')) {
+        return next(req);
+    }
+    // Clone request with authorization header
+    const authReq = token ?
+        req.clone({ setHeaders: { Authorization: `Bearer ${token}` } }) : req;
+    return next(authReq).pipe(
         catchError(error => {
-            console.error('Auth interceptor error:', error);
-            return next(req);
+            if (error.status == 401) {
+                return authService.refreshTokenAndRetry(req, next);
+            }
+            return throwError(() => error);
         })
     );
+    
 }

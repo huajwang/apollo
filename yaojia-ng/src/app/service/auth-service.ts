@@ -1,15 +1,15 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { environment } from '../../environments/environment';
-import { BehaviorSubject, catchError, Observable, of, tap, map } from 'rxjs';
+import { BehaviorSubject, catchError, Observable, of, tap, map, throwError, switchMap } from 'rxjs';
 import { User } from '../auth/user';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHandlerFn, HttpRequest } from '@angular/common/http';
 import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-
+  
   private baseUrl = environment.baseUrl;
   private apiUrl = environment.apiUrl;
   private readonly TOKEN_KEY = 'auth_token';
@@ -128,34 +128,6 @@ export class AuthService {
     );
   }
 
-  ensureValidToken(): Observable<string | null> {
-    const currentToken = this.getAccessToken();
-    console.log('locally stored token:', currentToken);
-    if (currentToken) {
-      return this.verifyToken(currentToken).pipe(
-        catchError(() => {
-          return this.attemptTokenRefresh();
-        })
-      )
-    } else return this.attemptTokenRefresh();
-  }
-
-  private verifyToken(token: string): Observable<string> {
-    console.log('verify token with backend:', token);
-    return this.http.get<{valid: boolean}>(`${this.apiUrl}/auth/verify`).pipe(
-      tap(response => {
-        if (!response.valid) {
-          throw new Error('Token invalid');
-        }
-        console.log('token verified:', response.valid);
-      }),
-      catchError(() => {
-        throw new Error('Token verification failed');
-      }),
-      map(() => token) // Return the token if valid
-    );
-  }
-
   /**
    * Attempt to refresh token or redirect to login
    */
@@ -193,6 +165,32 @@ export class AuthService {
       })
     );
   }
+
+  refreshTokenAndRetry(req: HttpRequest<unknown>, next: HttpHandlerFn): Observable<any> {
+    const refreshToken = this.getRefreshToken();
+    if (!refreshToken) {
+      // No refresh token available. redirect to login
+      this.redirectToLogin();
+      return throwError(() => new Error('No refresh token available'));
+    }
+
+    // Attempt to refresh the access token
+    return this.refreshAccessToken(refreshToken).pipe(
+      switchMap((newAccessToken: string) => {
+        const retryReq = req.clone({
+          setHeaders: { Authorization: `Bearer ${newAccessToken}` }
+        });
+        // Retry the original request
+        return next(retryReq);
+      }),
+      catchError(refreshError => {
+        this.clearAllTokens();
+        this.redirectToLogin();
+        return throwError(() => refreshError);
+      })
+    );
+  }
+
 
   private clearAllTokens() {
     this.accessToken = null;

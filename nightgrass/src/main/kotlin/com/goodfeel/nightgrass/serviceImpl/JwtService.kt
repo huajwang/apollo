@@ -15,6 +15,9 @@ class JwtService(
     private val jwtDecoder: ReactiveJwtDecoder
 ) {
 
+    private val accessTokenExpirySecond = 15 * 60L // 15 minutes
+    private val refreshTokenExpirySecond = 7 * 24 * 60 * 60L // 7 days
+
     // Generate a JWT token with the guestId claim
     fun generateJwt(guestId: String): String {
         val now = Instant.now()
@@ -37,44 +40,90 @@ class JwtService(
             }
     }
 
-    fun generateToken(authentication: Authentication): String {
+    data class TokenPair(
+        val accessToken: String,
+        val refreshToken: String,
+        val expiresIn: Long // in seconds
+    )
+
+    fun generateTokenPair(authentication: Authentication): TokenPair {
         val oauth2User = authentication.principal as OAuth2User
         val userId = getUserId(oauth2User)
         val userName = getUserName(oauth2User)
         val userEmail = getUserEmail(oauth2User)
         val userAvatarUrl = getUserAvatarUrl(oauth2User)
         val provider = authentication.name
-        return generateToken(
-            userId,
-            userName,
-            userEmail,
-            userAvatarUrl,
-            provider
-        )
+
+        val accessToken = generateAccessToken(userId, userName, userEmail, userAvatarUrl, provider)
+        val refreshToken = generateRefreshToken(userId) // In real scenario, store this in DB or cache TODO
+        return TokenPair(accessToken, refreshToken, accessTokenExpirySecond)
     }
 
-    private fun generateToken(
+    private fun generateAccessToken(
         userId: String,
         userName: String,
         userEmail: String,
         userAvatarUrl: String,
         provider: String): String {
-        val now = Date()
-        val expiryDate = Date(now.time + 3600 * 1000) // 1 hour expiration
+        val now = Instant.now()
+        val expiryDate = now.plusSeconds(accessTokenExpirySecond)
         return jwtEncoder.encode(
             JwtEncoderParameters.from(
                 JwtClaimsSet.builder()
                     .issuer("Yaojia Buy")
-                    .issuedAt(now.toInstant())
-                    .expiresAt(expiryDate.toInstant())
+                    .issuedAt(now)
+                    .expiresAt(expiryDate)
                     .subject(userId)
                     .claim("name", userName)
                     .claim("email", userEmail)
                     .claim("avatarUrl", userAvatarUrl)
                     .claim("provider", provider)
+                    .claim("type", "access")
                     .build()
             )
         ).tokenValue
+    }
+
+    private fun generateRefreshToken(userId: String): String {
+        val now = Instant.now()
+        val expiryDate = now.plusSeconds(refreshTokenExpirySecond)
+        val tokenId = UUID.randomUUID().toString()
+        return jwtEncoder.encode(
+            JwtEncoderParameters.from(
+                JwtClaimsSet.builder()
+                    .issuer("Yaojia Buy")
+                    .issuedAt(now)
+                    .expiresAt(expiryDate)
+                    .subject(userId)
+                    .claim("type", "refresh")
+                    .claim("jti", tokenId)
+                    .build()
+            )
+        ).tokenValue
+    }
+
+    private fun validateRefreshToken(refreshToken: String): Mono<Jwt> {
+        return jwtDecoder.decode(refreshToken)
+            .filter { jwt -> jwt.claims["type"] == "refresh"}
+            .onErrorResume { Mono.empty() } // Invalid or expired token
+    }
+
+    fun refreshTokenPair(refreshToken: String): Mono<TokenPair> {
+        return validateRefreshToken(refreshToken)
+            .flatMap { jwt ->
+                val userId = jwt.subject
+                // TODO: In real scenario, verify the jti against DB or cache to ensure it's valid and not revoked
+                // TODO: Consider fetch from database
+                val userName = jwt.claims["name"] as? String ?: ""
+                val userEmail = jwt.claims["email"] as? String ?: ""
+                val userAvatarUrl = jwt.claims["avatarUrl"] as? String ?: ""
+                val provider = jwt.claims["provider"] as? String ?: ""
+
+                val newAccessToken = generateAccessToken(userId, userName, userEmail, userAvatarUrl, provider)
+                val newRefreshToken = generateRefreshToken(userId) // In real scenario, update this in DB or cache TODO
+
+                Mono.just(TokenPair(newAccessToken, newRefreshToken, accessTokenExpirySecond))
+            }
     }
 
     private fun getUserId(oauth2User: OAuth2User): String {

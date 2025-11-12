@@ -4,6 +4,8 @@ import com.goodfeel.nightgrass.serviceImpl.JwtService
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ServerWebExchange
@@ -17,7 +19,8 @@ data class UserInfo(
     val provider: String?
 )
 
-data class ValidationResponse(val valid: Boolean)
+data class RefreshTokenRequest(val refreshToken: String)
+data class TokenResponse(val accessToken: String, val refreshToken: String, val expiresIn: Long)
 
 @RestController
 @RequestMapping("/api/auth")
@@ -42,15 +45,20 @@ class AuthApiController(private val jwtService: JwtService) {
             }.switchIfEmpty(Mono.just(ResponseEntity.status(401).build()))
     }
 
-    @GetMapping("/verify")
-    fun verifyToken(exchange: ServerWebExchange): Mono<ResponseEntity<ValidationResponse>> {
-        return extractTokenFromRequest(exchange)
-            .flatMap { token ->
-                jwtService.validateToken(token)
-                    .map {
-                        ResponseEntity.ok(ValidationResponse(valid = true))
-                    }
-            }.switchIfEmpty(Mono.just(ResponseEntity.status(401).build()))
+    @PostMapping("/refresh")
+    fun refreshToken(@RequestBody request: RefreshTokenRequest): Mono<ResponseEntity<TokenResponse>> {
+        return jwtService.refreshTokenPair(refreshToken = request.refreshToken)
+            .map { tokenPair ->
+                logger.debug("Generated new token pair from refresh token")
+                ResponseEntity.ok(
+                    TokenResponse(
+                        accessToken = tokenPair.accessToken,
+                        refreshToken = tokenPair.refreshToken,
+                        expiresIn = tokenPair.expiresIn
+                    )
+                )
+            }
+            .switchIfEmpty(Mono.just(ResponseEntity.status(401).build()))
     }
 
     private fun extractTokenFromRequest(exchange: ServerWebExchange): Mono<String> {

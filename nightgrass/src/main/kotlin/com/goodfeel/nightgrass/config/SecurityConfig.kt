@@ -1,12 +1,7 @@
 package com.goodfeel.nightgrass.config
 
-import com.goodfeel.nightgrass.service.OrderService
-import com.goodfeel.nightgrass.service.UserService
-import com.goodfeel.nightgrass.serviceImpl.CartService
-import com.goodfeel.nightgrass.serviceImpl.GuestService
 import com.goodfeel.nightgrass.serviceImpl.JwtService
 import com.goodfeel.nightgrass.util.AuthenticationSuccessHandler
-import com.goodfeel.nightgrass.web.MergeAuthenticationSuccessHandler
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
@@ -53,8 +48,6 @@ open class SecurityConfig(
         return http.build()
     }
 
-
-
     @Bean
     open fun securityWebFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain {
         http
@@ -63,7 +56,7 @@ open class SecurityConfig(
                     .pathMatchers(
                         "/", "/product/**", "/videos/**", "/blog/**", "/buynow", "/pay/**", "/home/**", "/search/**",
                         "/login", "/error", "/cart/**", "/checkout", "/update-user-info", "/workshop/**", "/legal/**",
-                        "/api/**", // TODO: remove
+                        "/api/product/**",
                         "/images/**", "/css/**", "/icons/**", "/js/**", "/webjars/**",
                     ).permitAll()
                     // All other paths require authentication
@@ -76,7 +69,6 @@ open class SecurityConfig(
                 it.authorizationRequestResolver(
                     ReactiveWeChatAuthorizationRequestResolver(clientRegistrationRepository)
                 )
-
                 // Use custom handler
                 it.authenticationSuccessHandler(AuthenticationSuccessHandler(jwtService))
             }

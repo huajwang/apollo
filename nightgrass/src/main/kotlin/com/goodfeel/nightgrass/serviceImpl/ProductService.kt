@@ -62,4 +62,11 @@ class ProductService(
         return productRepository.findByProductNameContainingIgnoreCase(query)
     }
 
+    override fun getRelatedProducts(productId: Long): Flux<ProductDto> {
+        return processedProductService.findAllAndProcessProducts() // TODO
+            .onErrorResume { ex ->
+                Flux.error(RuntimeException("Failed to fetch related products: ${ex.message}", ex))
+            }
+    }
+
 }

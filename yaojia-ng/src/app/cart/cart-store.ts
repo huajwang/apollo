@@ -1,8 +1,9 @@
 import { computed, inject, Injectable, signal } from "@angular/core";
-import { CartItem } from "./cart-item";
+import { CartItem, ProductVariantProperties } from "./cart-item";
 import { AuthService } from "../service/auth-service";
 import { CartService } from "./cart-service";
-import { catchError, of, Subscribable, Subscription } from "rxjs";
+import { catchError, of, Subscription } from "rxjs";
+import { Product } from "../model/product";
 
 @Injectable({
     providedIn: 'root',
@@ -27,20 +28,25 @@ export class CartStore {
     );
 
     readonly totalPrice = computed(() =>
-        this.items().reduce((total, item) => total + item.price * item.quantity, 0)
+        this.items().reduce((total, item) => total + item.product.price * item.quantity, 0)
 
     );
 
-    addItem(id: number, name: string, price: number) {
+    // Add item to cart, or increase quantity if already exists
+    addItem(product: Product, quantity: number = 1, properties: ProductVariantProperties = {}) {
         this.items.update( (currentItems) => {
-            const existingItem = currentItems.find((item) => item.id == id)
+            const existingItem = currentItems.find((item) => 
+                item.product.productId == product.productId && this.propertiesMatch(item.properties, properties)
+
+        );
 
             let updatedItems: CartItem[];
             if (existingItem) {
                 updatedItems = currentItems.map((item) => 
-                    item.id == id ? {...item, quantity: item.quantity + 1 } : item)
+                    item.product.productId == product.productId && this.propertiesMatch(item.properties, properties) 
+                ? {...item, quantity: item.quantity + quantity } : item)
             } else {
-                updatedItems = [...currentItems, { id, price, quantity: 1, properties: "" }]
+                updatedItems = [...currentItems, { product, quantity, properties }]
             }
             // Sync to backend and save to localStorage
             this.syncToBackend(updatedItems);
@@ -50,9 +56,13 @@ export class CartStore {
         })
     }
 
-    removeItem(id: number) {
+    removeItem(productId: number, properties?: ProductVariantProperties) {
         this.items.update((currentItems) => {
-            const updatedItems = currentItems.filter((item) => item.id != id)
+            const updatedItems = currentItems.filter((item) => {
+                if (item.product.productId !== productId) return true;
+                if (!properties) return false;
+                return !this.propertiesMatch(item.properties, properties);
+            })
             this.syncToBackend(updatedItems);
             this.saveToLocalStorage(updatedItems);
 
@@ -60,15 +70,21 @@ export class CartStore {
         })
     }
 
-    updateQuantity(id: number, quantity: number) {
+    updateQuantity(productId: number, quantity: number, properties?: ProductVariantProperties) {
         if (quantity <= 0) {
-            this.removeItem(id)
+            this.removeItem(productId, properties);
             return;
         }
 
         this.items.update((currentItems) => {
-            const updatedItems = currentItems.map((item) => 
-            item.id == id ? {...item, quantity} : item)
+            const updatedItems = currentItems.map((item) => {
+                if (item.product.productId === productId) {
+                    if (!properties || this.propertiesMatch(item.properties, properties))
+                         return {...item, quantity}
+                }
+                return item;
+            })
+            
             this.syncToBackend(updatedItems);
             this.saveToLocalStorage(updatedItems);
             return updatedItems;
@@ -109,19 +125,19 @@ export class CartStore {
 
         // add local item first
         localCart.forEach(item => {
-            merged.set(item.id, item)
+            merged.set(item.product.productId, item)
         });
 
         // override with backend items (backend wins conflicts)
         backendCart.forEach(item => {
-            const existingItem = merged.get(item.id)
+            const existingItem = merged.get(item.product.productId);
             if (existingItem) {
-                // combine quantities or use backend data
-                merged.set(item.id, {
+                // combine quantities
+                merged.set(item.product.productId, {
                     ...item, quantity: Math.max(item.quantity, existingItem.quantity)
                 })
             } else {
-                merged.set(item.id, item)
+                merged.set(item.product.productId, item)
             }
         });
 
@@ -169,6 +185,13 @@ export class CartStore {
                 }
             });
         }
+    }
+
+    private propertiesMatch(pros1: ProductVariantProperties, pros2: ProductVariantProperties) {
+        const keys1 = Object.keys(pros1);
+        const keys2 = Object.keys(pros2);
+        if (keys1.length !== keys2.length) return false;
+        return keys1.every(key => pros1[key] === pros2[key]);
     }
 
 }

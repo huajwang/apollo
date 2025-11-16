@@ -42,11 +42,16 @@ class RestProductController(
         ).map { tuple ->
             mapOf(
                 "product" to tuple.t1,
-                "photos" to tuple.t2,
-                "properties" to tuple.t3,
+                "gallery" to tuple.t2,
+                "specifications" to tuple.t3,
                 "reviews" to tuple.t4
             )
         }
+    }
+
+    @GetMapping("/related/{id}")
+    fun relatedProducts(@PathVariable("id") productId: Long): Flux<ProductDto> {
+        return productService.getRelatedProducts(productId)
     }
 }
 

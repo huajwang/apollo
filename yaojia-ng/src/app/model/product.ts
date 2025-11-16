@@ -14,4 +14,8 @@ export interface Product {
     showNewProductBadge: boolean;
     percentageDiscounted: boolean;
     flatDiscounted: boolean;
+
+    // Extended properties for product detail page
+    gallery?: string[];
+    specifications?: { [key: string]: string | string[] };
 }

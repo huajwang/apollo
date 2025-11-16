@@ -19,22 +19,22 @@ export class CartView implements OnInit, OnDestroy {
   private subscription = new Subscription()
 
   addProduct(product: Product) {
-    this.cartStore.addItem(product.productId, product.productName, product.price)
+    this.cartStore.addItem(product); // TODO
   }
 
-  increaseQuantity(id: number) {
+  increaseQuantity(productId: number) {
     const items = this.cartStore.cartItems()
-    const currentItem: CartItem | undefined = items.find((item) => item.id == id)
+    const currentItem: CartItem | undefined = items.find((item) => item.product.productId == productId)
     if (currentItem) {
-      this.cartStore.updateQuantity(id, currentItem.quantity + 1)
+      this.cartStore.updateQuantity(productId, currentItem.quantity + 1) // TODO - properties
     }
   }
 
-  decreaseQuantity(id: number) {
+  decreaseQuantity(productId: number) {
     const items = this.cartStore.cartItems()
-    const currentItem: CartItem | undefined = items.find((item) => item.id == id)
+    const currentItem: CartItem | undefined = items.find((item) => item.product.productId == productId)
     if (currentItem) {
-      this.cartStore.updateQuantity(id, currentItem.quantity -1)
+      this.cartStore.updateQuantity(productId, currentItem.quantity - 1) // TODO - properties?
     }
   }
 

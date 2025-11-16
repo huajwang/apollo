@@ -1,6 +1,9 @@
+import { Product } from "../model/product";
+
 export interface CartItem {
-    id: number;
-    price: number;
+    product: Product;
     quantity: number;
-    properties: string;
+    properties: ProductVariantProperties;
 }
+
+export type ProductVariantProperties = { [key: string]: string };

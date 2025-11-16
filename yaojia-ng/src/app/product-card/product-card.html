@@ -1,4 +1,4 @@
-<mat-card class="product-card" appearance="outlined">
+<mat-card class="product-card" appearance="outlined" [routerLink]="['/product/detail', product().productId]">
   <mat-card-header>
     <div mat-card-avatar class="product-header-image"></div>
     <mat-card-title>{{ product().productName }}</mat-card-title>

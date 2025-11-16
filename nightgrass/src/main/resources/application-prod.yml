@@ -4,10 +4,6 @@ spring:
     username: ${MYSQL_USERNAME}
     password: ${MYSQL_PASSWORD}
 
-server:
-  address: 127.0.0.1
-  port: 8080
-  forward-headers-strategy: framework
 
 oss:
   bucket-name: "yaojiabuy"

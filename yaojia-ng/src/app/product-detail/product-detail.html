@@ -1,1 +1,29 @@
-<p>product-detail works!</p>
+<div class="product-detail-container">
+    <!-- BreadCrum Navigation -->
+     <nav class="breadcrumb-nav">
+        <mat-chip-listbox>
+            <mat-chip-option>Home</mat-chip-option>
+            <mat-icon class="breadcrumb-separator">chevron_right</mat-icon>
+            <mat-chip-option>Products</mat-chip-option>
+            <mat-icon class="breadcrumb-separator">chevron_right</mat-icon>
+            <mat-chip-option selected>{{ product()?.productName }}</mat-chip-option>
+        </mat-chip-listbox>
+     </nav>
+
+     <!-- Main Product Section -->
+      <div class="product-main-section">
+        <div class="product-images">
+            <div class="main-image-container">
+                <img [src]="selectedImage() || product()?.imageUrl"
+                     [alt]="product()?.productName"
+                     class="main-product-image">
+                @if (product()?.gallery?.length) {
+
+
+                }
+                
+            </div>
+
+        </div>
+      </div>
+</div>

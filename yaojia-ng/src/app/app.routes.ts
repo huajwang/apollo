@@ -8,7 +8,7 @@ import { AuthGuard } from './guards/auth-guard';
 
 export const routes: Routes = [
   { path: '', component: Home, title: 'Yaojia Buy' },
-  { path: 'product/detail/:id', component: ProductDetail, title: 'Product detail' },
+  { path: 'product/detail/:productId', component: ProductDetail, title: 'Product detail' },
   { path: 'cart', component: CartView, title: 'Cart', canActivate: [AuthGuard] },
   { path: 'login', component: LoginComponent, title: 'OAuth2 Login'},
   { path: 'auth/callback', component: AuthCallbackComponent },

@@ -7,7 +7,7 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Prerender
   },
   {
-    path: 'product/detail/:id',
+    path: 'product/detail/:productId',
     renderMode: RenderMode.Prerender,
     getPrerenderParams: async () => {
       try {
@@ -15,11 +15,11 @@ export const serverRoutes: ServerRoute[] = [
       const response = await fetch('/api/product/all');
       const products = await response.json();
       // Extrac IDs and return in the format Angular expects
-      return products.map((product: Product) => ({ id: product.productId.toString() }));
+      return products.map((product: Product) => ({ productId: product.productId.toString() }));
       } catch( error ) {
         console.warn('Failed to fetch products for prerendering:', error);
         // Fall back to some default product IDs
-        return [ { id: '1' }, { id: '5' }, { id: '17' }]; // TODO - update preferred product IDs
+        return [ { productId: '1' }, { productId: '5' }, { productId: '7' }]; // TODO - update preferred product IDs
       }
    }
   },

@@ -36,7 +36,7 @@ import { ProductCard } from '../product-card/product-card';
 export class ProductDetail implements OnInit {
 
   // Input signal for the product
-  productId = input<number>();
+  // productId = input<number>();
 
   // Signals for component state
   product = signal<Product | null> (null);
@@ -50,7 +50,10 @@ export class ProductDetail implements OnInit {
   selectedImage = computed(() => {
     const prod = this.product();
     const index = this.selectedImageIndex();
-    return prod?.gallery?.[index] || prod?.imageUrl;
+    const galleryItem = prod?.gallery?.[index];
+    // Gallery items are objects with photoUrl property
+    const galleryUrl = galleryItem?.photoUrl;
+    return galleryUrl || prod?.imageUrl;
   });
 
   // Extract variant specifications (array values that represent user choices)
@@ -85,16 +88,16 @@ export class ProductDetail implements OnInit {
   ngOnInit(): void {
     // Get product ID from route parameters
     this.route.params.subscribe(params => {
-      const id = params['id'];
-      if (id) {
-        this.loadProduct(id);
-        this.loadRelatedProducts(id);
+      const productId = Number(params['productId']);
+      if (productId) {
+        this.loadProduct(productId);
+        this.loadRelatedProducts(productId);
       }
     });
   }
 
-  private loadProduct(id: string) {
-    this.productService.getProduct(id.trim()).subscribe({
+  private loadProduct(productId: number) {
+    this.productService.getProduct(productId).subscribe({
       next: (product) => {
         this.product.set(product);
         // Initialize default selections for all variant specifications
@@ -112,7 +115,7 @@ export class ProductDetail implements OnInit {
     });
   }
 
-  private loadRelatedProducts(productId: string) {
+  private loadRelatedProducts(productId: number) {
     this.productService.getRelatedProducts(productId).subscribe({
       next: (products) => {
         this.relatedProducts.set(products);

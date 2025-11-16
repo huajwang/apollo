@@ -16,6 +16,6 @@ export interface Product {
     flatDiscounted: boolean;
 
     // Extended properties for product detail page
-    gallery?: string[];
+    gallery?: Array<{ photoUrl: string }>;
     specifications?: { [key: string]: string | string[] };
 }

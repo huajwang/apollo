@@ -16,11 +16,11 @@ export class ProductService {
     return this.http.get<Product[]>(`${this.API_URL}/product/all`);
   }
 
-  getProduct(id: string) {
-    return this.http.get<Product>(`${this.API_URL}/product/detail/${id}`);
+  getProduct(productId: number) {
+    return this.http.get<Product>(`${this.API_URL}/product/detail/${productId}`);
   }
 
-  getRelatedProducts(productId: string) {
+  getRelatedProducts(productId: number) {
     return this.http.get<Product[]>(`${this.API_URL}/product/related/${productId}`);
   }
 }

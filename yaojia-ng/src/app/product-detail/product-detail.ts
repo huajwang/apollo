@@ -1,9 +1,9 @@
 import { Component, computed, inject, input, OnInit, signal } from '@angular/core';
 import { Product } from '../model/product';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ProductService } from '../service/product-service';
 import { CartStore } from '../cart/cart-store';
-import { CommonModule } from '@angular/common';
+import { CommonModule, KeyValuePipe, SlicePipe } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -19,6 +19,9 @@ import { ProductCard } from '../product-card/product-card';
   selector: 'app-product-detail',
   imports: [
     CommonModule,
+    RouterLink,
+    KeyValuePipe,
+    SlicePipe,
     MatCardModule,
     MatButtonModule,
     MatIconModule,
@@ -28,20 +31,17 @@ import { ProductCard } from '../product-card/product-card';
     MatInputModule,
     MatTabsModule,
     MatListModule,
-    // ProductCard
+    ProductCard
   ],
   templateUrl: './product-detail.html',
   styleUrl: './product-detail.scss'
 })
 export class ProductDetail implements OnInit {
 
-  // Input signal for the product
-  // productId = input<number>();
-
   // Signals for component state
-  product = signal<Product | null> (null);
+  product = signal<Product | null>(null);
   selectedImageIndex = signal<number>(0);
-  selectedSpecifications = signal<{[key: string]: string}>({});
+  selectedSpecifications = signal<{ [key: string]: string }>({});
   quantity = signal<number>(1);
   isInWishlist = signal<boolean>(false);
   relatedProducts = signal<Product[]>([]);
@@ -56,9 +56,8 @@ export class ProductDetail implements OnInit {
     return galleryUrl || prod?.imageUrl;
   });
 
-  // Extract variant specifications (array values that represent user choices)
   variantSpecifications = computed(() => {
-    const specs = this.product()?.specifications
+    const specs = this.product()?.specifications;
     if (!specs) return {};
 
     const variants: { [key: string]: string[] } = {};
@@ -68,25 +67,24 @@ export class ProductDetail implements OnInit {
     return variants;
   });
 
-  // Filter specifications to exclude variant options (automatically detects array-valued specs as variant)
   technicalSpecifications = computed(() => {
     const specs = this.product()?.specifications;
     if (!specs) return {};
 
     const filtered: { [key: string]: string | string[] } = {};
-    // Only include non-array values (technical specs, not user-selected variants)
     Object.entries(specs).forEach(([key, value]) => {
       if (!Array.isArray(value)) filtered[key] = value;
     });
     return filtered;
   });
 
+  variantKeys = computed(() => Object.keys(this.variantSpecifications()));
+
   private route = inject(ActivatedRoute);
   private productService = inject(ProductService);
   private cartStore = inject(CartStore);
-  
+
   ngOnInit(): void {
-    // Get product ID from route parameters
     this.route.params.subscribe(params => {
       const productId = Number(params['productId']);
       if (productId) {
@@ -100,17 +98,13 @@ export class ProductDetail implements OnInit {
     this.productService.getProduct(productId).subscribe({
       next: (product) => {
         this.product.set(product);
-        // Initialize default selections for all variant specifications
         const variants = this.variantSpecifications();
         const defaultSelections: { [key: string]: string } = {};
-
         Object.entries(variants).forEach(([key, values]) => {
           if (values.length > 0) defaultSelections[key] = values[0];
         });
-
         this.selectedSpecifications.set(defaultSelections);
       },
-
       error: (error) => console.error('Error loading product:', error)
     });
   }
@@ -120,7 +114,6 @@ export class ProductDetail implements OnInit {
       next: (products) => {
         this.relatedProducts.set(products);
       },
-
       error: (error) => console.error('Error loading related products:', error)
     });
   }
@@ -130,12 +123,15 @@ export class ProductDetail implements OnInit {
   }
 
   openImageDialog() {
-    // TODO - Implement image zoom/fullscreen dialog
     console.log('Opening image dialog');
   }
 
   onSpecificationSelect(specKey: string, value: string) {
     this.selectedSpecifications.update(current => ({ ...current, [specKey]: value }));
+  }
+
+  variantOptions(specKey: string): string[] {
+    return this.variantSpecifications()[specKey] || [];
   }
 
   increaseQuantity() {
@@ -152,25 +148,13 @@ export class ProductDetail implements OnInit {
     if (value && value > 0) this.quantity.set(value);
   }
 
-  // Add a product and its selected variant to cart
   addToCart() {
     const product = this.product();
     if (product) {
       const properties = this.selectedSpecifications();
       this.cartStore.addItem(product, this.quantity(), properties);
-      console.log(`Add ${this.quantity()} x ${product.productName} to cart with properties:`, properties);
-      
-      // Reset quantity after adding to cart
+      console.log(`Added ${this.quantity()} x ${product.productName} to cart`);
       this.quantity.set(1);
-    }
-  }
-
-  buyNow() {
-    const product = this.product();
-    if (product) {
-      // Add this to cart first
-      this.addToCart();
-      // TODO - Navigate to checkout or immediate purchase flow
     }
   }
 

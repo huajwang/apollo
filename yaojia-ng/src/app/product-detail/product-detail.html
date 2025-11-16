@@ -1,29 +1,184 @@
 <div class="product-detail-container">
-    <!-- BreadCrum Navigation -->
-     <nav class="breadcrumb-nav">
-        <mat-chip-listbox>
-            <mat-chip-option>Home</mat-chip-option>
-            <mat-icon class="breadcrumb-separator">chevron_right</mat-icon>
-            <mat-chip-option>Products</mat-chip-option>
-            <mat-icon class="breadcrumb-separator">chevron_right</mat-icon>
-            <mat-chip-option selected>{{ product()?.productName }}</mat-chip-option>
-        </mat-chip-listbox>
-     </nav>
+  <!-- Breadcrumb Navigation -->
+  <nav class="breadcrumb-nav">
+    <a href="/" class="breadcrumb-link">Home</a>
+    <mat-icon class="breadcrumb-separator">chevron_right</mat-icon>
+    <a href="/products" class="breadcrumb-link">Products</a>
+    <mat-icon class="breadcrumb-separator">chevron_right</mat-icon>
+    <span class="breadcrumb-current">{{ product()?.productName }}</span>
+  </nav>
 
-     <!-- Main Product Section -->
-      <div class="product-main-section">
-        <div class="product-images">
-            <div class="main-image-container">
-                <img [src]="selectedImage() || product()?.imageUrl"
-                     [alt]="product()?.productName"
-                     class="main-product-image">
-                @if (product()?.gallery?.length) {
+  <!-- Main Product Section -->
+  <div class="product-main-section">
+    <!-- Image Gallery -->
+    <div class="product-images">
+      <div class="main-image-container">
+        <div class="image-badge" *ngIf="product()?.showNewProductBadge">NEW</div>
+        <img
+          [src]="selectedImage() || product()?.imageUrl"
+          [alt]="product()?.productName"
+          class="main-product-image"
+        />
+        <button class="zoom-button" (click)="openImageDialog()" mat-icon-button>
+          <mat-icon>zoom_in</mat-icon>
+        </button>
+      </div>
 
+      <!-- Thumbnail Gallery -->
+      @if (product()?.gallery?.length) {
+      <div class="image-indicator">
+        <button
+          *ngFor="let item of product()?.gallery; let i = index"
+          class="thumbnail-btn"
+          [class.active]="selectedImageIndex() === i"
+          (click)="selectImage(i)"
+          [attr.aria-label]="'View image ' + (i + 1)"
+        >
+          <img [src]="item.photoUrl" [alt]="'Product image ' + (i + 1)" />
+        </button>
+      </div>
+      }
+    </div>
 
-                }
-                
-            </div>
+    <!-- Product Info Section -->
+    <div class="product-info">
+      <!-- Header -->
+      <div class="product-header">
+        <h1 class="product-title">{{ product()?.productName }}</h1>
+        <p class="product-category">Category: {{ product()?.category }}</p>
+      </div>
 
+      <!-- Price Section -->
+      <div class="price-section">
+        <div class="price-container">
+          @if (product()?.discountedPrice) {
+          <span class="price-original">{{ product()?.price | currency: 'CAD' }}</span>
+          <span class="price-discounted">{{ product()?.discountedPrice | currency: 'CAD' }}</span>
+          <span class="price-badge">
+            @if (product()?.percentageDiscounted) {
+            -{{ product()?.discountValue }}%
+            } @else {
+            Save {{ product()?.discountValue | currency: 'CAD' }}
+            }
+          </span>
+          } @else {
+          <span class="price-current">{{ product()?.price | currency: 'CAD' }}</span>
+          }
         </div>
       </div>
+
+      <!-- Description -->
+      <p class="product-description">{{ product()?.description }}</p>
+
+      <!-- Variant Selection -->
+      <div class="variants-section">
+        @for (specKey of variantKeys(); track specKey) {
+        <div class="variant-group">
+          <label class="variant-label">{{ specKey }}</label>
+          <div class="variant-options">
+            @for (value of variantOptions(specKey); track value) {
+            <button
+              class="variant-option"
+              [class.selected]="selectedSpecifications()[specKey] === value"
+              (click)="onSpecificationSelect(specKey, value)"
+            >
+              {{ value }}
+            </button>
+            }
+          </div>
+        </div>
+        }
+      </div>
+
+      <!-- Quantity and Actions -->
+      <div class="actions-section">
+        <div class="quantity-selector">
+          <label for="quantity">Quantity:</label>
+          <div class="quantity-control">
+            <button (click)="decreaseQuantity()" mat-icon-button [disabled]="quantity() <= 1">
+              <mat-icon>remove</mat-icon>
+            </button>
+            <input
+              id="quantity"
+              type="number"
+              [value]="quantity()"
+              (change)="onQuantityChange($event)"
+              min="1"
+              max="100"
+              class="quantity-input"
+            />
+            <button (click)="increaseQuantity()" mat-icon-button>
+              <mat-icon>add</mat-icon>
+            </button>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+          <button class="btn-add-cart" (click)="addToCart()" mat-raised-button color="primary">
+            <mat-icon>shopping_cart</mat-icon>
+            Add to Cart
+          </button>
+          <button
+            class="btn-wishlist"
+            (click)="toggleWishlist()"
+            mat-icon-button
+            [class.active]="isInWishlist()"
+          >
+            <mat-icon>{{ isInWishlist() ? 'favorite' : 'favorite_border' }}</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- Product Features -->
+      <div class="features-section">
+        <div class="feature-item">
+          <mat-icon>local_shipping</mat-icon>
+          <span>Free Shipping on Orders Over $50</span>
+        </div>
+        <div class="feature-item">
+          <mat-icon>security</mat-icon>
+          <span>Secure Checkout</span>
+        </div>
+        <div class="feature-item">
+          <mat-icon>history</mat-icon>
+          <span>30-Day Returns</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Technical Specifications -->
+  @if ((technicalSpecifications() | keyvalue).length > 0) {
+  <div class="specifications-section">
+    <h2>Specifications</h2>
+    <mat-accordion>
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>Details</mat-panel-title>
+        </mat-expansion-panel-header>
+        <div class="specs-grid">
+          @for (spec of technicalSpecifications() | keyvalue; track spec.key) {
+          <div class="spec-item">
+            <span class="spec-key">{{ spec.key }}:</span>
+            <span class="spec-value">{{ spec.value }}</span>
+          </div>
+          }
+        </div>
+      </mat-expansion-panel>
+    </mat-accordion>
+  </div>
+  }
+
+  <!-- Related Products -->
+  @if (relatedProducts()?.length) {
+  <div class="related-products-section">
+    <h2>You Might Also Like</h2>
+    <div class="related-products-grid">
+      @for (relatedProduct of relatedProducts() | slice: 0:4; track relatedProduct.productId) {
+      <product-card [product]="relatedProduct"></product-card>
+      }
+    </div>
+  </div>
+  }
 </div>

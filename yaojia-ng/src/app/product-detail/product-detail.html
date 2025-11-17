@@ -1,11 +1,17 @@
 <div class="product-detail-container">
+  @if (!productLoaded()) {
+    <div style="text-align: center; padding: 2rem; color: #999;">
+      <p>Loading product...</p>
+    </div>
+  } @else {
+
   <!-- Breadcrumb Navigation -->
   <nav class="breadcrumb-nav">
     <a href="/" class="breadcrumb-link">Home</a>
     <mat-icon class="breadcrumb-separator">chevron_right</mat-icon>
     <a href="/products" class="breadcrumb-link">Products</a>
     <mat-icon class="breadcrumb-separator">chevron_right</mat-icon>
-    <span class="breadcrumb-current">{{ product()?.productName }}</span>
+    <span class="breadcrumb-current">{{ product()!.productName }}</span>
   </nav>
 
   <!-- Main Product Section -->
@@ -13,10 +19,12 @@
     <!-- Image Gallery -->
     <div class="product-images">
       <div class="main-image-container">
-        <div class="image-badge" *ngIf="product()?.showNewProductBadge">NEW</div>
+        @if (product()!.showNewProductBadge) {
+            <div class="image-badge">NEW</div>
+        }
         <img
-          [src]="selectedImage() || product()?.imageUrl"
-          [alt]="product()?.productName"
+          [src]="selectedImage() || product()!.imageUrl"
+          [alt]="product()!.productName"
           class="main-product-image"
         />
         <button class="zoom-button" (click)="openImageDialog()" mat-icon-button>
@@ -25,10 +33,10 @@
       </div>
 
       <!-- Thumbnail Gallery -->
-      @if (product()?.gallery?.length) {
+      @if (product()!.gallery?.length) {
       <div class="image-indicator">
         <button
-          *ngFor="let item of product()?.gallery; let i = index"
+          *ngFor="let item of product()!.gallery; let i = index"
           class="thumbnail-btn"
           [class.active]="selectedImageIndex() === i"
           (click)="selectImage(i)"
@@ -44,31 +52,31 @@
     <div class="product-info">
       <!-- Header -->
       <div class="product-header">
-        <h1 class="product-title">{{ product()?.productName }}</h1>
-        <p class="product-category">Category: {{ product()?.category }}</p>
+        <h1 class="product-title">{{ product()!.productName }}</h1>
+        <p class="product-category">Category: {{ product()!.category }}</p>
       </div>
 
       <!-- Price Section -->
       <div class="price-section">
         <div class="price-container">
-          @if (product()?.discountedPrice) {
-          <span class="price-original">{{ product()?.price | currency: 'CAD' }}</span>
-          <span class="price-discounted">{{ product()?.discountedPrice | currency: 'CAD' }}</span>
+          @if (product()!.discountedPrice) {
+          <span class="price-original">{{ product()!.price | currency: 'CAD' }}</span>
+          <span class="price-discounted">{{ product()!.discountedPrice | currency: 'CAD' }}</span>
           <span class="price-badge">
-            @if (product()?.percentageDiscounted) {
-            -{{ product()?.discountValue }}%
+            @if (product()!.percentageDiscounted) {
+            -{{ product()!.discountValue }}%
             } @else {
-            Save {{ product()?.discountValue | currency: 'CAD' }}
+            Save {{ product()!.discountValue | currency: 'CAD' }}
             }
           </span>
           } @else {
-          <span class="price-current">{{ product()?.price | currency: 'CAD' }}</span>
+          <span class="price-current">{{ product()!.price | currency: 'CAD' }}</span>
           }
         </div>
       </div>
 
       <!-- Description -->
-      <p class="product-description">{{ product()?.description }}</p>
+      <p class="product-description">{{ product()!.description }}</p>
 
       <!-- Variant Selection -->
       <div class="variants-section">
@@ -171,7 +179,7 @@
   }
 
   <!-- Related Products -->
-  @if (relatedProducts()?.length) {
+  @if (relatedProducts().length) {
   <div class="related-products-section">
     <h2>You Might Also Like</h2>
     <div class="related-products-grid">
@@ -181,4 +189,6 @@
     </div>
   </div>
   }
+
+  } <!-- end @else -->
 </div>

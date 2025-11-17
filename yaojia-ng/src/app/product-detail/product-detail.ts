@@ -1,6 +1,6 @@
-import { Component, computed, inject, input, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { Product } from '../model/product';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { ProductService } from '../service/product-service';
 import { CartStore } from '../cart/cart-store';
 import { CommonModule, KeyValuePipe, SlicePipe } from '@angular/common';
@@ -19,7 +19,6 @@ import { ProductCard } from '../product-card/product-card';
   selector: 'app-product-detail',
   imports: [
     CommonModule,
-    RouterLink,
     KeyValuePipe,
     SlicePipe,
     MatCardModule,
@@ -45,6 +44,9 @@ export class ProductDetail implements OnInit {
   quantity = signal<number>(1);
   isInWishlist = signal<boolean>(false);
   relatedProducts = signal<Product[]>([]);
+
+  // Computed properties
+  productLoaded = computed(() => this.product() !== null);
 
   // Computed properties
   selectedImage = computed(() => {

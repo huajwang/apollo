@@ -48,6 +48,7 @@ export class CartStore {
             } else {
                 updatedItems = [...currentItems, { product, quantity, properties }]
             }
+            console.log('Cart updated items: ', updatedItems);
             // Sync to backend and save to localStorage
             this.syncToBackend(updatedItems);
             this.saveToLocalStorage(updatedItems);

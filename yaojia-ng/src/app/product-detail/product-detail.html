@@ -1,10 +1,4 @@
 <div class="product-detail-container">
-  @if (!productLoaded()) {
-    <div style="text-align: center; padding: 2rem; color: #999;">
-      <p>Loading product...</p>
-    </div>
-  } @else {
-
   <!-- Breadcrumb Navigation -->
   <nav class="breadcrumb-nav">
     <a href="/" class="breadcrumb-link">Home</a>
@@ -35,8 +29,8 @@
       <!-- Thumbnail Gallery -->
       @if (product()!.gallery?.length) {
       <div class="image-indicator">
+        @for (item of product()!.gallery; track $index; let i = $index) {
         <button
-          *ngFor="let item of product()!.gallery; let i = index"
           class="thumbnail-btn"
           [class.active]="selectedImageIndex() === i"
           (click)="selectImage(i)"
@@ -44,6 +38,7 @@
         >
           <img [src]="item.photoUrl" [alt]="'Product image ' + (i + 1)" />
         </button>
+        }
       </div>
       }
     </div>
@@ -53,7 +48,6 @@
       <!-- Header -->
       <div class="product-header">
         <h1 class="product-title">{{ product()!.productName }}</h1>
-        <p class="product-category">Category: {{ product()!.category }}</p>
       </div>
 
       <!-- Price Section -->
@@ -190,5 +184,4 @@
   </div>
   }
 
-  } <!-- end @else -->
 </div>

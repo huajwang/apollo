@@ -29,6 +29,6 @@ export class CartService {
   }
 
   updateCart(items: CartItem[]) {
-    return this.http.post(`${this.apiUrl}/update`, { items })
+    return this.http.post(`${this.apiUrl}/cart/update`, { items })
   }
 }

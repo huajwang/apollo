@@ -3,7 +3,6 @@ package com.goodfeel.nightgrass.serviceImpl
 import com.goodfeel.nightgrass.data.ReferralReward
 import com.goodfeel.nightgrass.repo.ReferralRepository
 import com.goodfeel.nightgrass.repo.ReferralRewardRepository
-import com.goodfeel.nightgrass.util.OrderStatus
 import com.goodfeel.nightgrass.util.ReferralRewardStatus
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -33,7 +32,7 @@ class ReferralTrackingService(
 
     fun rewardSharer(
         sharerId: String, reward: BigDecimal, orderId: Long, referralRewardStatus: ReferralRewardStatus): Mono<Void> {
-        logger.debug("Reward sharerId $sharerId on order $orderId is $reward")
+        logger.debug("Reward sharerId {} on order {} is {}", sharerId, orderId, reward)
         val referralReward = ReferralReward(
             null, sharerId, orderId, rewardAmount = reward, referralRewardStatus = referralRewardStatus)
         return referralRewardRepository.save(referralReward).then()

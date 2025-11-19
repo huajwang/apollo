@@ -1,1 +1,143 @@
-<p>cart-view works!</p>
+<div class="cart-container">
+  <!-- Header -->
+  <div class="cart-header">
+    <h1>Shopping Cart</h1>
+    <p class="item-count" *ngIf="!cartEmpty()">{{ cartItems().length }} {{ cartItems().length === 1 ? 'item' : 'items' }}</p>
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="loading-container">
+      <div class="loading-spinner"></div>
+      <p>Loading your cart...</p>
+    </div>
+  }
+
+  <!-- Empty Cart State -->
+  @if (cartEmpty() && !isLoading()) {
+    <div class="empty-cart">
+      <mat-icon class="empty-icon">shopping_cart</mat-icon>
+      <h2>Your cart is empty</h2>
+      <p>Start shopping to add items to your cart</p>
+      <a routerLink="/" mat-raised-button color="primary" class="continue-shopping-btn">
+        <mat-icon>arrow_back</mat-icon>
+        Continue Shopping
+      </a>
+    </div>
+  }
+
+  <!-- Cart Content -->
+  @if (!cartEmpty() && !isLoading()) {
+    <div class="cart-content">
+      <!-- Cart Items -->
+      <div class="cart-items-section">
+        <div class="items-list">
+          @for (item of cartItems(); track item.product.productId; let i = $index) {
+            <div class="cart-item" [attr.data-index]="i">
+              <!-- Product Image -->
+              <div class="item-image">
+                @if (item.product.gallery && item.product.gallery.length > 0) {
+                  <img [src]="item.product.gallery[0].photoUrl" [alt]="item.product.productName" />
+                } @else {
+                  <div class="placeholder-image">
+                    <mat-icon>image</mat-icon>
+                  </div>
+                }
+              </div>
+
+              <!-- Product Details -->
+              <div class="item-details">
+                <h3 class="product-name">{{ item.product.productName }}</h3>
+                <p class="product-sku">SKU: {{ item.product.productId }}</p>
+                <p class="product-price">${{ item.product.price | number : '1.2-2' }}</p>
+              </div>
+
+              <!-- Quantity Control -->
+              <div class="quantity-control">
+                <button 
+                  mat-icon-button 
+                  (click)="decreaseQuantity(item.product.productId)"
+                  [disabled]="item.quantity <= 1"
+                  class="qty-btn">
+                  <mat-icon>remove</mat-icon>
+                </button>
+                <span class="quantity-display">{{ item.quantity }}</span>
+                <button 
+                  mat-icon-button 
+                  (click)="increaseQuantity(item.product.productId)"
+                  [disabled]="item.quantity >= 99"
+                  class="qty-btn">
+                  <mat-icon>add</mat-icon>
+                </button>
+              </div>
+
+              <!-- Item Total -->
+              <div class="item-total">
+                <span class="total-label">Total</span>
+                <span class="total-price">${{ (item.product.price * item.quantity) | number : '1.2-2' }}</span>
+              </div>
+
+              <!-- Remove Button -->
+              <button 
+                mat-icon-button 
+                (click)="removeItem(item.product.productId)"
+                class="remove-btn"
+                matTooltip="Remove from cart">
+                <mat-icon>delete_outline</mat-icon>
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Order Summary Sidebar -->
+      <div class="order-summary">
+        <mat-card class="summary-card">
+          <mat-card-header>
+            <mat-card-title>Order Summary</mat-card-title>
+          </mat-card-header>
+
+          <mat-card-content>
+            <div class="summary-row">
+              <span class="summary-label">Subtotal</span>
+              <span class="summary-value">${{ subtotal() | number : '1.2-2' }}</span>
+            </div>
+
+            <div class="summary-row">
+              <span class="summary-label">Tax (8%)</span>
+              <span class="summary-value">${{ tax() | number : '1.2-2' }}</span>
+            </div>
+
+            <div class="summary-divider"></div>
+
+            <div class="summary-row total-row">
+              <span class="summary-label">Total</span>
+              <span class="total-amount">${{ total() | number : '1.2-2' }}</span>
+            </div>
+
+            <button mat-raised-button color="primary" class="checkout-btn" fullWidth>
+              <mat-icon>payment</mat-icon>
+              Proceed to Checkout
+            </button>
+
+            <button mat-stroked-button class="continue-btn" fullWidth routerLink="/">
+              <mat-icon>arrow_back</mat-icon>
+              Continue Shopping
+            </button>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Actions -->
+        <div class="cart-actions">
+          <button 
+            mat-stroked-button 
+            (click)="clearCart()"
+            class="clear-cart-btn">
+            <mat-icon>delete</mat-icon>
+            Clear Cart
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

@@ -1,85 +1,94 @@
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy, DestroyRef, signal, computed, effect } from '@angular/core';
 import { CartService } from '../cart-service';
 import { CartItem } from '../cart-item';
-import { Subscription } from 'rxjs';
 import { CartStore } from '../cart-store';
-import { Product } from '../../model/product';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatCardModule } from '@angular/material/card';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { CommonModule } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-cart-view',
-  imports: [],
+  standalone: true,
+  imports: [CommonModule, MatButtonModule, MatIconModule, MatCardModule, MatTooltipModule, RouterLink],
   templateUrl: './cart-view.html',
   styleUrl: './cart-view.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CartView implements OnInit, OnDestroy {
+export class CartView {
+  cartStore = inject(CartStore);
+  cartService = inject(CartService);
+  destroyRef = inject(DestroyRef);
 
-  cartStore = inject(CartStore)
-  cartService = inject(CartService)
-  cartItems: CartItem[] = []
-  private subscription = new Subscription()
+  isLoading = signal(true);
+  cartItems = this.cartStore.cartItems;
 
-  addProduct(product: Product) {
-    this.cartStore.addItem(product); // TODO
+  subtotal = computed(() => {
+    return this.cartItems().reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+  });
+
+  tax = computed(() => this.subtotal() * 0.08);
+
+  total = computed(() => this.subtotal() + this.tax());
+
+  cartEmpty = computed(() => this.cartItems().length === 0);
+
+  constructor() {
+    this.loadCart();
   }
 
-  increaseQuantity(productId: number) {
-    const items = this.cartStore.cartItems()
-    const currentItem: CartItem | undefined = items.find((item) => item.product.productId == productId)
-    if (currentItem) {
-      this.cartStore.updateQuantity(productId, currentItem.quantity + 1) // TODO - properties
+  increaseQuantity(productId: number): void {
+    const items = this.cartItems();
+    const currentItem = items.find((item) => item.product.productId === productId);
+    if (currentItem && currentItem.quantity < 99) {
+      this.cartStore.updateQuantity(productId, currentItem.quantity + 1);
     }
   }
 
-  decreaseQuantity(productId: number) {
-    const items = this.cartStore.cartItems()
-    const currentItem: CartItem | undefined = items.find((item) => item.product.productId == productId)
-    if (currentItem) {
-      this.cartStore.updateQuantity(productId, currentItem.quantity - 1) // TODO - properties?
+  decreaseQuantity(productId: number): void {
+    const items = this.cartItems();
+    const currentItem = items.find((item) => item.product.productId === productId);
+    if (currentItem && currentItem.quantity > 1) {
+      this.cartStore.updateQuantity(productId, currentItem.quantity - 1);
     }
   }
 
-  removeItem(id: number) {
-    this.cartStore.removeItem(id)
-    this.subscription.add(
-      this.cartService.clearCart().subscribe({
-        next: () => console.log("Remove item successfully: " + id),
+  removeItem(productId: number): void {
+    this.cartStore.removeItem(productId);
+    this.cartService
+      .clearCart()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        error: (err) => console.error('Error removing item:', err),
+      });
+  }
+
+  clearCart(): void {
+    if (confirm('Are you sure you want to clear your cart?')) {
+      this.cartStore.clearCart();
+      this.cartService
+        .clearCart()
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          error: (err) => console.error('Error clearing cart:', err),
+        });
+    }
+  }
+
+  private loadCart(): void {
+    this.cartService
+      .getCart()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => this.isLoading.set(false),
         error: (err) => {
-          console.log("Remove item failed: " + err)
-        }
-      })
-    )
-  }
-
-  clearCart() {
-    this.cartStore.clearCart()
-    
-    this.subscription.add(
-      this.cartService.clearCart().subscribe({
-        next: () => console.log("Clear shopping cart successfully"),
-        error: (err) => {
-          console.log("Error occurs while clear cart: " + err)
-          // TODO - set the original cart items back to cartStore?
-        }
-      })
-    )
-      
-  }
-
-  ngOnInit(): void {
-    this.subscription.add(
-      this.cartService.getCart().subscribe({
-      next: (cartItems) => {
-        this.cartItems = cartItems
-      },
-      error: (err) => {
-        console.log("Error get shopping cart: " + err)
-      }
-    }))
-    
-  }
-
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe()
+          console.error('Error loading cart:', err);
+          this.isLoading.set(false);
+        },
+      });
   }
 
 }

@@ -2,7 +2,9 @@
   <!-- Header -->
   <div class="cart-header">
     <h1>Shopping Cart</h1>
-    <p class="item-count" *ngIf="!cartEmpty()">{{ cartItems().length }} {{ cartItems().length === 1 ? 'item' : 'items' }}</p>
+    @if (!cartEmpty()) {
+        <p class="item-count">{{ cartItems().length }} {{ cartItems().length === 1 ? 'item' : 'items' }}</p>
+    }
   </div>
 
   <!-- Loading State -->
@@ -36,8 +38,8 @@
             <div class="cart-item" [attr.data-index]="i">
               <!-- Product Image -->
               <div class="item-image">
-                @if (item.product.gallery && item.product.gallery.length > 0) {
-                  <img [src]="item.product.gallery[0].photoUrl" [alt]="item.product.productName" />
+                @if (item.product.imageUrl) {
+                  <img [src]="item.product.imageUrl" [alt]="item.product.productName" />
                 } @else {
                   <div class="placeholder-image">
                     <mat-icon>image</mat-icon>
@@ -49,7 +51,7 @@
               <div class="item-details">
                 <h3 class="product-name">{{ item.product.productName }}</h3>
                 <p class="product-sku">SKU: {{ item.product.productId }}</p>
-                <p class="product-price">${{ item.product.price | number : '1.2-2' }}</p>
+                <p class="product-price">{{ item.product.price | currency : 'USD' }}</p>
               </div>
 
               <!-- Quantity Control -->
@@ -74,7 +76,7 @@
               <!-- Item Total -->
               <div class="item-total">
                 <span class="total-label">Total</span>
-                <span class="total-price">${{ (item.product.price * item.quantity) | number : '1.2-2' }}</span>
+                <span class="total-price">{{ (item.product.price * item.quantity) | currency : 'USD' }}</span>
               </div>
 
               <!-- Remove Button -->
@@ -100,19 +102,19 @@
           <mat-card-content>
             <div class="summary-row">
               <span class="summary-label">Subtotal</span>
-              <span class="summary-value">${{ subtotal() | number : '1.2-2' }}</span>
+              <span class="summary-value">{{ subtotal() | currency : 'USD' }}</span>
             </div>
 
             <div class="summary-row">
               <span class="summary-label">Tax (8%)</span>
-              <span class="summary-value">${{ tax() | number : '1.2-2' }}</span>
+              <span class="summary-value">{{ tax() | currency : 'USD' }}</span>
             </div>
 
             <div class="summary-divider"></div>
 
             <div class="summary-row total-row">
               <span class="summary-label">Total</span>
-              <span class="total-amount">${{ total() | number : '1.2-2' }}</span>
+              <span class="total-amount">{{ total() | currency : 'USD' }}</span>
             </div>
 
             <button mat-raised-button color="primary" class="checkout-btn" fullWidth>

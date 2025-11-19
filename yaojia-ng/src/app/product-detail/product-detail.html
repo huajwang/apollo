@@ -73,7 +73,8 @@
       <p class="product-description">{{ product()!.description }}</p>
 
       <!-- Variant Selection -->
-      <div class="variants-section">
+       @if(variantKeys().length > 0) {
+        <div class="variants-section">
         @for (specKey of variantKeys(); track specKey) {
         <div class="variant-group">
           <label class="variant-label">{{ specKey }}</label>
@@ -91,6 +92,7 @@
         </div>
         }
       </div>
+      }
 
       <!-- Quantity and Actions -->
       <div class="actions-section">

@@ -18,28 +18,6 @@ class JwtService(
     private val accessTokenExpirySecond = 15 * 60L // 15 minutes
     private val refreshTokenExpirySecond = 7 * 24 * 60 * 60L // 7 days
 
-    // Generate a JWT token with the guestId claim
-    fun generateJwt(guestId: String): String {
-        val now = Instant.now()
-        val claims = JwtClaimsSet.builder()
-            .issuedAt(now)
-            .expiresAt(now.plusSeconds(3600)) // Token valid for 1 hour
-            .claim("guestId", guestId)
-            .build()
-
-        return jwtEncoder.encode(JwtEncoderParameters.from(claims)).tokenValue
-    }
-
-    // Validate and extract the guestId from the JWT token
-    fun validateAndExtractGuestId(token: String): Mono<String> {
-        return jwtDecoder.decode(token)
-            .map { jwt -> jwt.claims["guestId"] as String }
-            .onErrorResume {
-                // Handle invalid or expired token
-                Mono.empty()
-            }
-    }
-
     data class TokenPair(
         val accessToken: String,
         val refreshToken: String,

@@ -3,10 +3,12 @@ import { Subscription } from 'rxjs';
 import { Product } from '../model/product';
 import { ProductService } from '../service/product-service';
 import { ProductCard } from '../product-card/product-card';
+import { MatFormField, MatLabel } from "@angular/material/form-field";
+import { MatInputModule } from '@angular/material/input';
 
 @Component({
   selector: 'app-home',
-  imports: [ProductCard],
+  imports: [ProductCard, MatFormField, MatLabel, MatInputModule],
   templateUrl: './home.html',
   styleUrl: './home.scss'
 })
@@ -19,12 +21,15 @@ export class Home implements OnInit, OnDestroy {
 
   productService = inject(ProductService);
 
-  filterResults(searchText: string) {
-    this.filteredProducts = this.products.filter((product: Product) => {
-      const searchTextLower = searchText.toLowerCase();
+  applyFilter(event: Event) {
+    const inputElement = event.target as HTMLInputElement;
+    const searchText = inputElement.value.trim();
+    const searchTextLower = searchText.toLowerCase();
+    this.filteredProducts = this.products.filter(product => {
+      console.log('Checking product:', product.productName);
       return product.productName.toLowerCase().includes(searchTextLower) ||
-             product.description.toLowerCase().includes(searchTextLower) ||
-             product.category.toLowerCase().includes(searchTextLower);
+      product.description.toLowerCase().includes(searchTextLower) ||
+      product.category.toLowerCase().includes(searchTextLower)
     });
   }
 
@@ -33,7 +38,7 @@ export class Home implements OnInit, OnDestroy {
       this.productService.getAllProducts().subscribe({
         next: (products) => {
           this.products = products;
-          this.filteredProducts = this.products;
+          this.filteredProducts = products;
         },
         error: (err) => {
           console.error('Error fetching products:', err);

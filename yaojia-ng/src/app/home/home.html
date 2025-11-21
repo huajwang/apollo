@@ -1,8 +1,8 @@
 <section>
-  <form>
-    <input type="text" placeholder="Filter by name, description or category" #filter />
-    <button class="primary" type="button" (click)="filterResults(filter.value)">Search</button>
-  </form>
+  <mat-form-field class="search-field">
+    <mat-label>Search</mat-label>
+    <input matInput type="text" placeholder="Search" #filter (keyup)="applyFilter($event)" />
+  </mat-form-field>
 </section>
 <section class="results">
   @for(product of filteredProducts; track $index) {

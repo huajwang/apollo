@@ -4,6 +4,7 @@ import { BehaviorSubject, catchError, Observable, of, tap, map, throwError, swit
 import { User } from '../auth/user';
 import { HttpClient, HttpHandlerFn, HttpRequest } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { decodeJwtPayload, getUserFromToken } from '../utils/jwt-utils';
 
 @Injectable({
   providedIn: 'root'
@@ -13,6 +14,7 @@ export class AuthService {
   private baseUrl = environment.baseUrl;
   private apiUrl = environment.apiUrl;
   private readonly TOKEN_KEY = 'auth_token';
+  private readonly RETURN_URL_KEY = 'auth_return_url';
 
   private http = inject(HttpClient)
   private router = inject(Router)
@@ -82,12 +84,52 @@ export class AuthService {
    */
   handleAuthCallback(token: string): Observable<User> {
     this.setAccessToken(token);
+    // Extract user info from token for immediate UI update (optimistic)
+    const userFromToken = getUserFromToken(token);
+    if (userFromToken) {
+      this.setUser(userFromToken);
+      // Navigate to the intended destination or home after login
+      const returnUrl = this.getAndClearReturnUrl();
+      this.router.navigateByUrl(returnUrl);
+
+      // Verify token with backend in background and update if different
+      // This provides security while maintaining good UX
+      this.getCurrentUser().pipe(
+        catchError(error => {
+          console.warn('Server verification failed, using token-based user info:', error);
+          return of(userFromToken)
+        })
+      ).subscribe({
+        next: (serverUser) => {
+          if (JSON.stringify(serverUser) !== JSON.stringify(userFromToken)) {
+            this.setUser(serverUser);
+          }
+        }, 
+        error: (err) => {
+          console.error('Error verifying user after login:', err);
+        }});
+
+        return of(userFromToken);
+    }
+    // Fallback to fetching user from backend
     return this.getCurrentUser().pipe(
       tap(user => {
         this.setUser(user);
-        this.router.navigate(['/']); // TODO - navigate to the intended target page?
+        const returnUrl = this.getAndClearReturnUrl();
+        this.router.navigateByUrl(returnUrl);
       })
     );
+}
+
+  /**
+   * Get the stored return URL and clear it
+   * Returns '/' if not valid URL is stored
+   */
+  private getAndClearReturnUrl() {
+    const storeUrl = sessionStorage.getItem(this.RETURN_URL_KEY);
+    sessionStorage.removeItem(this.RETURN_URL_KEY);
+    if (storeUrl) return storeUrl;
+    return '/';
   }
 
   /**
@@ -207,3 +249,5 @@ export class AuthService {
   }
 
 }
+
+

@@ -117,7 +117,7 @@
               <span class="total-amount">{{ total() | currency : 'USD' }}</span>
             </div>
 
-            <button mat-raised-button color="primary" class="checkout-btn" fullWidth>
+            <button mat-raised-button color="primary" class="checkout-btn" fullWidth (click)="proceedToCheckout()">
               <mat-icon>payment</mat-icon>
               Proceed to Checkout
             </button>

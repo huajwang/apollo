@@ -1,0 +1,185 @@
+<div class="checkout-container">
+  <!-- Success State -->
+  @if (orderPlaced()) {
+    <div class="success-state">
+      <div class="success-card">
+        <div class="success-icon">
+          <mat-icon>check_circle</mat-icon>
+        </div>
+        <h1>Order Placed Successfully!</h1>
+        <p class="order-number">Order #{{ (Math.random() * 1000000 | number : '1.0-0') }}</p>
+        <p class="confirmation-text">Thank you for your purchase. You will receive a confirmation email shortly.</p>
+        
+        <div class="success-actions">
+          <button mat-raised-button color="primary" (click)="continueShoppingAfterOrder()">
+            <mat-icon>shopping_bag</mat-icon>
+            Continue Shopping
+          </button>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <!-- Checkout Form -->
+    <div class="checkout-content">
+      <div class="checkout-form-section">
+        <h1>Checkout</h1>
+        
+        <form [formGroup]="checkoutForm" (ngSubmit)="placeOrder()">
+          <!-- Shipping Information -->
+          <mat-card class="form-section">
+            <mat-card-header>
+              <mat-card-title>Shipping Information</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <mat-form-field class="full-width">
+                <mat-label>Full Name</mat-label>
+                <input matInput formControlName="fullName" required />
+                @if (checkoutForm.get('fullName')?.hasError('required')) {
+                  <mat-error>Full name is required</mat-error>
+                }
+                @if (checkoutForm.get('fullName')?.hasError('minlength')) {
+                  <mat-error>Name must be at least 3 characters</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field class="full-width">
+                <mat-label>Email</mat-label>
+                <input matInput type="email" formControlName="email" required />
+                @if (checkoutForm.get('email')?.hasError('required')) {
+                  <mat-error>Email is required</mat-error>
+                }
+                @if (checkoutForm.get('email')?.hasError('email')) {
+                  <mat-error>Please enter a valid email</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field class="full-width">
+                <mat-label>Phone</mat-label>
+                <input matInput formControlName="phone" required />
+                @if (checkoutForm.get('phone')?.hasError('required')) {
+                  <mat-error>Phone is required</mat-error>
+                }
+                @if (checkoutForm.get('phone')?.hasError('pattern')) {
+                  <mat-error>Please enter a valid phone number</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field class="full-width">
+                <mat-label>Address</mat-label>
+                <input matInput formControlName="address" required />
+                @if (checkoutForm.get('address')?.hasError('required')) {
+                  <mat-error>Address is required</mat-error>
+                }
+              </mat-form-field>
+
+              <div class="form-row">
+                <mat-form-field class="half-width">
+                  <mat-label>City</mat-label>
+                  <input matInput formControlName="city" required />
+                  @if (checkoutForm.get('city')?.hasError('required')) {
+                    <mat-error>City is required</mat-error>
+                  }
+                </mat-form-field>
+
+                <mat-form-field class="half-width">
+                  <mat-label>Postal Code</mat-label>
+                  <input matInput formControlName="postalCode" required />
+                  @if (checkoutForm.get('postalCode')?.hasError('required')) {
+                    <mat-error>Postal code is required</mat-error>
+                  }
+                </mat-form-field>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Payment Method -->
+          <mat-card class="form-section">
+            <mat-card-header>
+              <mat-card-title>Payment Method</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <mat-radio-group formControlName="paymentMethod" class="payment-options">
+                <mat-radio-button value="credit-card">
+                  <mat-icon>credit_card</mat-icon>
+                  Credit/Debit Card
+                </mat-radio-button>
+                <mat-radio-button value="paypal">
+                  <mat-icon>account_balance_wallet</mat-icon>
+                  PayPal
+                </mat-radio-button>
+              </mat-radio-group>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Form Actions -->
+          <div class="form-actions">
+            <button mat-stroked-button type="button" (click)="goBackToCart()">
+              <mat-icon>arrow_back</mat-icon>
+              Back to Cart
+            </button>
+            <button 
+              mat-raised-button 
+              color="primary" 
+              type="submit"
+              [disabled]="isProcessing() || !checkoutForm.valid">
+              @if (isProcessing()) {
+                <mat-icon>hourglass_empty</mat-icon>
+                Processing...
+              } @else {
+                <mat-icon>payment</mat-icon>
+                Place Order
+              }
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Order Summary Sidebar -->
+      <div class="order-summary-section">
+        <mat-card class="summary-card">
+          <mat-card-header>
+            <mat-card-title>Order Summary</mat-card-title>
+          </mat-card-header>
+
+          <mat-card-content>
+            <div class="order-items">
+              @for (item of cartItems(); track item.product.productId) {
+                <div class="order-item">
+                  <div class="item-details">
+                    <span class="item-name">{{ item.product.productName }}</span>
+                    <span class="item-qty">x{{ item.quantity }}</span>
+                  </div>
+                  <span class="item-price">${{ (item.product.price * item.quantity) | number : '1.2-2' }}</span>
+                </div>
+              }
+            </div>
+
+            <div class="summary-divider"></div>
+
+            <div class="summary-row">
+              <span>Subtotal</span>
+              <span>${{ subtotal() | number : '1.2-2' }}</span>
+            </div>
+
+            <div class="summary-row">
+              <span>Tax (8%)</span>
+              <span>${{ tax() | number : '1.2-2' }}</span>
+            </div>
+
+            <div class="summary-row">
+              <span>Shipping</span>
+              <span class="free">FREE</span>
+            </div>
+
+            <div class="summary-divider"></div>
+
+            <div class="summary-row total">
+              <span>Total</span>
+              <span>${{ total() | number : '1.2-2' }}</span>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  }
+</div>

@@ -8,7 +8,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { CommonModule } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-cart-view',
@@ -21,6 +21,7 @@ import { RouterLink } from '@angular/router';
 export class CartView {
   cartStore = inject(CartStore);
   cartService = inject(CartService);
+  router = inject(Router);
   destroyRef = inject(DestroyRef);
 
   isLoading = signal(true);
@@ -89,6 +90,10 @@ export class CartView {
           this.isLoading.set(false);
         },
       });
+  }
+
+  proceedToCheckout(): void {
+    this.router.navigate(['/checkout']);
   }
 
 }

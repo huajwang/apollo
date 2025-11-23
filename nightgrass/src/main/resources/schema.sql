@@ -52,7 +52,9 @@ CREATE TABLE IF NOT EXISTS e_mall_user (
     email VARCHAR(255),
     customer_name VARCHAR(50),
     phone VARCHAR(15),
-    address VARCHAR(255)
+    address VARCHAR(255),
+    avatar VARCHAR(100),
+    provider VARCHAR(20)
 );
 
 CREATE TABLE IF NOT EXISTS e_mall_admin (

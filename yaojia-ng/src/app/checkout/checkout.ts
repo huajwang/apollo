@@ -87,10 +87,10 @@ export class CheckoutComponent {
           error: (err) => console.error('Error clearing cart after checkout:', err),
         });
 
-      // Redirect to home after 3 seconds
+      // Redirect to home after 10 seconds
       setTimeout(() => {
         this.router.navigate(['/']);
-      }, 3000);
+      }, 10000);
     }, 1500);
   }
 

@@ -1,6 +1,8 @@
 package com.goodfeel.nightgrass.rest.auth
 
 import com.goodfeel.nightgrass.serviceImpl.JwtService
+import com.goodfeel.nightgrass.util.AuthenticationUtility
+import com.goodfeel.nightgrass.repo.UserRepository
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -24,25 +26,37 @@ data class TokenResponse(val accessToken: String, val refreshToken: String, val 
 
 @RestController
 @RequestMapping("/api/auth")
-class AuthApiController(private val jwtService: JwtService) {
+class AuthApiController(
+    private val jwtService: JwtService,
+    private val authenticationUtility: AuthenticationUtility,
+    private val userRepository: UserRepository
+) {
 
     private val logger = LoggerFactory.getLogger(AuthApiController::class.java)
 
     @GetMapping("/user")
     fun getCurrentUser(exchange: ServerWebExchange): Mono<ResponseEntity<UserInfo>> {
-        return extractTokenFromRequest(exchange)
-            .doOnNext { logger.debug("Extracted token from request: $it") }
-            .flatMap { token ->
-                jwtService.validateToken(token).doOnNext { logger.debug("Token validation result: {}", it) }
-                    .flatMap { jwt ->
-                        jwtService.getUserInfoFromToken(jwt)
-                            .map { userInfo ->
-                                logger.debug("Retrieved user info from token: {}", userInfo)
-                                ResponseEntity.ok(userInfo)
-                            }
+        return authenticationUtility.extractOAuthIdFromExchange(exchange)
+            .flatMap { oauthId ->
+                userRepository.findByOauthId(oauthId)
+                    .map { user ->
+                        logger.debug("Retrieved user from database: {}", user.id)
+                        ResponseEntity.ok(
+                            UserInfo(
+                                id = user.oauthId ?: "",
+                                name = user.nickName ?: "",
+                                email = user.email,
+                                avatar = user.avatar,
+                                provider = user.provider
+                            )
+                        )
                     }
-                    .switchIfEmpty(Mono.just(ResponseEntity.status(401).build()))
-            }.switchIfEmpty(Mono.just(ResponseEntity.status(401).build()))
+            }
+            .switchIfEmpty(Mono.just(ResponseEntity.status(401).build()))
+            .onErrorResume {
+                logger.debug("Failed to retrieve current user: {}", it.message)
+                Mono.just(ResponseEntity.status(401).build())
+            }
     }
 
     @PostMapping("/refresh")
@@ -59,17 +73,5 @@ class AuthApiController(private val jwtService: JwtService) {
                 )
             }
             .switchIfEmpty(Mono.just(ResponseEntity.status(401).build()))
-    }
-
-    private fun extractTokenFromRequest(exchange: ServerWebExchange): Mono<String> {
-        val token = exchange.request.headers.getFirst("Authorization")
-        logger.debug("Authorization header token: {}", token)
-        if (token != null) {
-            return token.takeIf { it.startsWith("Bearer ") }
-                ?.substringAfter("Bearer ")
-                ?.let { Mono.just(it) }
-                ?: Mono.empty()
-        }
-        return Mono.empty()
     }
 }

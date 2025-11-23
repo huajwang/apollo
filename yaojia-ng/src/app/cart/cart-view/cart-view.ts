@@ -9,6 +9,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { CommonModule } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../service/auth-service';
 
 @Component({
   selector: 'app-cart-view',
@@ -21,6 +22,7 @@ import { Router, RouterLink } from '@angular/router';
 export class CartView {
   cartStore = inject(CartStore);
   cartService = inject(CartService);
+  authService = inject(AuthService);
   router = inject(Router);
   destroyRef = inject(DestroyRef);
 
@@ -41,6 +43,26 @@ export class CartView {
     this.loadCart();
   }
 
+  private loadCart(): void {
+    // Only load from backend if user is logged in
+    // Guests use localStorage which is already loaded in CartStore
+    if (!this.authService.isLoggedIn()) {
+      this.isLoading.set(false);
+      return;
+    }
+
+    this.cartService
+      .getCart()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => this.isLoading.set(false),
+        error: (err) => {
+          console.error('Error loading cart from backend:', err);
+          this.isLoading.set(false);
+        },
+      });
+  }
+
   increaseQuantity(productId: number): void {
     const items = this.cartItems();
     const currentItem = items.find((item) => item.product.productId === productId);
@@ -59,8 +81,17 @@ export class CartView {
 
   removeItem(productId: number): void {
     this.cartStore.removeItem(productId);
+    // Only sync to backend if logged in
+    if (!this.authService.isLoggedIn()) {
+      return;
+    }
+    // Sync the updated cart items to backend by setting quantity to 0 for removed item
+    const updatedItems = this.cartItems().map(item => ({
+      ...item,
+      quantity: item.product.productId === productId ? 0 : item.quantity
+    }));
     this.cartService
-      .clearCart()
+      .updateCart(updatedItems)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         error: (err) => console.error('Error removing item:', err),
@@ -70,26 +101,16 @@ export class CartView {
   clearCart(): void {
     if (confirm('Are you sure you want to clear your cart?')) {
       this.cartStore.clearCart();
-      this.cartService
-        .clearCart()
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe({
-          error: (err) => console.error('Error clearing cart:', err),
-        });
+      // Only sync to backend if logged in
+      if (this.authService.isLoggedIn()) {
+        this.cartService
+          .clearCart()
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe({
+            error: (err) => console.error('Error clearing cart:', err),
+          });
+      }
     }
-  }
-
-  private loadCart(): void {
-    this.cartService
-      .getCart()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => this.isLoading.set(false),
-        error: (err) => {
-          console.error('Error loading cart:', err);
-          this.isLoading.set(false);
-        },
-      });
   }
 
   proceedToCheckout(): void {

@@ -10,25 +10,21 @@ import { Observable } from 'rxjs';
 export class CartService {
   
   private http = inject(HttpClient);
-  readonly apiUrl = environment.apiUrl;
+  readonly apiUrl = `${environment.apiUrl}/cart`;
 
   getCart(): Observable<CartItem[]> {
-    return this.http.get<CartItem[]>(this.apiUrl);
+    return this.http.get<CartItem[]>(`${this.apiUrl}/my-cart`);
   }
 
   addToCart(cartItem: CartItem): Observable<CartItem> {
-    return this.http.post<CartItem>(this.apiUrl, cartItem);
-  }
-
-  getCartItems(): Observable<CartItem[]> {
-    return this.http.get<CartItem[]>(this.apiUrl)
+    return this.http.post<CartItem>(`${this.apiUrl}`, cartItem);
   }
 
   clearCart(): Observable<void> {
-    return this.http.delete<void>(this.apiUrl)
+    return this.http.delete<void>(`${this.apiUrl}/clear`);
   }
 
-  updateCart(items: CartItem[]) {
-    return this.http.post(`${this.apiUrl}/cart/update`, { items })
+  updateCart(items: CartItem[]): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/update`, { items });
   }
 }

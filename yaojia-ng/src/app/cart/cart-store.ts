@@ -96,10 +96,19 @@ export class CartStore {
         const emptyCart: CartItem[] = [];
         this.items.set(emptyCart);
 
-        // Sync to backend and save to localStorage
-        this.syncToBackend(emptyCart);
-        this.saveToLocalStorage(emptyCart);
-
+        // Clear from backend (if logged in) and localStorage
+        if (this.authService.isLoggedIn()) {
+            this.cartService.clearCart().pipe(
+                catchError(error => {
+                    console.error('Failed to clear cart on backend:', error);
+                    return of(void 0);
+                })
+            ).subscribe(() => {
+                this.saveToLocalStorage(emptyCart);
+            });
+        } else {
+            this.saveToLocalStorage(emptyCart);
+        }
     }
 
     /**
@@ -168,6 +177,8 @@ export class CartStore {
      * Prevents race condition caused by user rapid interactions. The previous pending
      * HTTP request will be cancelled so that no multiple requests are in flight. Also reduce
      * uneccessary server/network loads.
+     * 
+     * Only syncs when user is authenticated. Guest/unauthenticated users rely on localStorage only.
      */
     private syncToBackend(items: CartItem[]) {
         if (this.authService.isLoggedIn()) {

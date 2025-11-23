@@ -1,5 +1,6 @@
 package com.goodfeel.nightgrass.config
 
+import com.goodfeel.nightgrass.service.UserService
 import com.goodfeel.nightgrass.serviceImpl.JwtService
 import com.goodfeel.nightgrass.util.AuthenticationSuccessHandler
 import org.springframework.context.annotation.Bean
@@ -22,6 +23,7 @@ import java.net.URI
 open class SecurityConfig(
     private val clientRegistrationRepository: ReactiveClientRegistrationRepository,
     private val jwtService: JwtService,
+    private val userService: UserService,
     private val reactiveJwtDecoder: ReactiveJwtDecoder,
     private val adminAuthenticationManager: AdminAuthenticationManager
 ) {
@@ -55,7 +57,7 @@ open class SecurityConfig(
                 exchange
                     .pathMatchers(
                         "/", "/product/**", "/videos/**", "/blog/**", "/buynow", "/pay/**", "/home/**", "/search/**",
-                        "/login", "/error", "/cart/**", "/checkout", "/update-user-info", "/workshop/**", "/legal/**",
+                        "/login", "/error", "/api/cart/**", "/checkout", "/update-user-info", "/workshop/**", "/legal/**",
                         "/api/product/**",
                         "/images/**", "/css/**", "/icons/**", "/js/**", "/webjars/**",
                     ).permitAll()
@@ -70,7 +72,7 @@ open class SecurityConfig(
                     ReactiveWeChatAuthorizationRequestResolver(clientRegistrationRepository)
                 )
                 // Use custom handler
-                it.authenticationSuccessHandler(AuthenticationSuccessHandler(jwtService))
+                it.authenticationSuccessHandler(AuthenticationSuccessHandler(jwtService, userService))
             }
             .oauth2Client(Customizer.withDefaults<OAuth2ClientSpec>())
             // Enable JWT validation for incoming requests

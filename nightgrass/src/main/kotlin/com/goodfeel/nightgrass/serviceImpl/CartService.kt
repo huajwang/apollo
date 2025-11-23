@@ -70,57 +70,32 @@ open class CartService(
      * If shopping cart is not yet in DB, insert one. TODO - to confirm shopping cart insertion
      */
     override fun getCartForUserOrGuest(user: User): Mono<Cart> {
-        return when {
-            user.oauthId != null -> {
-                cartRepository.findByUserId(user.oauthId)
-                    .switchIfEmpty(
-                        Mono.defer {
-                            val newCart =
-                                Cart(cartId = null, userId = user.oauthId, guestId = null, total = BigDecimal.ZERO)
-                            cartRepository.save(newCart)
-                                .onErrorResume {
-                                    if (it is DuplicateKeyException) {
-                                        logger.debug("The cart already exists for user: ${user.oauthId}")
-                                        cartRepository.findByUserId(user.oauthId)
-                                    } else {
-                                        Mono.error(it)
-                                    }
-                                }
-                                .doOnError {
-                                    logger.error("Failed to get save or get cart for user: ${user.oauthId}")
-                                }
-                        }.doOnSuccess {
-                            logger.debug("new cart is saved for userId: $it")
-                        }
-                    )
-            }
-
-            user.guestId != null -> {
-                cartRepository.findByGuestId(user.guestId)
-                    .switchIfEmpty(
-                        Mono.defer {
-                            val newCart =
-                                Cart(cartId = null, userId = null, guestId = user.guestId, total = BigDecimal.ZERO)
-                            cartRepository.save(newCart)
-                                .onErrorResume {
-                                    if (it is DuplicateKeyException) {
-                                        logger.debug("The cart already exists for guest: ${user.guestId}")
-                                        cartRepository.findByGuestId(user.guestId)
-                                    } else {
-                                        Mono.error(it)
-                                    }
-                                }
-                                .doOnError {
-                                    logger.error("Error to save or get for guest: ${user.guestId}")
-                                }
-                        }.doOnSuccess {
-                            logger.debug("new cart is saved for guest: $it")
-                        }
-                    )
-            }
-
-            else -> Mono.error(IllegalArgumentException("Either userId or guestId must be provided"))
+        // Only authenticated users can access backend cart
+        if (user.oauthId == null) {
+            return Mono.error(IllegalArgumentException("User must be authenticated to access cart"))
         }
+
+        return cartRepository.findByUserId(user.oauthId)
+            .switchIfEmpty(
+                Mono.defer {
+                    val newCart =
+                        Cart(cartId = null, userId = user.oauthId, guestId = null, total = BigDecimal.ZERO)
+                    cartRepository.save(newCart)
+                        .onErrorResume {
+                            if (it is DuplicateKeyException) {
+                                logger.debug("The cart already exists for user: ${user.oauthId}")
+                                cartRepository.findByUserId(user.oauthId)
+                            } else {
+                                Mono.error(it)
+                            }
+                        }
+                        .doOnError {
+                            logger.error("Failed to get save or get cart for user: ${user.oauthId}")
+                        }
+                }.doOnSuccess {
+                    logger.debug("new cart is saved for userId: $it")
+                }
+            )
     }
 
     private fun findOrAddCartItem(cart: Cart, addCartRequest: AddCartRequest): Mono<Cart> {
@@ -263,18 +238,11 @@ open class CartService(
     /**
      * If cart item with itemID does not exist, emit an error downstream
      */
-    open fun updateQuantity(itemId: Long, quantity: Int): Mono<CartItem> {
+    override fun updateQuantity(itemId: Long, quantity: Int): Mono<CartItem> {
         return cartItemRepository.findById(itemId)
             .flatMap { cartItem: CartItem ->
                 cartItem.quantity = quantity
                 cartItemRepository.save(cartItem)
-                    //  ensure that the total is only updated when a cart item is selected
-                    .then(
-                        if (cartItem.isSelected)
-                            updateCartTotalAndNotifyCartUpdate(cartItem.cartId)
-                        else Mono.empty()
-                    )
-                    .thenReturn(cartItem)
             }
             .switchIfEmpty(Mono.error(IllegalArgumentException("Cart item with ID $itemId not found")))
     }
@@ -599,6 +567,25 @@ open class CartService(
             .doOnNext { totalQuantity ->
                 logger.debug("Centralized notification: Cart item count is now $totalQuantity")
                 sendCartUpdate(totalQuantity)
+            }
+    }
+
+    @Transactional
+    override fun clearCart(user: User): Mono<Void> {
+        return getCartForUserOrGuest(user)
+            .flatMap { cart ->
+                cartItemRepository.findByCartId(cart.cartId!!)
+                    .collectList()
+                    .flatMap { items ->
+                        cartItemRepository.deleteAll(items)
+                            .then(cartRepository.updateTotal(cart.cartId, BigDecimal.ZERO))
+                            .then(notifyCartUpdate(cart.cartId).then())
+                    }
+            }
+            .doOnNext { logger.info("Cart cleared for user: ${user.oauthId ?: user.guestId}") }
+            .onErrorResume { error ->
+                logger.error("Error clearing cart for user: ${user.oauthId ?: user.guestId}", error)
+                Mono.error(error)
             }
     }
 

@@ -15,5 +15,7 @@ data class User(
     val email: String? = null,
     var customerName: String? = null,
     var phone: String? = null,
-    var address: String? = null
+    var address: String? = null,
+    var avatar: String? = null,
+    var provider: String? = null
 )

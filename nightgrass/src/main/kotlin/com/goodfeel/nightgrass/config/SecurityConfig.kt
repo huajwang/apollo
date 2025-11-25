@@ -57,7 +57,7 @@ open class SecurityConfig(
                 exchange
                     .pathMatchers(
                         "/", "/product/**", "/videos/**", "/blog/**", "/buynow", "/pay/**", "/home/**", "/search/**",
-                        "/login", "/error", "/api/cart/**", "/checkout", "/update-user-info", "/workshop/**", "/legal/**",
+                        "/login", "/error", "/api/cart/**", "/api/orders/**", "/checkout", "/legal/**",
                         "/api/product/**",
                         "/images/**", "/css/**", "/icons/**", "/js/**", "/webjars/**",
                     ).permitAll()

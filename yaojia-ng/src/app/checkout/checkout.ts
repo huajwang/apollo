@@ -1,6 +1,8 @@
 import { Component, inject, computed, signal, DestroyRef } from '@angular/core';
 import { CartStore } from '../cart/cart-store';
 import { CartService } from '../cart/cart-service';
+import { OrderService, PlaceOrderRequest } from '../service/order-service';
+import { AuthService } from '../service/auth-service';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
@@ -32,6 +34,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 export class CheckoutComponent {
   cartStore = inject(CartStore);
   cartService = inject(CartService);
+  orderService = inject(OrderService);
+  authService = inject(AuthService);
   router = inject(Router);
   destroyRef = inject(DestroyRef);
   fb = inject(FormBuilder);
@@ -71,27 +75,62 @@ export class CheckoutComponent {
 
     this.isProcessing.set(true);
 
-    // Simulate order placement
-    setTimeout(() => {
-      this.orderPlaced.set(true);
-      this.isProcessing.set(false);
+    // Prepare order request
+    const formValue = this.checkoutForm.value;
+    const orderRequest: PlaceOrderRequest = {
+      items: this.cartItems().map(item => ({
+        productId: item.product.productId,
+        quantity: item.quantity,
+        price: item.product.price,
+        properties: Object.keys(item.properties).length > 0 ? JSON.stringify(item.properties) : undefined
+      })),
+      subtotal: this.subtotal(),
+      tax: this.tax(),
+      total: this.total(),
+      shippingFee: 0, // Can be calculated based on address if needed
+      fullName: formValue.fullName || '',
+      email: formValue.email || '',
+      phone: formValue.phone || '',
+      address: formValue.address || '',
+      city: formValue.city || '',
+      postalCode: formValue.postalCode || '',
+      paymentMethod: formValue.paymentMethod || 'credit-card'
+    };
 
-      // Clear cart after successful order
-      this.cartStore.clearCart();
+    // Send order to backend
+    this.orderService
+      .placeOrder(orderRequest)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (order) => {
+          console.log(`Order placed successfully: ${order.orderNo}`);
+          this.orderPlaced.set(true);
+          this.isProcessing.set(false);
 
-      // Optionally clear backend cart
-      this.cartService
-        .clearCart()
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe({
-          error: (err) => console.error('Error clearing cart after checkout:', err),
-        });
+          // Clear cart after successful order
+          this.cartStore.clearCart();
 
-      // Redirect to home after 10 seconds
-      setTimeout(() => {
-        this.router.navigate(['/']);
-      }, 10000);
-    }, 1500);
+          // Only clear backend cart if user is logged in
+          if (this.authService.isLoggedIn()) {
+            this.cartService
+              .clearCart()
+              .pipe(takeUntilDestroyed(this.destroyRef))
+              .subscribe({
+                error: (err) => console.error('Error clearing cart after checkout:', err),
+              });
+          }
+
+          // Redirect to home after 10 seconds
+          setTimeout(() => {
+            this.router.navigate(['/']);
+          }, 10000);
+        },
+        error: (err) => {
+          console.error('Error placing order:', err);
+          this.isProcessing.set(false);
+          alert('Failed to place order. Please try again.');
+        }
+      });
   }
 
   continueShoppingAfterOrder(): void {

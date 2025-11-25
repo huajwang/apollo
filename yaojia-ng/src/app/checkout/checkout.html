@@ -123,11 +123,15 @@
               type="submit"
               [disabled]="isProcessing() || !checkoutForm.valid">
               @if (isProcessing()) {
-                <mat-icon>hourglass_empty</mat-icon>
-                Processing...
+                <ng-container>
+                  <mat-icon>hourglass_empty</mat-icon>
+                  Processing...
+                </ng-container>
               } @else {
-                <mat-icon>payment</mat-icon>
-                Place Order
+                <ng-container>
+                  <mat-icon>payment</mat-icon>
+                  Place Order
+                </ng-container>
               }
             </button>
           </div>

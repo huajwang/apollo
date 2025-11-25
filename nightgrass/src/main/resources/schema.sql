@@ -124,7 +124,7 @@ CREATE TABLE IF NOT EXISTS e_mall_order (
     logistics_no VARCHAR(30),
     delivery_date TIMESTAMP NULL DEFAULT NULL,
     pay_no VARCHAR(20),
-    pay_type VARCHAR(10),
+    pay_type VARCHAR(50),
     remark VARCHAR(255)
 );
 

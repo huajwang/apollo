@@ -49,12 +49,25 @@ export class CheckoutComponent {
   cartItems = this.cartStore.cartItems;
 
   subtotal = computed(() => {
-    return this.cartItems().reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+    const items = this.cartItems();
+    const sum = items.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+    // Round to 2 decimal places to avoid floating point precision issues
+    return Math.round(sum * 100) / 100;
   });
 
-  tax = computed(() => this.subtotal() * 0.08);
+  tax = computed(() => {
+    const subtotalValue = this.subtotal();
+    const taxAmount = subtotalValue * 0.08;
+    // Round to 2 decimal places
+    return Math.round(taxAmount * 100) / 100;
+  });
 
-  total = computed(() => this.subtotal() + this.tax());
+  total = computed(() => {
+    const subtotalValue = this.subtotal();
+    const taxValue = this.tax();
+    // Round to 2 decimal places
+    return Math.round((subtotalValue + taxValue) * 100) / 100;
+  });
 
   // Simple checkout form
   checkoutForm = this.fb.group({

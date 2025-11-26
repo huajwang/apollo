@@ -16,17 +16,20 @@
 <!-- User Menu -->
 <mat-menu #menu="matMenu" class="user-menu">
   <!-- Section 1: Account -->
-  <div>
-    <h3 matMenuLabel class="menu-label">
-      <mat-icon class="menu-icon">person</mat-icon>
-      <span>Account</span>
+  <div class="menu-section account-section">
+    <h3 matMenuLabel class="menu-label section-header account-header icon-only">
+      @if (isLoggedIn()) {
+        <mat-icon class="menu-icon user-logged-in">account_circle</mat-icon>
+      } @else {
+        <mat-icon class="menu-icon user-guest">person_outline</mat-icon>
+      }
     </h3>
-    <button mat-menu-item>
-      <mat-icon>loyalty</mat-icon>
+    <button mat-menu-item class="menu-item">
+      <mat-icon class="item-icon">loyalty</mat-icon>
       <span>积分 (Points)</span>
     </button>
-    <button mat-menu-item>
-      <mat-icon>card_giftcard</mat-icon>
+    <button mat-menu-item class="menu-item">
+      <mat-icon class="item-icon">card_giftcard</mat-icon>
       <span>礼品卡 (Gift Card)</span>
     </button>
   </div>
@@ -35,17 +38,16 @@
   <mat-divider></mat-divider>
 
   <!-- Section 2: Settings -->
-  <div>
-    <h3 matMenuLabel class="menu-label">
+  <div class="menu-section settings-section">
+    <h3 matMenuLabel class="menu-label section-header settings-header icon-only">
       <mat-icon class="menu-icon">settings</mat-icon>
-      <span>Settings</span>
     </h3>
-    <button mat-menu-item>
-      <mat-icon>location_on</mat-icon>
+    <button mat-menu-item class="menu-item">
+      <mat-icon class="item-icon">location_on</mat-icon>
       <span>Address</span>
     </button>
-    <button mat-menu-item>
-      <mat-icon>history</mat-icon>
+    <button mat-menu-item class="menu-item">
+      <mat-icon class="item-icon">history</mat-icon>
       <span>Order History</span>
     </button>
   </div>

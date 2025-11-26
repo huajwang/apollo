@@ -9,14 +9,115 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+// User Menu Styling
+.user-menu {
+  min-width: 250px !important;
+  border-radius: 12px;
+}
+
+.menu-section {
+  padding: 8px 0;
+}
+
 .menu-label {
   display: flex;
   align-items: center;
   gap: 8px;
   margin: 0;
+  padding: 12px 16px;
+  font-weight: 600;
+  font-size: 14px;
+
+  &.icon-only {
+    padding: 12px 16px;
+    justify-content: center;
+  }
 }
 
 .menu-icon {
   display: flex;
   align-items: center;
 }
+
+// Account Section
+.account-section {
+  .section-header.account-header {
+    color: #1976d2;
+    background-color: rgba(25, 118, 210, 0.08);
+    border-radius: 8px 8px 0 0;
+
+    .menu-icon {
+      font-size: 28px;
+      width: 28px;
+      height: 28px;
+
+      &.user-logged-in {
+        color: #1976d2;
+      }
+
+      &.user-guest {
+        color: #757575;
+        opacity: 0.6;
+      }
+    }
+  }
+
+  .menu-item {
+    color: #555;
+    font-size: 13px;
+
+    &:hover {
+      background-color: rgba(25, 118, 210, 0.05) !important;
+
+      .item-icon {
+        color: #1976d2;
+      }
+    }
+
+    .item-icon {
+      color: #1976d2;
+      margin-right: 12px;
+    }
+  }
+}
+
+// Settings Section
+.settings-section {
+  .section-header.settings-header {
+    color: #388e3c;
+    background-color: rgba(56, 142, 60, 0.08);
+    border-radius: 0 0 8px 8px;
+  }
+
+  .menu-item {
+    color: #555;
+    font-size: 13px;
+
+    &:hover {
+      background-color: rgba(56, 142, 60, 0.05) !important;
+
+      .item-icon {
+        color: #388e3c;
+      }
+    }
+
+    .item-icon {
+      color: #388e3c;
+      margin-right: 12px;
+    }
+  }
+}
+
+// Menu Item Styling
+.menu-item {
+  display: flex;
+  align-items: center;
+  transition: all 0.2s ease;
+  padding: 8px 16px;
+  line-height: 1.5;
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+

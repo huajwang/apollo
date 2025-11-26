@@ -1,5 +1,5 @@
 <mat-toolbar class="sticky-toolbar">
-  <button matIconButton class="example-icon" aria-label="Example icon-button with menu icon">
+  <button mat-icon-button [matMenuTriggerFor]="menu" class="example-icon" aria-label="Menu">
     <mat-icon>menu</mat-icon>
   </button>
   <span>Yaojia Buy</span>
@@ -12,5 +12,43 @@
     <mat-icon>shopping_cart</mat-icon>
   </a>
 </mat-toolbar>
+
+<!-- User Menu -->
+<mat-menu #menu="matMenu" class="user-menu">
+  <!-- Section 1: Account -->
+  <div>
+    <h3 matMenuLabel class="menu-label">
+      <mat-icon class="menu-icon">person</mat-icon>
+      <span>Account</span>
+    </h3>
+    <button mat-menu-item>
+      <mat-icon>loyalty</mat-icon>
+      <span>积分 (Points)</span>
+    </button>
+    <button mat-menu-item>
+      <mat-icon>card_giftcard</mat-icon>
+      <span>礼品卡 (Gift Card)</span>
+    </button>
+  </div>
+
+  <!-- Divider -->
+  <mat-divider></mat-divider>
+
+  <!-- Section 2: Settings -->
+  <div>
+    <h3 matMenuLabel class="menu-label">
+      <mat-icon class="menu-icon">settings</mat-icon>
+      <span>Settings</span>
+    </h3>
+    <button mat-menu-item>
+      <mat-icon>location_on</mat-icon>
+      <span>Address</span>
+    </button>
+    <button mat-menu-item>
+      <mat-icon>history</mat-icon>
+      <span>Order History</span>
+    </button>
+  </div>
+</mat-menu>
 
 <router-outlet></router-outlet>

@@ -12,6 +12,21 @@
   gap: 8px;
 }
 
+.app-title {
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 18px;
+  transition: opacity 0.2s ease;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:active {
+    opacity: 0.6;
+  }
+}
+
 // Search Bar Styling
 .search-form-field {
   max-width: 250px;

@@ -70,7 +70,7 @@ class AuthenticationSuccessHandler(
                 response.addCookie(refreshTokenCookie)
 
                 response.statusCode = HttpStatus.FOUND
-                response.headers.location = URI.create(Utility.FRONTEND_URL + "/auth/callback?token=$${tokenPair.accessToken}")
+                response.headers.location = URI.create(Utility.FRONTEND_URL + "/auth/callback?token=${tokenPair.accessToken}")
                 response.setComplete()
             }
             .onErrorResume { error ->

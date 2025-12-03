@@ -13,7 +13,7 @@ export class LoginComponent {
 
   loading = false;
 
-  loginWith(provider: 'google' | 'tiktok' | 'wechat' | 'facebook'): void {
+  loginWith(provider: 'google' | 'tiktok' | 'wechat' | 'facebook' | 'github'): void {
     this.loading = true;
     this.authService.loginWithProvider(provider);
   }

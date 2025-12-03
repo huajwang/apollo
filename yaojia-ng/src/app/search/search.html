@@ -1,0 +1,42 @@
+<div class="search-page-container">
+  <!-- Search Bar at Top -->
+  <div class="search-bar-container">
+    <mat-form-field class="search-form-field" appearance="outline">
+      <mat-label>Search products</mat-label>
+      <input
+        #searchInput
+        matInput
+        type="text"
+        placeholder="Enter product name, description, or category..."
+        (input)="onSearchInput($event)"
+        [value]="searchQuery()"
+      />
+      <mat-icon matPrefix>search</mat-icon>
+    </mat-form-field>
+  </div>
+
+  <!-- Search Results -->
+  <div class="search-results">
+    @if (searchQuery() && filteredProducts.length === 0) {
+      <div class="no-results">
+        <mat-icon>search_off</mat-icon>
+        <p>No products found for "{{ searchQuery() }}"</p>
+      </div>
+    } @else if (filteredProducts.length > 0) {
+      <div class="results-header">
+        <h2>{{ searchQuery() ? 'Search Results' : 'All Products' }}</h2>
+        <span class="result-count">({{ filteredProducts.length }} products)</span>
+      </div>
+      <div class="products-grid">
+        @for (product of filteredProducts; track product.productId) {
+          <product-card [product]="product"></product-card>
+        }
+      </div>
+    } @else {
+      <div class="no-products">
+        <mat-icon>inventory_2</mat-icon>
+        <p>No products available</p>
+      </div>
+    }
+  </div>
+</div>

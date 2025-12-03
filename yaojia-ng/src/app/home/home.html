@@ -1,9 +1,3 @@
-<section>
-  <mat-form-field class="search-field">
-    <mat-label>Search</mat-label>
-    <input matInput type="text" placeholder="Search" #filter (keyup)="applyFilter($event)" />
-  </mat-form-field>
-</section>
 <section class="results">
   @for(product of filteredProducts; track $index) {
     <product-card [product]="product"></product-card>

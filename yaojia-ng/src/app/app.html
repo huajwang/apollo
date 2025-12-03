@@ -4,6 +4,12 @@
   </button>
   <span>Yaojia Buy</span>
   <span class="example-spacer"></span>
+  
+  <!-- Search Icon -->
+  <button mat-icon-button [routerLink]="['/search']" class="example-icon" aria-label="Search">
+    <mat-icon>search</mat-icon>
+  </button>
+
   <button matIconButton class="example-icon favorite-icon" aria-label="Example icon-button with heart icon">
     <mat-icon>share</mat-icon>
   </button>
@@ -21,16 +27,21 @@
       @if (isLoggedIn()) {
         <mat-icon class="menu-icon user-logged-in">account_circle</mat-icon>
       } @else {
-        <mat-icon class="menu-icon user-guest">person_outline</mat-icon>
+        <div class="guest-header">
+          <mat-icon class="menu-icon user-guest">person_outline</mat-icon>
+          <button mat-button color="primary" class="login-btn" (click)="authService.loginWithProvider('google')">
+            Login
+          </button>
+        </div>
       }
     </h3>
     <button mat-menu-item class="menu-item">
       <mat-icon class="item-icon">loyalty</mat-icon>
-      <span>积分 (Points)</span>
+      <span>Points</span>
     </button>
     <button mat-menu-item class="menu-item">
       <mat-icon class="item-icon">card_giftcard</mat-icon>
-      <span>礼品卡 (Gift Card)</span>
+      <span>Gift Card</span>
     </button>
   </div>
 

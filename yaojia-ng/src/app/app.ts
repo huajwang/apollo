@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { RouterOutlet, RouterModule } from '@angular/router';
 import {MatToolbarModule} from '@angular/material/toolbar';
 import {MatButtonModule} from '@angular/material/button';
@@ -16,7 +16,6 @@ import { AuthService } from './service/auth-service';
   styleUrl: './app.scss'
 })
 export class App {
-  protected readonly title = signal('yaojia-ng');
   cartStore = inject(CartStore);
   authService = inject(AuthService);
   

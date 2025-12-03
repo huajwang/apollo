@@ -20,19 +20,24 @@ class CustomReactiveOAuth2UserService(private val userRepository: UserRepository
             .flatMap { oAuth2User: OAuth2User ->
 
                 val registrationId = userRequest.clientRegistration.registrationId
-                logger.info("Processing OAuth2 login for provider: $registrationId")
+                logger.debug("Processing OAuth2 login for provider: {}, {}", registrationId, oAuth2User)
                 val oauthId = when (registrationId) {
                     "google" -> oAuth2User.getAttribute<String>("sub")
                     "facebook" -> oAuth2User.getAttribute<String>("id")
                     "wechat" -> oAuth2User.getAttribute<String>("openid")
                     "tiktok" -> oAuth2User.getAttribute("open_id")
+                    "github" -> oAuth2User.getAttribute<String>("login")
                     else -> throw IllegalArgumentException("Unsupported OAuth2 provider: $registrationId")
                 } ?: throw RuntimeException("OAuth ID is null for provider: $registrationId")
 
                 // Extract additional attributes (if any)
                 val name = when (registrationId) {
-                    "google", "facebook" -> oAuth2User.getAttribute<String>("name")
+                    "google", "facebook", "github" -> oAuth2User.getAttribute<String>("name")
                     "wechat" -> oAuth2User.getAttribute<String>("nickname")
+                    else -> null
+                }
+                val avatar = when (registrationId) {
+                    "github" -> oAuth2User.getAttribute<String>("avatar_url")
                     else -> null
                 }
                 val email = oAuth2User.getAttribute<String>("email") // Email may not be available for WeChat
@@ -42,7 +47,9 @@ class CustomReactiveOAuth2UserService(private val userRepository: UserRepository
                             val newUser = User(
                                 oauthId = oauthId,
                                 nickName = name,
-                                email = email
+                                email = email,
+                                provider = registrationId,
+                                avatar = avatar
                             )
                             Mono.just(newUser)
                         }.doOnSuccess {

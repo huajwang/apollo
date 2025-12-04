@@ -5,17 +5,21 @@ import com.goodfeel.nightgrass.serviceImpl.JwtService
 import com.goodfeel.nightgrass.util.AuthenticationSuccessHandler
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.convert.converter.Converter
 import org.springframework.http.HttpStatus
+import org.springframework.security.authentication.AbstractAuthenticationToken
 import org.springframework.security.config.Customizer
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
 import org.springframework.security.config.web.server.ServerHttpSecurity
 import org.springframework.security.config.web.server.ServerHttpSecurity.*
 import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository
+import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder
 import org.springframework.security.web.server.SecurityWebFilterChain
 import org.springframework.security.web.server.authentication.ServerAuthenticationFailureHandler
 import org.springframework.security.web.server.authentication.ServerAuthenticationSuccessHandler
 import org.springframework.security.web.server.util.matcher.PathPatternParserServerWebExchangeMatcher
+import reactor.core.publisher.Mono
 import java.net.URI
 
 @Configuration
@@ -58,7 +62,7 @@ open class SecurityConfig(
                     .pathMatchers(
                         "/", "/product/**", "/videos/**", "/blog/**", "/buynow", "/pay/**", "/home/**", "/search/**",
                         "/login", "/error", "/api/cart/**", "/api/orders/**", "/checkout", "/legal/**",
-                        "/api/product/**",
+                        "/api/product/**", "/api/auth/user", "/api/auth/refresh",
                         "/images/**", "/css/**", "/icons/**", "/js/**", "/webjars/**",
                     ).permitAll()
                     // All other paths require authentication
@@ -78,7 +82,7 @@ open class SecurityConfig(
             // Enable JWT validation for incoming requests
             .oauth2ResourceServer { resourceServer ->
                 resourceServer.jwt { jwtConfigurer ->
-                    jwtConfigurer.jwtDecoder(reactiveJwtDecoder) // Explicitly specify the JwtDecoder bean
+                    jwtConfigurer.jwtDecoder(reactiveJwtDecoder)
                 }
             }
             .csrf { it.disable() }

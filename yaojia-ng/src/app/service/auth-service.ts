@@ -31,41 +31,52 @@ export class AuthService {
   private refreshToken: string | null = null;
 
   constructor() {
-    this.loadUserFromToken()
+    // Empty constructor - no initialization needed on startup
+    // User is loaded on demand (OAuth callback, login, etc.)
   }
 
   getAccessToken(): string | null {
+    // Try to get from memory first, then fall back to localStorage
+    if (this.accessToken) {
+      return this.accessToken;
+    }
+    const storedToken = localStorage.getItem(this.TOKEN_KEY);
+    if (storedToken) {
+      this.accessToken = storedToken;
+    }
     return this.accessToken;
   }
 
   setAccessToken(token: string | null) {
+    console.log('setAccessToken called with:', token ? token.substring(0, 20) + '...' : 'null');
     this.accessToken = token;
+    if (token) {
+      localStorage.setItem(this.TOKEN_KEY, token);
+      console.log('Token saved to localStorage, verify:', localStorage.getItem(this.TOKEN_KEY)?.substring(0, 20) + '...');
+    } else {
+      localStorage.removeItem(this.TOKEN_KEY);
+    }
   }
 
   getRefreshToken() {
+    if (this.refreshToken) {
+      return this.refreshToken;
+    }
+    const storedRefresh = localStorage.getItem('refresh_token');
+    if (storedRefresh) {
+      this.refreshToken = storedRefresh;
+    }
     return this.refreshToken;
   }
 
   setRefreshToken(refreshToken: string) {
     this.refreshToken = refreshToken;
+    localStorage.setItem('refresh_token', refreshToken);
   }
 
   /**
    * Load user from stored token on app initialization
    */
-  private loadUserFromToken(): void {
-    const token = this.getToken();
-    if (token) {
-      this.getCurrentUser().subscribe({
-        next: user => this.setUser(user),
-        error: () => {
-          // Token is invalid, clear it
-          this.setAccessToken(null);
-        }
-      })
-    }
-  }
-  
   isLoggedIn() {
     return this.getToken() !== null && this.user() !== null;
   }
@@ -74,7 +85,7 @@ export class AuthService {
    * Start OAuth2 login flow
    * Angular redirects to backend OAuth2 endpoint
    */
-  loginWithProvider(provider: 'google' | 'tiktok' | 'wechat' | 'facebook'): void {
+  loginWithProvider(provider: 'google' | 'tiktok' | 'wechat' | 'facebook' | 'github'): void {
     const authUrl = `${this.baseUrl}/oauth2/authorization/${provider}`;
     window.location.href = authUrl;
   }
@@ -83,9 +94,14 @@ export class AuthService {
    * Handle OAuth2 callback with token from YaojiaBuy backend
    */
   handleAuthCallback(token: string): Observable<User> {
+    console.log('handleAuthCallback called with token:', token.substring(0, 20) + '...');
     this.setAccessToken(token);
+    console.log('Token stored. getAccessToken() now returns:', this.getAccessToken()?.substring(0, 20) + '...');
+    
     // Extract user info from token for immediate UI update (optimistic)
     const userFromToken = getUserFromToken(token);
+    console.log('User extracted from token:', userFromToken);
+    
     if (userFromToken) {
       this.setUser(userFromToken);
       // Navigate to the intended destination or home after login
@@ -150,7 +166,8 @@ export class AuthService {
   }
 
   private setUser(user: User | null): void {
-    
+    this.user.set(user);
+    this.userSubject.next(user);
   }
 
   private logout(): Observable<any> {

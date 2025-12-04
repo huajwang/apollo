@@ -57,6 +57,7 @@ class JwtService(
                     .claim("avatarUrl", userAvatarUrl)
                     .claim("provider", provider)
                     .claim("type", "access")
+                    .claim("scope", "read write")
                     .build()
             )
         ).tokenValue
@@ -110,7 +111,8 @@ class JwtService(
             attributes.containsKey("sub") -> attributes["sub"].toString() // Google
             attributes.containsKey("open_id") -> attributes["open_id"].toString() // TikTok
             attributes.containsKey("openid") -> attributes["openid"].toString() // WeChat
-            attributes.containsKey("id") -> attributes["id"].toString() // Facebook
+            attributes.containsKey("login") -> attributes["login"].toString() // GitHub (use login as unique ID for consistency with DB)
+            attributes.containsKey("id") -> attributes["id"].toString() // Facebook, GitHub (numeric ID)
             // general fallback for other providers
             attributes.containsKey("user_id") -> attributes["user_id"].toString()
             // use oauth2User.name as last resort

@@ -33,17 +33,19 @@ class CartApiController(
         @RequestBody cartUpdateRequest: CartUpdateRequest,
         exchange: ServerWebExchange
     ): Mono<ResponseEntity<CartResponse>> {
-        return authenticationUtility.extractUserFromExchange(exchange)
+        val guestSessionId = exchange.request.headers.getFirst("X-Guest-Session-Id")
+        
+        return authenticationUtility.extractUserFromExchangeOptional(exchange)
             .flatMap { user ->
-                cartService.getCartForUserOrGuest(user)
+                cartService.getCartForUserOrGuest(user, guestSessionId)
                     .flatMap { cart ->
                         // Process each cart item update in parallel
                         Flux.fromIterable(cartUpdateRequest.items)
                             .flatMap { updatedItem ->
                                 if (updatedItem.itemId == null) {
-                                    // Item has no ID - skip (malformed request)
-                                    logger.warn("Received cart item without ID, skipping")
-                                    Mono.empty<Long>()
+                                    // Item has no ID - this is a new item to be added
+                                    logger.debug("Adding new cart item for product: ${updatedItem.productId}")
+                                    cartService.addCartItemToCart(cart, updatedItem)
                                 } else if (updatedItem.quantity <= 0) {
                                     // Quantity 0 or negative - remove item
                                     logger.debug("Removing cart item: ${updatedItem.itemId}")
@@ -56,29 +58,36 @@ class CartApiController(
                             }
                             .collectList() // Wait for all updates to complete
                             .flatMap {
-                                // After updates, fetch updated cart items and return
-                                cartService.getCartItemsForCart(cart.cartId!!)
-                                    .collectList()
-                                    .map { updatedItems ->
-                                        ResponseEntity.ok(CartResponse(items = updatedItems))
-                                    }
+                                // After all item updates, recalculate cart total
+                                cartService.updateCartTotalByCartId(cart.cartId!!)
+                                    .then(cartService.getCartItemsForCart(cart.cartId)
+                                        .collectList()
+                                        .map { updatedItems ->
+                                            ResponseEntity.ok(CartResponse(items = updatedItems))
+                                        }
+                                    )
                             }
                     }
                     .doOnSuccess {
-                        logger.info("Cart updated successfully for user: ${user.oauthId}")
+                        val userInfo = if (user != null) "authenticated user: ${user.oauthId}" else "guest"
+                        logger.info("Cart updated successfully for $userInfo")
                     }
             }
             .onErrorResume { error ->
                 logger.error("Failed to update cart", error)
-                Mono.just(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build())
+                Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build())
             }
     }
 
     @GetMapping("/my-cart")
     fun myCart(exchange: ServerWebExchange): Mono<ResponseEntity<CartResponse>> {
-        return authenticationUtility.extractUserFromExchange(exchange)
+        val guestSessionId = exchange.request.headers.getFirst("X-Guest-Session-Id")
+        
+        return authenticationUtility.extractUserFromExchangeOptional(exchange)
             .flatMap { user ->
-                cartService.getCartForUserOrGuest(user)
+                logger.debug("myCart called: user=${user?.oauthId}")
+                
+                cartService.getCartForUserOrGuest(user, guestSessionId)
                     .flatMap { cart ->
                         cartService.getCartItemsForCart(cart.cartId!!)
                             .collectList()
@@ -86,20 +95,28 @@ class CartApiController(
                                 ResponseEntity.ok(CartResponse(items = cartItems))
                             }
                     }
-                    .doOnSuccess { logger.info("Retrieved cart for user: ${user.oauthId}") }
+                    .doOnSuccess {
+                        val userInfo = if (user != null) "authenticated user: ${user.oauthId}" else "guest"
+                        logger.info("Retrieved cart for $userInfo")
+                    }
             }
             .onErrorResume { error ->
                 logger.error("Failed to retrieve cart", error)
-                Mono.just(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build())
+                Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build())
             }
     }
 
     @DeleteMapping("/clear")
     fun clearCart(exchange: ServerWebExchange): Mono<Void> {
-        return authenticationUtility.extractUserFromExchange(exchange)
+        val guestSessionId = exchange.request.headers.getFirst("X-Guest-Session-Id")
+        
+        return authenticationUtility.extractUserFromExchangeOptional(exchange)
             .flatMap { user ->
-                cartService.clearCart(user)
-                    .doOnSuccess { logger.info("Cart cleared successfully for user: ${user.oauthId}") }
+                cartService.clearCart(user, guestSessionId)
+                    .doOnSuccess {
+                        val userInfo = if (user != null) "authenticated user: ${user.oauthId}" else "guest: $guestSessionId"
+                        logger.info("Cart cleared successfully for $userInfo")
+                    }
             }
             .onErrorResume { error ->
                 logger.error("Failed to clear cart", error)
@@ -107,4 +124,43 @@ class CartApiController(
             }
     }
 
+    @PostMapping("/merge")
+    fun mergeGuestCartToUserCart(
+        @RequestBody mergeRequest: MergeCartRequest,
+        exchange: ServerWebExchange
+    ): Mono<ResponseEntity<CartResponse>> {
+        return authenticationUtility.extractUserFromExchange(exchange)
+            .flatMap { user ->
+                // Only authenticated users can merge carts
+                val guestSessionId: String = mergeRequest.guestSessionId
+                if (guestSessionId.isBlank()) {
+                    return@flatMap Mono.just(ResponseEntity.badRequest().build())
+                }
+                
+                if (user.oauthId == null) {
+                    return@flatMap Mono.just(ResponseEntity.badRequest().build())
+                }
+
+                cartService.mergeCart(user.oauthId, guestSessionId)
+                    .then(cartService.getCartForUserOrGuest(user, null)
+                        .flatMap { cart ->
+                            cartService.getCartItemsForCart(cart.cartId!!)
+                                .collectList()
+                                .map { items ->
+                                    logger.info("Cart merged successfully for user: ${user.oauthId} from guest: ${mergeRequest.guestSessionId}")
+                                    ResponseEntity.ok(CartResponse(items = items))
+                                }
+                        }
+                    )
+            }
+            .onErrorResume { error ->
+                logger.error("Failed to merge cart", error)
+                Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build())
+            }
+    }
+
 }
+
+data class MergeCartRequest(
+    val guestSessionId: String
+)

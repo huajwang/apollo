@@ -14,6 +14,8 @@ interface ProductRepository : ReactiveCrudRepository<Product, Long> {
             "FROM e_mall_product p\n" +
             "LEFT JOIN e_mall_discount d\n" +
             "ON p.product_id = d.product_id\n" +
+            "AND (d.start_date IS NULL OR d.start_date <= NOW())\n" +
+            "AND (d.end_date IS NULL OR d.end_date >= NOW())\n" +
             "WHERE p.category = 'BIG_HIT'\n" +
             "LIMIT 3;")
     fun findTop3BigHits(): Flux<ProductDto>
@@ -23,6 +25,8 @@ interface ProductRepository : ReactiveCrudRepository<Product, Long> {
             "FROM e_mall_product p\n" +
             "LEFT JOIN e_mall_discount d\n" +
             "ON p.product_id = d.product_id\n" +
+            "AND (d.start_date IS NULL OR d.start_date <= NOW())\n" +
+            "AND (d.end_date IS NULL OR d.end_date >= NOW())\n" +
             "WHERE p.category = 'POPULAR' || p.category = 'NEW'\n" +
             "LIMIT 8;")
     fun findTop8PopularOrNewProducts(): Flux<ProductDto>
@@ -32,6 +36,8 @@ interface ProductRepository : ReactiveCrudRepository<Product, Long> {
         "FROM e_mall_product p\n" +
         "LEFT JOIN e_mall_discount d\n" +
         "ON p.product_id = d.product_id\n" +
+        "AND (d.start_date IS NULL OR d.start_date <= NOW())\n" +
+        "AND (d.end_date IS NULL OR d.end_date >= NOW())\n" +
         "WHERE p.product_id = :id")
     fun findByProductId(id: Long): Mono<ProductDto>
 
@@ -39,7 +45,9 @@ interface ProductRepository : ReactiveCrudRepository<Product, Long> {
         "p.additional_info, p.category, d.discount_type, d.discount_value\n" +
         "FROM e_mall_product p\n" +
         "LEFT JOIN e_mall_discount d\n" +
-        "ON p.product_id = d.product_id"
+        "ON p.product_id = d.product_id\n" +
+        "AND (d.start_date IS NULL OR d.start_date <= NOW())\n" +
+        "AND (d.end_date IS NULL OR d.end_date >= NOW())"
     )
     fun findAllProducts(): Flux<ProductDto>
 

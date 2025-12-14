@@ -8,9 +8,9 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     const token = authService.getAccessToken();
     
     // Public endpoints that allow unauthenticated access
-    // But authenticated users can still send their token
+    // Do NOT add Authorization header for these endpoints
     const publicEndpoints = [
-        '/oauth2', '/login', '/api/product', '/auth/refresh', '/api/cart', '/api/orders'
+        '/oauth2', '/login', '/api/product', '/auth/refresh'
     ];
     const isPublicEndpoint = publicEndpoints.some(endpoint => 
         req.url.includes(endpoint)
@@ -18,11 +18,24 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
     // If request already has Authorization header, don't override it
     if (req.headers.has('Authorization')) {
+        console.warn('Request already has Authorization header, skipping auth interceptor.');
         return next(req);
     }
 
-    // Add token if available, regardless of whether endpoint is public or private
+    // For public endpoints, don't add token even if available
+    // This ensures public APIs work without authentication
+    if (isPublicEndpoint) {
+        return next(req).pipe(
+            catchError(error => {
+                // For public endpoints, don't attempt token refresh on 401
+                return throwError(() => error);
+            })
+        );
+    }
+
+    // For private endpoints, add token if available
     if (token) {
+        console.log('Adding Authorization header with token:', token);
         const authReq = req.clone({ setHeaders: { Authorization: `Bearer ${token}` } });
         return next(authReq).pipe(
             catchError(error => {
@@ -34,11 +47,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         );
     }
 
-    // No token available - send request as-is
-    // Public endpoints will work without auth, private endpoints will get 401
+    // No token available for private endpoint - send request as-is
+    // Will get 401 which may trigger redirect to login
     return next(req).pipe(
         catchError(error => {
-            if (error.status == 401 && !isPublicEndpoint) {
+            if (error.status == 401) {
                 return authService.refreshTokenAndRetry(req, next);
             }
             return throwError(() => error);

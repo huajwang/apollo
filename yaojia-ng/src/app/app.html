@@ -25,7 +25,10 @@
   <div class="menu-section account-section">
     <h3 matMenuLabel class="menu-label section-header account-header icon-only">
       @if (isLoggedIn()) {
-        <mat-icon class="menu-icon user-logged-in">account_circle</mat-icon>
+        <div class="logged-in-header">
+          <mat-icon class="menu-icon user-logged-in">account_circle</mat-icon>
+          <span class="username">{{ currentUser()?.name }}</span>
+        </div>
       } @else {
         <div class="guest-header">
           <mat-icon class="menu-icon user-guest">person_outline</mat-icon>

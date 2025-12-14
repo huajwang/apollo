@@ -20,7 +20,8 @@ export class CartStore {
 
     constructor() {
         this.loadCartFromStorage();
-        this.syncWithBackend();
+        // syncWithBackend() is called from AuthService when user logs in
+        // This avoids race conditions during app initialization
     }
 
     readonly totalQuantity = computed(() =>
@@ -35,10 +36,15 @@ export class CartStore {
     // Add item to cart, or increase quantity if already exists
     addItem(product: Product, quantity: number = 1, properties: ProductVariantProperties = {}) {
         this.items.update( (currentItems) => {
+            // Defensive check: ensure currentItems is an array
+            if (!Array.isArray(currentItems)) {
+                console.error('currentItems is not an array:', currentItems);
+                return [{ product, quantity, properties }];
+            }
+            
             const existingItem = currentItems.find((item) => 
                 item.product.productId == product.productId && this.propertiesMatch(item.properties, properties)
-
-        );
+            );
 
             let updatedItems: CartItem[];
             if (existingItem) {
@@ -112,7 +118,34 @@ export class CartStore {
     }
 
     /**
-     * Initial sync shopping cart on app loading
+     * Sync cart with backend when user logs in
+     * Merges any guest items (in localStorage) with the user's backend cart
+     * Public method called from AuthService after login
+     */
+    syncCartAfterLogin() {
+        // Try to merge guest cart (if any) into user cart
+        const guestSessionId = sessionStorage.getItem('guest-session-id');
+        if (guestSessionId) {
+            this.cartService.mergeGuestCart(guestSessionId).pipe(
+                catchError(error => {
+                    console.warn('Failed to merge guest cart, continuing with user cart:', error);
+                    return this.cartService.getCart();
+                })
+            ).subscribe(mergedCart => {
+                // Update local state with merged cart
+                this.items.set(mergedCart);
+                this.saveToLocalStorage(mergedCart);
+                console.log('Guest cart merged successfully');
+            });
+        } else {
+            // No guest cart, just load user cart
+            this.syncWithBackend();
+        }
+    }
+
+    /**
+     * Sync shopping cart with backend
+     * Loads user's backend cart and merges with local cart
      */
     private syncWithBackend() {
         if (this.authService.isLoggedIn()) {
@@ -130,28 +163,37 @@ export class CartStore {
     }
 
     private mergeCartItems(backendCart: CartItem[], localCart: CartItem[]) {
-        // simple merge strategy: backend takes precedence
-        const merged = new Map<number, CartItem>()
+        // Merge strategy: use both productId AND properties as unique key
+        // This prevents duplicate items with same product but different variants
+        const createItemKey = (item: CartItem): string => {
+            const propertiesStr = JSON.stringify(item.properties || {});
+            return `${item.product.productId}::${propertiesStr}`;
+        };
 
-        // add local item first
+        const merged = new Map<string, CartItem>();
+
+        // Add local items first
         localCart.forEach(item => {
-            merged.set(item.product.productId, item)
+            const key = createItemKey(item);
+            merged.set(key, item);
         });
 
-        // override with backend items (backend wins conflicts)
+        // Merge backend items
         backendCart.forEach(item => {
-            const existingItem = merged.get(item.product.productId);
+            const key = createItemKey(item);
+            const existingItem = merged.get(key);
             if (existingItem) {
-                // combine quantities
-                merged.set(item.product.productId, {
+                // Same product with same properties - keep the one with higher quantity
+                merged.set(key, {
                     ...item, quantity: Math.max(item.quantity, existingItem.quantity)
-                })
+                });
             } else {
-                merged.set(item.product.productId, item)
+                // New product variant - add it
+                merged.set(key, item);
             }
         });
 
-        return Array.from(merged.values())
+        return Array.from(merged.values());
     }
 
     private saveToLocalStorage(items: CartItem[]) {
@@ -162,11 +204,19 @@ export class CartStore {
         const savedCart = localStorage.getItem('cart');
         if (savedCart) {
             try {
-                const parsedCart: CartItem[] = JSON.parse(savedCart);
-                this.items.set(parsedCart)
+                const parsedCart = JSON.parse(savedCart);
+                // Ensure parsed cart is an array
+                if (Array.isArray(parsedCart)) {
+                    this.items.set(parsedCart);
+                } else {
+                    console.warn('Saved cart is not an array:', parsedCart);
+                    localStorage.removeItem('cart');
+                    this.items.set([]);
+                }
             } catch (error) {
                 console.warn('Failed to load cart from localStorage: ', error);
                 localStorage.removeItem('cart'); // Remove corrupted data
+                this.items.set([]);
             }
         }
     }
@@ -188,9 +238,17 @@ export class CartStore {
             this.syncSubscription = this.cartService.updateCart(items).pipe(
                 catchError(error => {
                     console.warn('Failed to sync cart to backend:', error);
-                    return of(null); // continue with local operation on error
+                    return of([]); // continue with local operation on error
                 })
             ).subscribe({
+                next: (updatedItems) => {
+                    // Backend returns items with their itemIds populated
+                    // Update local cart with the returned items to sync itemIds
+                    if (Array.isArray(updatedItems) && updatedItems.length > 0) {
+                        this.items.set(updatedItems);
+                        this.saveToLocalStorage(updatedItems);
+                    }
+                },
                 complete: () => {
                     // clean up reference
                     this.syncSubscription = undefined

@@ -104,6 +104,23 @@
       padding: 0 8px;
     }
 
+    .logged-in-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      padding: 0 8px;
+
+      .username {
+        font-size: 14px;
+        font-weight: 500;
+        color: #1976d2;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+
     .login-btn {
       padding: 4px 12px !important;
       font-size: 12px !important;

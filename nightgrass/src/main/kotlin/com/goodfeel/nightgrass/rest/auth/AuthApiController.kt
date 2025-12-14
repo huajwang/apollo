@@ -60,18 +60,38 @@ class AuthApiController(
     }
 
     @PostMapping("/refresh")
-    fun refreshToken(@RequestBody request: RefreshTokenRequest): Mono<ResponseEntity<TokenResponse>> {
-        return jwtService.refreshTokenPair(refreshToken = request.refreshToken)
-            .map { tokenPair ->
-                logger.debug("Generated new token pair from refresh token")
-                ResponseEntity.ok(
-                    TokenResponse(
-                        accessToken = tokenPair.accessToken,
-                        refreshToken = tokenPair.refreshToken,
-                        expiresIn = tokenPair.expiresIn
+    fun refreshToken(
+        @RequestBody request: RefreshTokenRequest,
+        exchange: ServerWebExchange
+    ): Mono<ResponseEntity<TokenResponse>> {
+        // Get refresh token from request body or from HttpOnly cookie
+        val cookieToken = exchange.request.cookies.getFirst("refreshToken")?.value
+        val origin = exchange.request.headers.getFirst("Origin")
+        val referer = exchange.request.headers.getFirst("Referer")
+        logger.info("RefreshToken request received. Origin: {}, Referer: {}, Body token present: {}, Cookie token present: {}", origin, referer, request.refreshToken.isNotEmpty(), cookieToken != null)
+        
+        val refreshToken = if (request.refreshToken.isNotEmpty()) {
+            request.refreshToken
+        } else {
+            cookieToken ?: ""
+        }
+        
+        return if (refreshToken.isEmpty()) {
+            logger.warn("No refresh token found in request body or cookies")
+            Mono.just(ResponseEntity.status(401).build())
+        } else {
+            jwtService.refreshTokenPair(refreshToken = refreshToken)
+                .map { tokenPair ->
+                    logger.debug("Generated new token pair from refresh token")
+                    ResponseEntity.ok(
+                        TokenResponse(
+                            accessToken = tokenPair.accessToken,
+                            refreshToken = tokenPair.refreshToken,
+                            expiresIn = tokenPair.expiresIn
+                        )
                     )
-                )
-            }
-            .switchIfEmpty(Mono.just(ResponseEntity.status(401).build()))
+                }
+                .switchIfEmpty(Mono.just(ResponseEntity.status(401).build()))
+        }
     }
 }

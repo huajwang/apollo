@@ -62,11 +62,15 @@ class AuthenticationSuccessHandler(
                 val response = webFilterExchange.exchange.response
                 val refreshTokenCookie = ResponseCookie.from("refreshToken", tokenPair.refreshToken)
                     .httpOnly(true)
-                    .secure(true) // TODO Set to true in production Utility.isProduction()
+                    .secure(false) // TODO Set to true in production Utility.isProduction()
                     .path("/")
                     .maxAge(Duration.ofDays(7))
-                    .sameSite("Lax") // TODO - Consider "Strict" based on frontend requirements
+                    .sameSite("Lax") // Reverted to Lax for localhost compatibility
                     .build()
+                
+                logger.info("Setting Refresh Token Cookie: name={}, secure={}, httpOnly={}, sameSite={}, domain={}", 
+                    refreshTokenCookie.name, refreshTokenCookie.isSecure, refreshTokenCookie.isHttpOnly, refreshTokenCookie.sameSite, refreshTokenCookie.domain)
+                    
                 response.addCookie(refreshTokenCookie)
 
                 response.statusCode = HttpStatus.FOUND

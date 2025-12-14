@@ -40,25 +40,30 @@ class JwtService(
     private fun generateAccessToken(
         userId: String,
         userName: String,
-        userEmail: String,
+        userEmail: String?,
         userAvatarUrl: String,
         provider: String): String {
         val now = Instant.now()
         val expiryDate = now.plusSeconds(accessTokenExpirySecond)
+        
+        val claimsBuilder = JwtClaimsSet.builder()
+            .issuer("Yaojia Buy")
+            .issuedAt(now)
+            .expiresAt(expiryDate)
+            .subject(userId)
+            .claim("name", userName)
+            .claim("avatarUrl", userAvatarUrl)
+            .claim("provider", provider)
+            .claim("type", "access")
+            .claim("scope", "read write")
+
+        if (userEmail != null) {
+            claimsBuilder.claim("email", userEmail)
+        }
+
         return jwtEncoder.encode(
             JwtEncoderParameters.from(
-                JwtClaimsSet.builder()
-                    .issuer("Yaojia Buy")
-                    .issuedAt(now)
-                    .expiresAt(expiryDate)
-                    .subject(userId)
-                    .claim("name", userName)
-                    .claim("email", userEmail)
-                    .claim("avatarUrl", userAvatarUrl)
-                    .claim("provider", provider)
-                    .claim("type", "access")
-                    .claim("scope", "read write")
-                    .build()
+                claimsBuilder.build()
             )
         ).tokenValue
     }
@@ -83,7 +88,12 @@ class JwtService(
 
     private fun validateRefreshToken(refreshToken: String): Mono<Jwt> {
         return jwtDecoder.decode(refreshToken)
-            .filter { jwt -> jwt.claims["type"] == "refresh"}
+            .filter { jwt -> 
+                val isRefresh = jwt.claims["type"] == "refresh"
+                if (!isRefresh) println("Token validation failed: type is ${jwt.claims["type"]}")
+                isRefresh
+            }
+            .doOnError { e -> println("Token validation error: ${e.message}") }
             .onErrorResume { Mono.empty() } // Invalid or expired token
     }
 
@@ -123,14 +133,15 @@ class JwtService(
     private fun getUserName(oauth2User: OAuth2User): String {
         val attributes = oauth2User.attributes
         return when {
-            attributes.containsKey("name") -> attributes["name"].toString() // General name field
+            attributes.containsKey("name") && attributes["name"] != null -> attributes["name"].toString() // General name field
+            attributes.containsKey("login") -> attributes["login"].toString() // GitHub username
             attributes.containsKey("nickname") -> attributes["nickname"].toString() // TikTok
             attributes.containsKey("given_name") && attributes.containsKey("family_name") ->
                 "${attributes["given_name"].toString()} ${attributes["family_name"].toString()}" // Google
             attributes.containsKey("displayName") -> attributes["displayName"].toString() // Facebook
             attributes.containsKey("username") -> attributes["username"].toString() // General username field
             // Fallback to email prefix if name not available
-            attributes.containsKey("email") -> {
+            attributes.containsKey("email") && attributes["email"] != null -> {
                 val email = attributes["email"].toString()
                 email.substringBefore("@")
             }
@@ -138,12 +149,12 @@ class JwtService(
         }
     }
 
-    private fun getUserEmail(oauth2User: OAuth2User): String {
+    private fun getUserEmail(oauth2User: OAuth2User): String? {
         val attributes = oauth2User.attributes
         return when {
-            attributes.containsKey("email") -> attributes["email"].toString()
-            attributes.containsKey("email_address") -> attributes["email_address"].toString()
-            else -> "" // Email not available
+            attributes.containsKey("email") && attributes["email"] != null -> attributes["email"].toString()
+            attributes.containsKey("email_address") && attributes["email_address"] != null -> attributes["email_address"].toString()
+            else -> null // Email not available
         }
     }
 

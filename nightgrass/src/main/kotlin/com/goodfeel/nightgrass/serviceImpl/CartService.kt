@@ -7,7 +7,6 @@ import com.goodfeel.nightgrass.repo.*
 import com.goodfeel.nightgrass.service.ICartService
 import com.goodfeel.nightgrass.service.ProcessedProductService
 import com.goodfeel.nightgrass.util.OrderStatus
-import com.goodfeel.nightgrass.web.util.AddCartRequest
 import com.goodfeel.nightgrass.web.util.Utility
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -16,7 +15,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import reactor.core.publisher.Sinks
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.text.NumberFormat
@@ -27,7 +25,6 @@ import java.util.*
 open class CartService(
     private val cartRepository: CartRepository,
     private val cartItemRepository: CartItemRepository,
-    private val productRepository: ProductRepository,
     private val orderRepository: OrderRepository,
     private val orderItemRepository: OrderItemRepository,
     private val userRepository: UserRepository,
@@ -36,104 +33,53 @@ open class CartService(
 
     companion object {
         private val logger: Logger = LoggerFactory.getLogger(CartService::class.java)
-        private val cartUpdateSink = Sinks.many().replay().latest<Int>()
-    }
-
-
-    private fun sendCartUpdate(event: Int) {
-        val result = cartUpdateSink.tryEmitNext(event)
-        logger.debug("cartUpdateSink emit result: $result")
-    }
-
-    fun getCartUpdateStream(): Flux<Int> {
-        return cartUpdateSink.asFlux()
-            .share()
-            .doOnSubscribe {
-                logger.debug("New subscriber connected to cartUpdateSink")
-            }
-            .doOnCancel {
-                logger.debug("Subscriber disconnected from cartUpdateSink")
-            }
-    }
-
-    override fun addProductToCart(
-        addCartRequest: AddCartRequest,
-        user: User
-    ): Mono<Cart> {
-        return getCartForUserOrGuest(user)
-            .flatMap { cart -> findOrAddCartItem(cart, addCartRequest) }
-            .flatMap { cart -> updateCartTotalAndNotifyCartUpdate(cart) }
-            .flatMap { cart -> notifyCartUpdate(cart.cartId!!).thenReturn(cart) }
     }
 
     /**
-     * If shopping cart is not yet in DB, insert one. TODO - to confirm shopping cart insertion
+     * If shopping cart is not yet in DB, insert one.
+     * Supports both authenticated users and guests.
+     * - Authenticated users: cart associated with userId
+     * - Guests: cart associated with guestId (session ID from frontend)
+     * 
+     * @param user User object (can be null for guests)
+     * @param guestSessionId Session ID for guest carts (required if user is null)
      */
-    override fun getCartForUserOrGuest(user: User): Mono<Cart> {
-        // Only authenticated users can access backend cart
-        if (user.oauthId == null) {
-            return Mono.error(IllegalArgumentException("User must be authenticated to access cart"))
+    override fun getCartForUserOrGuest(user: User?, guestSessionId: String?): Mono<Cart> {
+        // Determine which identifier to use
+        val cartIdentifier = if (user != null && user.oauthId != null) {
+            user.oauthId
+        } else if (!guestSessionId.isNullOrBlank()) {
+            guestSessionId
+        } else {
+            return Mono.error(IllegalArgumentException("Either user or guestSessionId must be provided"))
         }
-
-        return cartRepository.findByUserId(user.oauthId)
+        
+        return cartRepository.findByUserId(cartIdentifier)
             .switchIfEmpty(
                 Mono.defer {
                     val newCart =
-                        Cart(cartId = null, userId = user.oauthId, guestId = null, total = BigDecimal.ZERO)
+                        Cart(cartId = null, userId = cartIdentifier, guestId = null, total = BigDecimal.ZERO)
                     cartRepository.save(newCart)
                         .onErrorResume {
                             if (it is DuplicateKeyException) {
-                                logger.debug("The cart already exists for user: ${user.oauthId}")
-                                cartRepository.findByUserId(user.oauthId)
+                                logger.debug("The cart already exists for: $cartIdentifier")
+                                cartRepository.findByUserId(cartIdentifier)
                             } else {
                                 Mono.error(it)
                             }
                         }
                         .doOnError {
-                            logger.error("Failed to get save or get cart for user: ${user.oauthId}")
+                            logger.error("Failed to save or get cart for: $cartIdentifier")
                         }
                 }.doOnSuccess {
-                    logger.debug("new cart is saved for userId: $it")
+                    logger.debug("New cart saved for: $cartIdentifier")
                 }
             )
     }
 
-    private fun findOrAddCartItem(cart: Cart, addCartRequest: AddCartRequest): Mono<Cart> {
-        return cartItemRepository.findByCartId(cart.cartId!!)
-            .filter { item ->
-                val addCartRequestPropertyMap = addCartRequest.properties ?: emptyMap()
-                item.productId == addCartRequest.productId &&
-                        item.getPropertiesAsMap() == addCartRequestPropertyMap
-            }
-            .next()
-            .flatMap { existingItem ->
-                logger.debug("Updating quantity for existing item in cart: ${cart.cartId}")
-                existingItem.quantity += 1
-                // if the added cart item is currently unchecked at shopping cart, make it checked
-                if (!existingItem.isSelected) {
-                    logger.debug("Make the unselected cart item selected since user add it to cart again")
-                    existingItem.isSelected = true
-                }
-                cartItemRepository.save(existingItem).thenReturn(cart)
-            }
-            .switchIfEmpty(
-                Mono.defer {
-                    logger.debug("Adding new item to cart: ${cart.cartId}")
-                    val newItem = CartItem(
-                        itemId = null,
-                        cartId = cart.cartId,
-                        productId = addCartRequest.productId,
-                        quantity = 1,
-                        isSelected = true
-                    )
-                    newItem.setPropertiesFromMap(map = addCartRequest.properties ?: emptyMap())
-                    cartItemRepository.save(newItem).thenReturn(cart)
-                }
-            )
-    }
 
     override fun getCartItemCount(user: User): Mono<Int> {
-        return getCartForUserOrGuest(user)
+        return getCartForUserOrGuest(user, null)
             .flatMap { cart: Cart ->
                 cart.cartId?.let {
                     cartItemRepository.findByCartId(cart.cartId)
@@ -150,7 +96,7 @@ open class CartService(
         return cartItemRepository.findById(itemId)
             .flatMap { cartItem: CartItem ->
                 cartItemRepository.delete(cartItem)
-                    .then(updateCartTotalAndNotifyCartUpdate(cartItem.cartId))
+                    .then(updateCartTotalByCartId(cartItem.cartId))
                     .then(notifyCartUpdate(cartItem.cartId))
                     .thenReturn(cartItem.cartId)
             }
@@ -248,16 +194,32 @@ open class CartService(
     }
 
     /**
-     * This item is used to update the cart total when
-     * 1. A product is added to the shopping cart;
-     * 2. quantity is changed;
-     * 3. cart item is deleted from the cart;
-     *
-     * @param cartId
-     * @return
+     * Add a new cart item from CartItemDto (used by updateCart endpoint)
      */
-    internal fun updateCartTotalAndNotifyCartUpdate(cartId: Long): Mono<Void> {
-        // Retrieve all items in the cart
+    open fun addCartItemToCart(cart: Cart, cartItemDto: CartItemDto): Mono<CartItem> {
+        val newItem = CartItem(
+            itemId = null,
+            cartId = cart.cartId!!,
+            productId = cartItemDto.productId,
+            quantity = cartItemDto.quantity,
+            properties = cartItemDto.properties,
+            isSelected = true
+        )
+        return cartItemRepository.save(newItem)
+            .flatMap { savedItem ->
+                updateCartTotalByCartId(cart.cartId)
+                    .thenReturn(savedItem)
+            }
+    }
+
+    /**
+     * Update cart total by calculating sum of all items and their prices.
+     * Used when: product added, quantity changed, or item deleted from cart.
+     *
+     * @param cartId The cart ID to update
+     * @return Mono<Void> when complete
+     */
+    open fun updateCartTotalByCartId(cartId: Long): Mono<Void> {
         return cartItemRepository.findByCartId(cartId)
             .flatMap { cartItem ->
                 processedProductService.findAndProcessProductByProductId(cartItem.productId)
@@ -280,35 +242,15 @@ open class CartService(
             .then()
     }
 
-    private fun updateCartTotalAndNotifyCartUpdate(cart: Cart): Mono<Cart> {
-        return cartItemRepository.findByCartId(cart.cartId!!)
-            .flatMap { cartItem ->
-                processedProductService.findAndProcessProductByProductId(cartItem.productId)
-                    .map { productDto ->
-                        val salePrice = productDto.discountedPrice ?: productDto.price
-                        salePrice.multiply(BigDecimal.valueOf(cartItem.quantity.toLong()))
-                    }
-            }
-            .reduce(BigDecimal.ZERO, BigDecimal::add)
-            .flatMap { total ->
-                cart.total = total
-                cartRepository.save(cart)
-            }
-            .flatMap { savedCart ->
-                notifyCartUpdate(savedCart.cartId!!)
-            }
-            .thenReturn(cart)
-
-    }
-
     /**
-     * This function is used to update the cart total when user select/deselect the item by (un)check the checkbox
+     * Update cart total when user selects/deselects an item via checkbox.
+     * Recalculates total based on selection state.
      *
-     * @param itemId     - Cart item ID
-     * @param isSelected Is the cart item selected or not
-     * @return
+     * @param itemId     Cart item ID to update
+     * @param isSelected Whether the item is now selected
+     * @return Mono<Cart> with updated cart
      */
-    open fun updateCartTotalAndNotifyCartUpdate(itemId: Long, isSelected: Boolean): Mono<Cart> {
+    open fun updateCartTotalByItemSelection(itemId: Long, isSelected: Boolean): Mono<Cart> {
         return cartItemRepository.findById(itemId)
             .flatMap { cartItem: CartItem ->
                 cartItem.isSelected = isSelected
@@ -564,15 +506,11 @@ open class CartService(
     private fun notifyCartUpdate(cartId: Long): Mono<Int> {
         return cartItemRepository.findByCartId(cartId)
             .reduce(0) { total, cartItem -> total + cartItem.quantity }
-            .doOnNext { totalQuantity ->
-                logger.debug("Centralized notification: Cart item count is now $totalQuantity")
-                sendCartUpdate(totalQuantity)
-            }
     }
 
     @Transactional
-    override fun clearCart(user: User): Mono<Void> {
-        return getCartForUserOrGuest(user)
+    override fun clearCart(user: User?, guestSessionId: String?): Mono<Void> {
+        return getCartForUserOrGuest(user, guestSessionId)
             .flatMap { cart ->
                 cartItemRepository.findByCartId(cart.cartId!!)
                     .collectList()
@@ -582,9 +520,13 @@ open class CartService(
                             .then(notifyCartUpdate(cart.cartId).then())
                     }
             }
-            .doOnNext { logger.info("Cart cleared for user: ${user.oauthId ?: user.guestId}") }
+            .doOnNext {
+                val userInfo = if (user != null) "user: ${user.oauthId}" else "guest: $guestSessionId"
+                logger.info("Cart cleared for $userInfo")
+            }
             .onErrorResume { error ->
-                logger.error("Error clearing cart for user: ${user.oauthId ?: user.guestId}", error)
+                val userInfo = if (user != null) "user: ${user.oauthId}" else "guest: $guestSessionId"
+                logger.error("Error clearing cart for $userInfo", error)
                 Mono.error(error)
             }
     }

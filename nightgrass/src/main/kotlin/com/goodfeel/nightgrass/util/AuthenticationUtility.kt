@@ -61,16 +61,59 @@ class AuthenticationUtility(
      * @param exchange ServerWebExchange containing the HTTP request
      * @return Mono<String> with the token or empty if not present/invalid
      */
-    fun extractTokenFromRequest(exchange: ServerWebExchange): Mono<String> {
+    private fun extractTokenFromRequest(exchange: ServerWebExchange): Mono<String> {
         val token = exchange.request.headers.getFirst("Authorization")
         logger.debug("Authorization header token present: {}", token != null)
         if (token != null) {
             return token.takeIf { it.startsWith("Bearer ") }
                 ?.substringAfter("Bearer ")
-                ?.let { Mono.just(it) }
-                ?: Mono.empty()
+                ?.let { 
+                    logger.debug("TOKEN FOUND: extractTokenFromRequest emitting token to flatMap")
+                    Mono.just(it) 
+                }
+                ?: run {
+                    logger.debug("INVALID FORMAT: Authorization header doesn't start with 'Bearer '")
+                    Mono.empty()
+                }
         }
+        logger.debug("NO TOKEN: Authorization header is null, returning Mono.empty()")
         return Mono.empty()
+    }
+
+    /**
+     * Extracts token from request header, validates it, and constructs User from JWT claims.
+     * Returns empty Mono for guests (no token) instead of error - allows guest access.
+     * Used for optional authentication endpoints where guests are allowed.
+     *
+     * @param exchange ServerWebExchange containing the HTTP request
+     * @return Mono<User?> with the authenticated user, or empty Mono for guests
+     */
+    fun extractUserFromExchangeOptional(exchange: ServerWebExchange): Mono<User?> {
+        return extractTokenFromRequest(exchange)
+            .doOnNext { logger.debug("TOKEN EXTRACTED: proceeding to validate token") }
+            .flatMap { token ->
+                jwtService.validateToken(token)
+                    .doOnNext { logger.debug("Token validation successful") }
+                    .flatMap { jwt ->
+                        jwtService.getUserInfoFromToken(jwt)
+                            .map { userInfo ->
+                                logger.debug("Retrieved user info from token, OAuth ID: {}", userInfo.id)
+                                User(
+                                    oauthId = userInfo.id,
+                                    nickName = userInfo.name,
+                                    email = userInfo.email,
+                                    avatar = userInfo.avatar
+                                )
+                            }
+                    }
+            }
+            .doOnNext { user -> logger.debug("USER CONSTRUCTED: returning user with oauthId: {}", user?.oauthId) }
+            .switchIfEmpty(
+                Mono.defer {
+                    logger.debug("SWITCHIFEMPTY TRIGGERED: No token found, returning empty Mono for guest")
+                    Mono.empty()
+                }
+            )
     }
 
     /**

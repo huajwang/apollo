@@ -1,10 +1,11 @@
-import { computed, inject, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, signal, Injector } from '@angular/core';
 import { environment } from '../../environments/environment';
-import { BehaviorSubject, catchError, Observable, of, tap, map, throwError, switchMap } from 'rxjs';
+import { BehaviorSubject, catchError, Observable, of, tap, map, throwError, switchMap, from } from 'rxjs';
 import { User } from '../auth/user';
 import { HttpClient, HttpHandlerFn, HttpRequest } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { decodeJwtPayload, getUserFromToken } from '../utils/jwt-utils';
+import { CartStore } from '../cart/cart-store';
 
 @Injectable({
   providedIn: 'root'
@@ -18,6 +19,7 @@ export class AuthService {
 
   private http = inject(HttpClient)
   private router = inject(Router)
+  private injector = inject(Injector)
 
   private userSubject = new BehaviorSubject<User | null>(null);
   private user = signal<User | null>(null);
@@ -31,8 +33,17 @@ export class AuthService {
   private refreshToken: string | null = null;
 
   constructor() {
-    // Empty constructor - no initialization needed on startup
-    // User is loaded on demand (OAuth callback, login, etc.)
+    // Initialize user from stored token on app startup
+    // This allows the user to remain logged in after page refresh
+    const storedToken = localStorage.getItem(this.TOKEN_KEY);
+    if (storedToken) {
+      this.accessToken = storedToken;
+      const userFromToken = getUserFromToken(storedToken);
+      if (userFromToken) {
+        this.setUser(userFromToken);
+        console.log('User loaded from stored token on app initialization:', userFromToken);
+      }
+    }
   }
 
   getAccessToken(): string | null {
@@ -104,6 +115,10 @@ export class AuthService {
     
     if (userFromToken) {
       this.setUser(userFromToken);
+      // Sync cart after login to merge guest items with backend cart
+      // Use lazy injection to avoid circular dependency
+      this.injector.get(CartStore).syncCartAfterLogin();
+      
       // Navigate to the intended destination or home after login
       const returnUrl = this.getAndClearReturnUrl();
       this.router.navigateByUrl(returnUrl);
@@ -131,6 +146,9 @@ export class AuthService {
     return this.getCurrentUser().pipe(
       tap(user => {
         this.setUser(user);
+        // Sync cart after login to merge guest items with backend cart
+        // Use lazy injection to avoid circular dependency
+        this.injector.get(CartStore).syncCartAfterLogin();
         const returnUrl = this.getAndClearReturnUrl();
         this.router.navigateByUrl(returnUrl);
       })
@@ -204,14 +222,22 @@ export class AuthService {
 
   /**
    * Refresh access token using refresh token
+   * The refresh token is stored in an HttpOnly cookie by the backend,
+   * so the browser will automatically send it with this request.
+   * We just send an empty object to trigger the endpoint.
+   * 
+   * IMPORTANT: withCredentials: true is required for browser to send HttpOnly cookies
    */
   private refreshAccessToken(refreshToken: string): Observable<string> {
     return this.http.post<{accessToken: string, refreshToken?: string}>(`${this.apiUrl}/auth/refresh`, {
-      refreshToken
+      refreshToken: "" // Backend will read from HttpOnly cookie
+    }, {
+      withCredentials: true  // CRITICAL: allows browser to send HttpOnly cookies
     }).pipe(
       tap(response => {
         // Store new access token
         this.setAccessToken(response.accessToken);
+        // Backend returns new refresh token in response body (for backup/sync with cookie)
         if (response.refreshToken) {
           this.setRefreshToken(response.refreshToken);
         }
@@ -226,23 +252,19 @@ export class AuthService {
   }
 
   refreshTokenAndRetry(req: HttpRequest<unknown>, next: HttpHandlerFn): Observable<any> {
-    const refreshToken = this.getRefreshToken();
-    if (!refreshToken) {
-      // No refresh token available. redirect to login
-      this.redirectToLogin();
-      return throwError(() => new Error('No refresh token available'));
-    }
+    console.log('Token expired, attempting to refresh...');
 
     // Attempt to refresh the access token
-    return this.refreshAccessToken(refreshToken).pipe(
+    return this.refreshAccessToken("").pipe(
       switchMap((newAccessToken: string) => {
         const retryReq = req.clone({
           setHeaders: { Authorization: `Bearer ${newAccessToken}` }
         });
-        // Retry the original request
+        console.log('Token refreshed successfully, retrying original request');
         return next(retryReq);
       }),
       catchError(refreshError => {
+        console.error('Token refresh failed:', refreshError);
         this.clearAllTokens();
         this.redirectToLogin();
         return throwError(() => refreshError);

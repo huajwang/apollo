@@ -22,10 +22,15 @@ export class App {
   activatedRoute = inject(ActivatedRoute);
   
   cartItemCount = computed(() => {
-    return this.cartStore.cartItems().reduce((sum, item) => sum + item.quantity, 0);
+    const items = this.cartStore.cartItems();
+    if (!Array.isArray(items)) {
+      return 0;
+    }
+    return items.reduce((sum, item) => sum + item.quantity, 0);
   });
 
   isLoggedIn = computed(() => this.authService.isLoggedIn());
+  currentUser = computed(() => this.authService.currentUser());
 
   /**
    * Get the share URL based on current route

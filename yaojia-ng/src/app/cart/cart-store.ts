@@ -2,7 +2,7 @@ import { computed, inject, Injectable, signal } from "@angular/core";
 import { CartItem, ProductVariantProperties } from "./cart-item";
 import { AuthService } from "../service/auth-service";
 import { CartService } from "./cart-service";
-import { catchError, of, Subscription } from "rxjs";
+import { catchError, of, Subscription, retry, tap, map, Observable } from "rxjs";
 import { Product } from "../model/product";
 
 @Injectable({
@@ -65,12 +65,23 @@ export class CartStore {
 
     removeItem(productId: number, properties?: ProductVariantProperties) {
         this.items.update((currentItems) => {
+            // Find the item(s) being removed to send to backend with quantity 0
+            const itemsToRemove = currentItems.filter((item) => {
+                if (item.product.productId !== productId) return false;
+                if (!properties) return true;
+                return this.propertiesMatch(item.properties, properties);
+            });
+
             const updatedItems = currentItems.filter((item) => {
                 if (item.product.productId !== productId) return true;
                 if (!properties) return false;
                 return !this.propertiesMatch(item.properties, properties);
             })
-            this.syncToBackend(updatedItems);
+            
+            // Include removed items with quantity 0 for backend sync
+            const itemsToSync = [...updatedItems, ...itemsToRemove.map(item => ({ ...item, quantity: 0 }))];
+            
+            this.syncToBackend(itemsToSync);
             this.saveToLocalStorage(updatedItems);
 
             return updatedItems;
@@ -144,22 +155,36 @@ export class CartStore {
     }
 
     /**
+     * Refresh cart from backend
+     * Returns Observable so caller can handle loading state and errors
+     */
+    refresh(): Observable<void> {
+        if (!this.authService.isLoggedIn()) {
+            return of(void 0);
+        }
+        return this.cartService.getCart().pipe(
+            retry(3),
+            tap(backendCart => {
+                const localCart = this.items();
+                const mergedCart = this.mergeCartItems(backendCart, localCart);
+                this.items.set(mergedCart);
+                this.saveToLocalStorage(mergedCart);
+            }),
+            map(() => void 0)
+        );
+    }
+
+    /**
      * Sync shopping cart with backend
      * Loads user's backend cart and merges with local cart
      */
     private syncWithBackend() {
-        if (this.authService.isLoggedIn()) {
-            this.cartService.getCart().pipe(
-                catchError(error => {
-                    return of([])
-                })
-            ).subscribe(backendCart => {
-                const localCart = this.items()
-                const mergedCart = this.mergeCartItems(backendCart, localCart)
-                this.items.set(mergedCart)
-                this.saveToLocalStorage(mergedCart)
+        this.refresh().pipe(
+            catchError(error => {
+                console.warn('Failed to sync with backend:', error);
+                return of(void 0);
             })
-        }
+        ).subscribe();
     }
 
     private mergeCartItems(backendCart: CartItem[], localCart: CartItem[]) {

@@ -27,6 +27,7 @@ export class CartView {
   destroyRef = inject(DestroyRef);
 
   isLoading = signal(true);
+  errorMessage = signal<string | null>(null);
   cartItems = this.cartStore.cartItems;
 
   subtotal = computed(() => {
@@ -44,6 +45,9 @@ export class CartView {
   }
 
   private loadCart(): void {
+    this.isLoading.set(true);
+    this.errorMessage.set(null);
+
     // Only load from backend if user is logged in
     // Guests use localStorage which is already loaded in CartStore
     if (!this.authService.isLoggedIn()) {
@@ -51,51 +55,36 @@ export class CartView {
       return;
     }
 
-    this.cartService
-      .getCart()
+    this.cartStore.refresh()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => this.isLoading.set(false),
         error: (err) => {
           console.error('Error loading cart from backend:', err);
+          this.errorMessage.set('Failed to load cart. Please try again.');
           this.isLoading.set(false);
         },
       });
   }
 
-  increaseQuantity(productId: number): void {
-    const items = this.cartItems();
-    const currentItem = items.find((item) => item.product.productId === productId);
-    if (currentItem && currentItem.quantity < 99) {
-      this.cartStore.updateQuantity(productId, currentItem.quantity + 1);
+  onRetry(): void {
+    this.loadCart();
+  }
+
+  increaseQuantity(item: CartItem): void {
+    if (item.quantity < 99) {
+      this.cartStore.updateQuantity(item.product.productId, item.quantity + 1, item.properties);
     }
   }
 
-  decreaseQuantity(productId: number): void {
-    const items = this.cartItems();
-    const currentItem = items.find((item) => item.product.productId === productId);
-    if (currentItem && currentItem.quantity > 1) {
-      this.cartStore.updateQuantity(productId, currentItem.quantity - 1);
+  decreaseQuantity(item: CartItem): void {
+    if (item.quantity > 1) {
+      this.cartStore.updateQuantity(item.product.productId, item.quantity - 1, item.properties);
     }
   }
 
-  removeItem(productId: number): void {
-    this.cartStore.removeItem(productId);
-    // Only sync to backend if logged in
-    if (!this.authService.isLoggedIn()) {
-      return;
-    }
-    // Sync the updated cart items to backend by setting quantity to 0 for removed item
-    const updatedItems = this.cartItems().map(item => ({
-      ...item,
-      quantity: item.product.productId === productId ? 0 : item.quantity
-    }));
-    this.cartService
-      .updateCart(updatedItems)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        error: (err) => console.error('Error removing item:', err),
-      });
+  removeItem(item: CartItem): void {
+    this.cartStore.removeItem(item.product.productId, item.properties);
   }
 
   clearCart(): void {

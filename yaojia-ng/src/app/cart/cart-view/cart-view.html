@@ -15,8 +15,20 @@
     </div>
   }
 
+  <!-- Error State -->
+  @if (errorMessage()) {
+    <div class="error-container">
+      <mat-icon class="error-icon">error_outline</mat-icon>
+      <p>{{ errorMessage() }}</p>
+      <button mat-raised-button color="primary" (click)="onRetry()">
+        <mat-icon>refresh</mat-icon>
+        Retry
+      </button>
+    </div>
+  }
+
   <!-- Empty Cart State -->
-  @if (cartEmpty() && !isLoading()) {
+  @if (cartEmpty() && !isLoading() && !errorMessage()) {
     <div class="empty-cart">
       <mat-icon class="empty-icon">shopping_cart</mat-icon>
       <h2>Your cart is empty</h2>
@@ -29,7 +41,7 @@
   }
 
   <!-- Cart Content -->
-  @if (!cartEmpty() && !isLoading()) {
+  @if (!cartEmpty() && !isLoading() && !errorMessage()) {
     <div class="cart-content">
       <!-- Cart Items -->
       <div class="cart-items-section">
@@ -51,6 +63,18 @@
               <div class="item-details">
                 <h3 class="product-name">{{ item.product.productName }}</h3>
                 <p class="product-sku">SKU: {{ item.product.productId }}</p>
+                
+                @if (item.properties) {
+                  <div class="item-properties">
+                    @for (prop of item.properties | keyvalue; track prop.key) {
+                      <p class="property-row">
+                        <span class="property-label">{{ prop.key }}:</span>
+                        <span class="property-value">{{ prop.value }}</span>
+                      </p>
+                    }
+                  </div>
+                }
+
                 <p class="product-price">{{ item.product.price | currency : 'USD' }}</p>
               </div>
 
@@ -58,7 +82,7 @@
               <div class="quantity-control">
                 <button 
                   mat-icon-button 
-                  (click)="decreaseQuantity(item.product.productId)"
+                  (click)="decreaseQuantity(item)"
                   [disabled]="item.quantity <= 1"
                   class="qty-btn">
                   <mat-icon>remove</mat-icon>
@@ -66,7 +90,7 @@
                 <span class="quantity-display">{{ item.quantity }}</span>
                 <button 
                   mat-icon-button 
-                  (click)="increaseQuantity(item.product.productId)"
+                  (click)="increaseQuantity(item)"
                   [disabled]="item.quantity >= 99"
                   class="qty-btn">
                   <mat-icon>add</mat-icon>
@@ -82,7 +106,7 @@
               <!-- Remove Button -->
               <button 
                 mat-icon-button 
-                (click)="removeItem(item.product.productId)"
+                (click)="removeItem(item)"
                 class="remove-btn"
                 matTooltip="Remove from cart">
                 <mat-icon>delete_outline</mat-icon>

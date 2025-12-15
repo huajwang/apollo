@@ -54,6 +54,31 @@
   }
 }
 
+// Error State
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 1rem;
+  text-align: center;
+
+  .error-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    color: var(--mat-sys-error);
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    color: var(--mat-sys-on-surface);
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+  }
+}
+
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
@@ -219,6 +244,26 @@
       margin: 0;
       font-size: 0.85rem;
       color: var(--mat-sys-on-surface-variant);
+    }
+
+    .item-properties {
+      margin-top: 0.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+
+      .property-row {
+        margin: 0;
+        font-size: 0.9rem;
+        color: var(--mat-sys-on-surface-variant);
+        display: flex;
+        gap: 0.5rem;
+        
+        .property-label {
+          font-weight: 500;
+          text-transform: capitalize;
+        }
+      }
     }
 
     .product-price {

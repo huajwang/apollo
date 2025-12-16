@@ -1,0 +1,91 @@
+<div class="order-history-container">
+  <div class="header">
+    <h1>Order History</h1>
+    <p class="subtitle">View and track your past orders</p>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Loading your orders...</p>
+    </div>
+  } @else if (error()) {
+    <div class="error-container">
+      <mat-icon class="error-icon">error_outline</mat-icon>
+      <p>{{ error() }}</p>
+      <button mat-raised-button color="primary" (click)="loadOrders()">Retry</button>
+    </div>
+  } @else if (orders().length === 0) {
+    <div class="empty-state">
+      <mat-icon class="empty-icon">shopping_bag</mat-icon>
+      <h2>No orders yet</h2>
+      <p>Looks like you haven't placed any orders yet.</p>
+      <a routerLink="/" mat-raised-button color="primary">Start Shopping</a>
+    </div>
+  } @else {
+    <div class="orders-list">
+      @for (order of orders(); track order.orderId) {
+        <mat-card class="order-card">
+          <mat-card-header>
+            <div class="order-header-content">
+              <div class="order-info">
+                <span class="order-no">Order #{{ order.orderNo }}</span>
+                <span class="order-date">{{ order.createdAt | date:'mediumDate' }}</span>
+              </div>
+              <mat-chip [color]="getStatusColor(order.orderStatus)" selected>
+                {{ order.orderStatus }}
+              </mat-chip>
+            </div>
+          </mat-card-header>
+          
+          <mat-card-content>
+            <div class="order-details">
+              <div class="detail-row">
+                <span class="label">Total Amount:</span>
+                <span class="value price">{{ order.orderTotal | currency:'USD' }}</span>
+              </div>
+              
+              <div class="order-items-container">
+                <span class="label">Items:</span>
+                <div class="order-items-list">
+                  @for (item of order.items; track item.productId) {
+                    <div class="order-item-row">
+                      @if (item.imageUrl) {
+                        <img [src]="item.imageUrl" [alt]="item.productName" class="item-thumb">
+                      } @else {
+                        <div class="item-thumb-placeholder">
+                          <mat-icon>image</mat-icon>
+                        </div>
+                      }
+                      <div class="item-info">
+                        <span class="item-name">{{ item.productName }}</span>
+                        <span class="item-meta">
+                          Qty: {{ item.quantity }}
+                          @if (item.properties) {
+                             • {{ item.properties }}
+                          }
+                        </span>
+                      </div>
+                      <span class="item-price">{{ item.price | currency:'USD' }}</span>
+                    </div>
+                  }
+                </div>
+              </div>
+
+              @if (order.deliveryAddress) {
+                <div class="detail-row address-row">
+                  <span class="label">Shipping to:</span>
+                  <span class="value address">{{ order.deliveryAddress }}</span>
+                </div>
+              }
+            </div>
+          </mat-card-content>
+          
+          <mat-card-actions align="end">
+            <button mat-button color="primary">View Details</button>
+          </mat-card-actions>
+        </mat-card>
+      }
+    </div>
+  }
+</div>

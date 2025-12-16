@@ -18,5 +18,6 @@ data class OrderDto(
     val orderProcessDate: LocalDateTime? = null,
     val logisticsNo: String? = null,
     val deliveryDate: LocalDateTime? = null,
-    val orderStatus: OrderStatus
+    val orderStatus: OrderStatus,
+    val items: List<OrderItemDto> = emptyList()
 )

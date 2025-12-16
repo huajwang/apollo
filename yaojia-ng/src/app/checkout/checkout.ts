@@ -93,6 +93,8 @@ export class CheckoutComponent {
     const orderRequest: PlaceOrderRequest = {
       items: this.cartItems().map(item => ({
         productId: item.product.productId,
+        productName: item.product.productName,
+        imageUrl: item.product.imageUrl,
         quantity: item.quantity,
         price: item.product.price,
         properties: Object.keys(item.properties).length > 0 ? JSON.stringify(item.properties) : undefined

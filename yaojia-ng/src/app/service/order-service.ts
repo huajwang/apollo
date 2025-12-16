@@ -6,6 +6,8 @@ import { ProductVariantProperties } from '../cart/cart-item';
 
 export interface OrderItem {
   productId: number;
+  productName: string;
+  imageUrl: string;
   quantity: number;
   price: number;
   properties?: string; // JSON string of variant properties
@@ -38,6 +40,7 @@ export interface OrderResponse {
   orderTotal: number;
   createdAt: string;
   orderStatus: string;
+  items: OrderItem[];
 }
 
 @Injectable({
@@ -56,5 +59,9 @@ export class OrderService {
    */
   placeOrder(request: PlaceOrderRequest): Observable<OrderResponse> {
     return this.http.post<OrderResponse>(`${this.apiUrl}/place`, request);
+  }
+
+  getMyOrders(): Observable<OrderResponse[]> {
+    return this.http.get<OrderResponse[]>(`${this.apiUrl}/my-orders`);
   }
 }

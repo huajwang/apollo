@@ -58,8 +58,8 @@ class OrderServiceImpl(
                         OrderItem(
                             orderItemId = null,
                             orderId = savedOrder.orderId!!,
-                            productName = "", // Can be fetched from product service if needed
-                            imageUrl = "",
+                            productName = item.productName,
+                            imageUrl = item.imageUrl,
                             quantity = item.quantity,
                             properties = item.properties,
                             unitPrice = BigDecimal.valueOf(item.price)
@@ -131,8 +131,8 @@ class OrderServiceImpl(
                                 OrderItem(
                                     orderItemId = null,
                                     orderId = savedOrder.orderId!!,
-                                    productName = "",
-                                    imageUrl = "",
+                                    productName = item.productName,
+                                    imageUrl = item.imageUrl,
                                     quantity = item.quantity,
                                     properties = item.properties,
                                     unitPrice = BigDecimal.valueOf(item.price)
@@ -159,6 +159,18 @@ class OrderServiceImpl(
      */
     private fun generateOrderNumber(): String {
         return "ORD-${System.currentTimeMillis()}-${(1000..9999).random()}"
+    }
+
+    fun getOrdersByUserId(userId: String): Flux<com.goodfeel.nightgrass.dto.OrderDto> {
+        return orderRepository.findByUserId(userId)
+            .flatMap { order ->
+                orderItemRepository.findByOrderId(order.orderId!!)
+                    .map { it.toDto() }
+                    .collectList()
+                    .map { items ->
+                        order.toDto(items)
+                    }
+            }
     }
 }
 

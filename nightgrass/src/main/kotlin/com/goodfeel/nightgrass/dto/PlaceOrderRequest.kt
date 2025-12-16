@@ -21,6 +21,8 @@ data class PlaceOrderRequest(
 
 data class OrderItemRequest(
     val productId: Long,
+    val productName: String,
+    val imageUrl: String,
     val quantity: Int,
     val price: Double,
     val properties: String? = null

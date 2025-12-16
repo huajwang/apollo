@@ -29,18 +29,20 @@ data class Order(
     val payType: String? = null,
     val remark: String? = null
 ) {
-    fun toDto(): OrderDto {
+    fun toDto(items: List<com.goodfeel.nightgrass.dto.OrderItemDto> = emptyList()): OrderDto {
         return OrderDto(
             orderId = this.orderId!!,
             orderNo = this.orderNo,
             userId = this.userId,
+            deliveryAddress = this.deliveryAddress,
             originalTotal = this.originalTotal,
             discountedTotal = this.discountedTotal,
             hst = this.hst,
             shippingFee = this.shippingFee,
             orderTotal = this.finalTotal,
             createdAt = this.createdAt,
-            orderStatus = this.orderStatus
+            orderStatus = this.orderStatus,
+            items = items
         )
     }
 }

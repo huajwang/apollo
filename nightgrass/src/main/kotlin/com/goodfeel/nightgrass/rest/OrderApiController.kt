@@ -7,11 +7,13 @@ import com.goodfeel.nightgrass.util.AuthenticationUtility
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ServerWebExchange
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 @RestController
@@ -22,6 +24,18 @@ class OrderApiController(
 ) {
 
     private val logger = LoggerFactory.getLogger(OrderApiController::class.java)
+
+    @GetMapping("/my-orders")
+    fun getMyOrders(exchange: ServerWebExchange): Flux<OrderDto> {
+        return authenticationUtility.extractUserFromExchange(exchange)
+            .flatMapMany { user ->
+                orderService.getOrdersByUserId(user.oauthId!!)
+            }
+            .onErrorResume { error ->
+                logger.error("Failed to retrieve orders: {}", error.message)
+                Flux.empty()
+            }
+    }
 
     /**
      * Place an order from cart.

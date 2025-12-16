@@ -7,6 +7,7 @@ import { LoginComponent } from './auth/login-component/login-component';
 import { AuthCallbackComponent } from './auth/auth-callback-component/auth-callback-component';
 import { SearchComponent } from './search/search';
 import { AuthGuard } from './guards/auth-guard';
+import { OrderHistoryComponent } from './order-history/order-history';
 
 export const routes: Routes = [
   { path: '', component: Home, title: 'Yaojia Buy' },
@@ -16,4 +17,5 @@ export const routes: Routes = [
   { path: 'checkout', component: CheckoutComponent, title: 'Checkout' },
   { path: 'login', component: LoginComponent, title: 'OAuth2 Login'},
   { path: 'auth/callback', component: AuthCallbackComponent },
+  { path: 'orders', component: OrderHistoryComponent, title: 'Order History', canActivate: [AuthGuard] },
 ];

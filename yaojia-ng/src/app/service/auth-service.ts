@@ -93,6 +93,38 @@ export class AuthService {
   }
 
   /**
+   * Update user address
+   */
+  updateAddress(addressData: any): Observable<User> {
+    return this.http.post<User>(`${this.apiUrl}/user/address`, addressData).pipe(
+      tap(updatedUser => {
+        // Update local user state with new address info
+        const currentUser = this.user();
+        if (currentUser) {
+          const newUser = { ...currentUser, ...updatedUser };
+          this.setUser(newUser);
+        }
+      })
+    );
+  }
+
+  /**
+   * Get user profile from backend
+   */
+  getUserProfile(): Observable<User> {
+    return this.http.get<User>(`${this.apiUrl}/user/profile`).pipe(
+      tap(user => {
+        if (user) {
+          // Merge with existing user to keep token info if needed, or just replace
+          const currentUser = this.user();
+          const newUser = currentUser ? { ...currentUser, ...user } : user;
+          this.setUser(newUser);
+        }
+      })
+    );
+  }
+
+  /**
    * Start OAuth2 login flow
    * Angular redirects to backend OAuth2 endpoint
    */

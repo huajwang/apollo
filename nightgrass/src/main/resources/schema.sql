@@ -53,6 +53,8 @@ CREATE TABLE IF NOT EXISTS e_mall_user (
     customer_name VARCHAR(50),
     phone VARCHAR(15),
     address VARCHAR(255),
+    city VARCHAR(100),
+    postal_code VARCHAR(20),
     avatar VARCHAR(100),
     provider VARCHAR(20)
 );

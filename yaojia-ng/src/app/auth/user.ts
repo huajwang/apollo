@@ -4,4 +4,9 @@ export interface User {
     email?: string;
     avatar?: string;
     provider?: string;
+    customerName?: string;
+    phone?: string;
+    address?: string;
+    city?: string;
+    postalCode?: string;
 }

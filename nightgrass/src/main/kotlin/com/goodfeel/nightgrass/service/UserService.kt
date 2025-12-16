@@ -36,8 +36,7 @@ class UserService(private val userRepository: UserRepository) {
                 val updatedUser = existingUser.copy(
                     nickName = nickName.takeIf { it.isNotBlank() } ?: existingUser.nickName,
                     email = email.takeIf { it.isNotBlank() } ?: existingUser.email,
-                    // Note: avatar is typically updated, so we always use the latest from provider
-                    // Uncomment if avatar field exists in User entity: avatar = avatar
+                    avatar = avatar.takeIf { it.isNotBlank() } ?: existingUser.avatar
                 )
                 userRepository.save(updatedUser)
             }
@@ -63,4 +62,26 @@ class UserService(private val userRepository: UserRepository) {
             }
     }
 
+    fun getUserByOauthId(oauthId: String): Mono<User> {
+        return userRepository.findByOauthId(oauthId)
+    }
+
+    fun updateAddress(
+        oauthId: String,
+        customerName: String,
+        phone: String,
+        address: String,
+        city: String,
+        postalCode: String
+    ): Mono<User> {
+        return userRepository.findByOauthId(oauthId)
+            .flatMap { user ->
+                user.customerName = customerName
+                user.phone = phone
+                user.address = address
+                user.city = city
+                user.postalCode = postalCode
+                userRepository.save(user)
+            }
+    }
 }

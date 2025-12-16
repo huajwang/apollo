@@ -1,0 +1,105 @@
+<div class="address-container">
+  <mat-card class="address-card">
+    <mat-card-header>
+      <mat-card-title>My Address</mat-card-title>
+      <mat-card-subtitle>Manage your shipping address</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      @if (isLoading()) {
+        <div class="loading-container">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p>Loading address information...</p>
+        </div>
+      } @else {
+        <form [formGroup]="addressForm" (ngSubmit)="onSubmit()" class="address-form">
+          
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Full Name</mat-label>
+              <input matInput formControlName="customerName" placeholder="John Doe">
+              <mat-icon matSuffix>person</mat-icon>
+              @if (addressForm.get('customerName')?.hasError('required')) {
+                <mat-error>Name is required</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Phone Number</mat-label>
+              <input matInput formControlName="phone" placeholder="+1 234 567 8900">
+              <mat-icon matSuffix>phone</mat-icon>
+              @if (addressForm.get('phone')?.hasError('required')) {
+                <mat-error>Phone number is required</mat-error>
+              }
+              @if (addressForm.get('phone')?.hasError('pattern')) {
+                <mat-error>Please enter a valid phone number</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Address</mat-label>
+              <input matInput formControlName="address" placeholder="123 Main St, Apt 4B">
+              <mat-icon matSuffix>home</mat-icon>
+              @if (addressForm.get('address')?.hasError('required')) {
+                <mat-error>Address is required</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <div class="form-row two-col">
+            <mat-form-field appearance="outline">
+              <mat-label>City</mat-label>
+              <input matInput formControlName="city" placeholder="New York">
+              @if (addressForm.get('city')?.hasError('required')) {
+                <mat-error>City is required</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Postal Code</mat-label>
+              <input matInput formControlName="postalCode" placeholder="10001">
+              @if (addressForm.get('postalCode')?.hasError('required')) {
+                <mat-error>Postal code is required</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          @if (successMessage()) {
+            <div class="success-message">
+              <mat-icon>check_circle</mat-icon>
+              <span>{{ successMessage() }}</span>
+            </div>
+          }
+
+          @if (errorMessage()) {
+            <div class="error-message">
+              <mat-icon>error</mat-icon>
+              <span>{{ errorMessage() }}</span>
+            </div>
+          }
+
+          <div class="form-actions">
+            <button mat-button type="button" (click)="onCancel()">
+              @if (hasSaved()) {
+                Back
+              } @else {
+                Cancel
+              }
+            </button>
+            <button mat-raised-button color="primary" type="submit" [disabled]="addressForm.invalid || addressForm.pristine || isSaving()">
+              @if (isSaving()) {
+                <mat-spinner diameter="20"></mat-spinner>
+              } @else {
+                Save Address
+              }
+            </button>
+          </div>
+        </form>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

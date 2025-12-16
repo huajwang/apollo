@@ -40,7 +40,8 @@ class UserApiController(
                     phone = request.phone,
                     address = request.address,
                     city = request.city,
-                    postalCode = request.postalCode
+                    postalCode = request.postalCode,
+                    email = request.email
                 ).map { ResponseEntity.ok(it) }
             }
             .defaultIfEmpty(ResponseEntity.notFound().build())
@@ -52,5 +53,6 @@ data class UpdateAddressRequest(
     val phone: String,
     val address: String,
     val city: String,
-    val postalCode: String
+    val postalCode: String,
+    val email: String? = null
 )

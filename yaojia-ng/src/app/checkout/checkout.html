@@ -31,64 +31,86 @@
               <mat-card-title>Shipping Information</mat-card-title>
             </mat-card-header>
             <mat-card-content>
-              <mat-form-field class="full-width">
-                <mat-label>Full Name</mat-label>
-                <input matInput formControlName="fullName" required />
-                @if (checkoutForm.get('fullName')?.hasError('required')) {
-                  <mat-error>Full name is required</mat-error>
-                }
-                @if (checkoutForm.get('fullName')?.hasError('minlength')) {
-                  <mat-error>Name must be at least 3 characters</mat-error>
-                }
-              </mat-form-field>
-
-              <mat-form-field class="full-width">
-                <mat-label>Email</mat-label>
-                <input matInput type="email" formControlName="email" required />
-                @if (checkoutForm.get('email')?.hasError('required')) {
-                  <mat-error>Email is required</mat-error>
-                }
-                @if (checkoutForm.get('email')?.hasError('email')) {
-                  <mat-error>Please enter a valid email</mat-error>
-                }
-              </mat-form-field>
-
-              <mat-form-field class="full-width">
-                <mat-label>Phone</mat-label>
-                <input matInput formControlName="phone" required />
-                @if (checkoutForm.get('phone')?.hasError('required')) {
-                  <mat-error>Phone is required</mat-error>
-                }
-                @if (checkoutForm.get('phone')?.hasError('pattern')) {
-                  <mat-error>Please enter a valid phone number</mat-error>
-                }
-              </mat-form-field>
-
-              <mat-form-field class="full-width">
-                <mat-label>Address</mat-label>
-                <input matInput formControlName="address" required />
-                @if (checkoutForm.get('address')?.hasError('required')) {
-                  <mat-error>Address is required</mat-error>
-                }
-              </mat-form-field>
-
-              <div class="form-row">
-                <mat-form-field class="half-width">
-                  <mat-label>City</mat-label>
-                  <input matInput formControlName="city" required />
-                  @if (checkoutForm.get('city')?.hasError('required')) {
-                    <mat-error>City is required</mat-error>
+              @if (showAddressPrompt()) {
+                <div class="address-prompt">
+                  <div class="prompt-content">
+                    <h3>Use saved address?</h3>
+                    <p class="saved-address-preview">
+                      <strong>{{ savedAddress()?.customerName || savedAddress()?.name }}</strong><br>
+                      {{ savedAddress()?.address }}<br>
+                      {{ savedAddress()?.city }}, {{ savedAddress()?.postalCode }}<br>
+                      {{ savedAddress()?.phone }}
+                    </p>
+                    <div class="prompt-actions">
+                      <button mat-raised-button color="primary" type="button" (click)="useSavedAddress()">
+                        Yes, use this address
+                      </button>
+                      <button mat-stroked-button type="button" (click)="useNewAddress()">
+                        No, enter new address
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              } @else {
+                <mat-form-field class="full-width">
+                  <mat-label>Full Name</mat-label>
+                  <input matInput formControlName="fullName" required />
+                  @if (checkoutForm.get('fullName')?.hasError('required')) {
+                    <mat-error>Full name is required</mat-error>
+                  }
+                  @if (checkoutForm.get('fullName')?.hasError('minlength')) {
+                    <mat-error>Name must be at least 3 characters</mat-error>
                   }
                 </mat-form-field>
 
-                <mat-form-field class="half-width">
-                  <mat-label>Postal Code</mat-label>
-                  <input matInput formControlName="postalCode" required />
-                  @if (checkoutForm.get('postalCode')?.hasError('required')) {
-                    <mat-error>Postal code is required</mat-error>
+                <mat-form-field class="full-width">
+                  <mat-label>Email</mat-label>
+                  <input matInput type="email" formControlName="email" required />
+                  @if (checkoutForm.get('email')?.hasError('required')) {
+                    <mat-error>Email is required</mat-error>
+                  }
+                  @if (checkoutForm.get('email')?.hasError('email')) {
+                    <mat-error>Please enter a valid email</mat-error>
                   }
                 </mat-form-field>
-              </div>
+
+                <mat-form-field class="full-width">
+                  <mat-label>Phone</mat-label>
+                  <input matInput formControlName="phone" required />
+                  @if (checkoutForm.get('phone')?.hasError('required')) {
+                    <mat-error>Phone is required</mat-error>
+                  }
+                  @if (checkoutForm.get('phone')?.hasError('pattern')) {
+                    <mat-error>Please enter a valid phone number</mat-error>
+                  }
+                </mat-form-field>
+
+                <mat-form-field class="full-width">
+                  <mat-label>Address</mat-label>
+                  <input matInput formControlName="address" required />
+                  @if (checkoutForm.get('address')?.hasError('required')) {
+                    <mat-error>Address is required</mat-error>
+                  }
+                </mat-form-field>
+
+                <div class="form-row">
+                  <mat-form-field class="half-width">
+                    <mat-label>City</mat-label>
+                    <input matInput formControlName="city" required />
+                    @if (checkoutForm.get('city')?.hasError('required')) {
+                      <mat-error>City is required</mat-error>
+                    }
+                  </mat-form-field>
+
+                  <mat-form-field class="half-width">
+                    <mat-label>Postal Code</mat-label>
+                    <input matInput formControlName="postalCode" required />
+                    @if (checkoutForm.get('postalCode')?.hasError('required')) {
+                      <mat-error>Postal code is required</mat-error>
+                    }
+                  </mat-form-field>
+                </div>
+              }
             </mat-card-content>
           </mat-card>
 

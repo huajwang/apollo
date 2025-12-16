@@ -1,8 +1,9 @@
-import { Component, inject, computed, signal, DestroyRef } from '@angular/core';
+import { Component, inject, computed, signal, DestroyRef, OnInit } from '@angular/core';
 import { CartStore } from '../cart/cart-store';
 import { CartService } from '../cart/cart-service';
 import { OrderService, PlaceOrderRequest } from '../service/order-service';
 import { AuthService } from '../service/auth-service';
+import { User } from '../auth/user';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
@@ -31,7 +32,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
   templateUrl: './checkout.html',
   styleUrl: './checkout.scss',
 })
-export class CheckoutComponent {
+export class CheckoutComponent implements OnInit {
   cartStore = inject(CartStore);
   cartService = inject(CartService);
   orderService = inject(OrderService);
@@ -45,6 +46,8 @@ export class CheckoutComponent {
 
   isProcessing = signal(false);
   orderPlaced = signal(false);
+  savedAddress = signal<User | null>(null);
+  showAddressPrompt = signal(false);
 
   cartItems = this.cartStore.cartItems;
 
@@ -80,6 +83,36 @@ export class CheckoutComponent {
     paymentMethod: ['credit-card', Validators.required],
   });
 
+  ngOnInit() {
+    this.authService.getUserProfile().subscribe(user => {
+      if (user && user.address) {
+        this.savedAddress.set(user);
+        this.showAddressPrompt.set(true);
+      }
+    });
+  }
+
+  useSavedAddress() {
+    const user = this.savedAddress();
+    if (user) {
+      this.checkoutForm.patchValue({
+        fullName: user.customerName || user.name,
+        email: user.email,
+        phone: user.phone,
+        address: user.address,
+        city: user.city,
+        postalCode: user.postalCode
+      });
+      this.showAddressPrompt.set(false);
+    }
+  }
+
+  useNewAddress() {
+    this.showAddressPrompt.set(false);
+    // Optionally clear the form or leave it empty
+    // this.checkoutForm.reset();
+  }
+
   placeOrder(): void {
     if (!this.checkoutForm.valid) {
       alert('Please fill in all required fields correctly');
@@ -113,39 +146,67 @@ export class CheckoutComponent {
     };
 
     // Send order to backend
-    this.orderService
-      .placeOrder(orderRequest)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (order) => {
-          console.log(`Order placed successfully: ${order.orderNo}`);
-          this.orderPlaced.set(true);
-          this.isProcessing.set(false);
+    const submitOrder = () => {
+      this.orderService
+        .placeOrder(orderRequest)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (order) => {
+            console.log(`Order placed successfully: ${order.orderNo}`);
+            this.orderPlaced.set(true);
+            this.isProcessing.set(false);
 
-          // Clear cart after successful order
-          this.cartStore.clearCart();
+            // Clear cart after successful order
+            this.cartStore.clearCart();
 
-          // Only clear backend cart if user is logged in
-          if (this.authService.isLoggedIn()) {
-            this.cartService
-              .clearCart()
-              .pipe(takeUntilDestroyed(this.destroyRef))
-              .subscribe({
-                error: (err) => console.error('Error clearing cart after checkout:', err),
-              });
+            // Only clear backend cart if user is logged in
+            if (this.authService.isLoggedIn()) {
+              this.cartService
+                .clearCart()
+                .pipe(takeUntilDestroyed(this.destroyRef))
+                .subscribe({
+                  error: (err) => console.error('Error clearing cart after checkout:', err),
+                });
+            }
+
+            // Redirect to home after 10 seconds
+            setTimeout(() => {
+              this.router.navigate(['/']);
+            }, 10000);
+          },
+          error: (err) => {
+            console.error('Error placing order:', err);
+            this.isProcessing.set(false);
+            alert('Failed to place order. Please try again.');
           }
+        });
+    };
 
-          // Redirect to home after 10 seconds
-          setTimeout(() => {
-            this.router.navigate(['/']);
-          }, 10000);
-        },
-        error: (err) => {
-          console.error('Error placing order:', err);
-          this.isProcessing.set(false);
-          alert('Failed to place order. Please try again.');
-        }
-      });
+    if (this.authService.isLoggedIn()) {
+      const updateAddressRequest = {
+        customerName: formValue.fullName,
+        phone: formValue.phone,
+        address: formValue.address,
+        city: formValue.city,
+        postalCode: formValue.postalCode,
+        email: formValue.email
+      };
+
+      this.authService.updateAddress(updateAddressRequest)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: () => {
+            console.log('Address updated successfully during checkout');
+            submitOrder();
+          },
+          error: (err) => {
+            console.warn('Failed to update address during checkout, proceeding with order', err);
+            submitOrder();
+          }
+        });
+    } else {
+      submitOrder();
+    }
   }
 
   continueShoppingAfterOrder(): void {

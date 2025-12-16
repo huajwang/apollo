@@ -12,7 +12,7 @@ data class User(
     val oauthId: String? =null,
     val guestId: String? = null,
     val nickName: String? = null,
-    val email: String? = null,
+    var email: String? = null,
     var customerName: String? = null,
     var phone: String? = null,
     var address: String? = null,

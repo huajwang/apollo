@@ -72,7 +72,8 @@ class UserService(private val userRepository: UserRepository) {
         phone: String,
         address: String,
         city: String,
-        postalCode: String
+        postalCode: String,
+        email: String? = null
     ): Mono<User> {
         return userRepository.findByOauthId(oauthId)
             .flatMap { user ->
@@ -81,6 +82,9 @@ class UserService(private val userRepository: UserRepository) {
                 user.address = address
                 user.city = city
                 user.postalCode = postalCode
+                if (!email.isNullOrBlank()) {
+                    user.email = email
+                }
                 userRepository.save(user)
             }
     }

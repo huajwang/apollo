@@ -327,3 +327,39 @@
     }
   }
 }
+
+.address-prompt {
+  background-color: var(--mat-sys-surface-variant);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--mat-sys-outline);
+
+  .prompt-content {
+    h3 {
+      margin-top: 0;
+      margin-bottom: 1rem;
+      color: var(--mat-sys-on-surface);
+    }
+
+    .saved-address-preview {
+      margin-bottom: 1.5rem;
+      line-height: 1.6;
+      color: var(--mat-sys-on-surface-variant);
+      
+      strong {
+        color: var(--mat-sys-on-surface);
+        font-size: 1.1rem;
+      }
+    }
+
+    .prompt-actions {
+      display: flex;
+      gap: 1rem;
+      
+      button {
+        min-width: 120px;
+      }
+    }
+  }
+}

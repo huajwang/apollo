@@ -40,7 +40,7 @@ export function getUserFromToken(token: string) {
         id: payload.sub,
         name: payload.name,
         email: payload.email || undefined,
-        avatarUrl: payload.avatarUrl || undefined,
+        avatar: payload.avatarUrl || undefined,
         provider: payload.provider || undefined
     };
 }

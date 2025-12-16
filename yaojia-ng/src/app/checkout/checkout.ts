@@ -169,10 +169,8 @@ export class CheckoutComponent implements OnInit {
                 });
             }
 
-            // Redirect to home after 10 seconds
-            setTimeout(() => {
-              this.router.navigate(['/']);
-            }, 10000);
+            // Navigate to payment page
+            this.router.navigate(['/payment', order.orderId]);
           },
           error: (err) => {
             console.error('Error placing order:', err);

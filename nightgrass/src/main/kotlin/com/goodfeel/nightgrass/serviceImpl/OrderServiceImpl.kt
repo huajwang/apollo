@@ -172,5 +172,17 @@ class OrderServiceImpl(
                     }
             }
     }
+
+    fun getOrderById(orderId: Long): Mono<com.goodfeel.nightgrass.dto.OrderDto> {
+        return orderRepository.findById(orderId)
+            .flatMap { order ->
+                orderItemRepository.findByOrderId(order.orderId!!)
+                    .map { it.toDto() }
+                    .collectList()
+                    .map { items ->
+                        order.toDto(items)
+                    }
+            }
+    }
 }
 

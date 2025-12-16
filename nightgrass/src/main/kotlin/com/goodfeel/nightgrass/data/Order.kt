@@ -35,6 +35,8 @@ data class Order(
             orderNo = this.orderNo,
             userId = this.userId,
             deliveryAddress = this.deliveryAddress,
+            contactName = this.contactName,
+            contactPhone = this.contactPhone,
             originalTotal = this.originalTotal,
             discountedTotal = this.discountedTotal,
             hst = this.hst,

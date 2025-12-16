@@ -4,6 +4,7 @@ import com.goodfeel.nightgrass.rest.auth.UserInfo
 import org.springframework.security.core.Authentication
 import org.springframework.security.oauth2.core.user.OAuth2User
 import org.springframework.security.oauth2.jwt.*
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 import java.time.Instant
@@ -30,7 +31,12 @@ class JwtService(
         val userName = getUserName(oauth2User)
         val userEmail = getUserEmail(oauth2User)
         val userAvatarUrl = getUserAvatarUrl(oauth2User)
-        val provider = authentication.name
+        
+        val provider = if (authentication is OAuth2AuthenticationToken) {
+            authentication.authorizedClientRegistrationId
+        } else {
+            authentication.name
+        }
 
         val accessToken = generateAccessToken(userId, userName, userEmail, userAvatarUrl, provider)
         val refreshToken = generateRefreshToken(userId) // In real scenario, store this in DB or cache TODO

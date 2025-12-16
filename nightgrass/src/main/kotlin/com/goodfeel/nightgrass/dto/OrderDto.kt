@@ -9,6 +9,8 @@ data class OrderDto(
     val orderNo: String,
     val userId: String,
     val deliveryAddress: String? = null,
+    val contactName: String? = null,
+    val contactPhone: String? = null,
     val originalTotal: BigDecimal,
     val discountedTotal: BigDecimal,
     val hst: BigDecimal,

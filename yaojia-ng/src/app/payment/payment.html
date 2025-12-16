@@ -1,0 +1,54 @@
+<div class="payment-container">
+  @if (isLoading()) {
+    <div class="loading-state">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>Loading order details...</p>
+    </div>
+  } @else if (errorMessage()) {
+    <div class="error-state">
+      <mat-icon class="error-icon">error_outline</mat-icon>
+      <h2>Error</h2>
+      <p>{{ errorMessage() }}</p>
+      <button mat-raised-button color="primary" routerLink="/">Go Home</button>
+    </div>
+  } @else if (order()) {
+    <div class="payment-content">
+      <h1>Complete Your Payment</h1>
+      
+      <div class="order-summary">
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Order Summary</mat-card-title>
+            <mat-card-subtitle>Order #{{ order()?.orderNo }}</mat-card-subtitle>
+          </mat-card-header>
+          
+          <mat-card-content>
+            <div class="summary-row">
+              <span>Total Amount</span>
+              <span class="amount">${{ order()?.orderTotal | number:'1.2-2' }}</span>
+            </div>
+            
+            <div class="items-preview">
+              <p>{{ order()?.items?.length }} items</p>
+            </div>
+
+            <div class="shipping-info">
+              <h3>Shipping to:</h3>
+              <p>{{ order()?.deliveryAddress }}</p>
+            </div>
+          </mat-card-content>
+          
+          <mat-card-actions align="end">
+            <button mat-raised-button color="primary" (click)="proceedToPayment()" [disabled]="isProcessingPayment()">
+              @if (isProcessingPayment()) {
+                <mat-spinner diameter="20"></mat-spinner>
+              } @else {
+                Pay Now
+              }
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      </div>
+    </div>
+  }
+</div>

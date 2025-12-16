@@ -9,6 +9,7 @@ import { SearchComponent } from './search/search';
 import { AuthGuard } from './guards/auth-guard';
 import { OrderHistoryComponent } from './order-history/order-history';
 import { AddressComponent } from './address/address';
+import { PaymentComponent } from './payment/payment';
 
 export const routes: Routes = [
   { path: '', component: Home, title: 'Yaojia Buy' },
@@ -20,4 +21,5 @@ export const routes: Routes = [
   { path: 'auth/callback', component: AuthCallbackComponent },
   { path: 'orders', component: OrderHistoryComponent, title: 'Order History', canActivate: [AuthGuard] },
   { path: 'address', component: AddressComponent, title: 'My Address', canActivate: [AuthGuard] },
+  { path: 'payment/:orderId', component: PaymentComponent, title: 'Payment' },
 ];

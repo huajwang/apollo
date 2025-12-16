@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { Observable } from 'rxjs';
 import { ProductVariantProperties } from '../cart/cart-item';
@@ -33,6 +33,8 @@ export interface OrderResponse {
   orderNo: string;
   userId: string;
   deliveryAddress: string;
+  contactName: string;
+  contactPhone: string;
   originalTotal: number;
   discountedTotal: number;
   hst: number;
@@ -63,5 +65,20 @@ export class OrderService {
 
   getMyOrders(): Observable<OrderResponse[]> {
     return this.http.get<OrderResponse[]>(`${this.apiUrl}/my-orders`);
+  }
+
+  getOrderById(orderId: string): Observable<OrderResponse> {
+    return this.http.get<OrderResponse>(`${this.apiUrl}/${orderId}`);
+  }
+
+  initiatePayment(order: OrderResponse): Observable<string> {
+    const params = new HttpParams()
+      .set('orderId', order.orderId)
+      .set('amount', order.orderTotal)
+      .set('contactName', order.contactName || '')
+      .set('contactPhone', order.contactPhone || '')
+      .set('deliveryAddress', order.deliveryAddress || '');
+
+    return this.http.post(`${environment.baseUrl}/pay/create-checkout-session`, {}, { params, responseType: 'text' });
   }
 }

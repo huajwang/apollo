@@ -13,12 +13,6 @@ data class User(
     val guestId: String? = null,
     val nickName: String? = null,
     var email: String? = null,
-    var customerName: String? = null,
-    var phone: String? = null,
-    var address: String? = null,
-    var city: String? = null,
-    @Column("postal_code")
-    var postalCode: String? = null,
     var avatar: String? = null,
     var provider: String? = null
 )

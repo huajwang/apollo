@@ -50,13 +50,20 @@ CREATE TABLE IF NOT EXISTS e_mall_user (
     guest_id VARCHAR(255) UNIQUE,
     nick_name VARCHAR(255),
     email VARCHAR(255),
-    customer_name VARCHAR(50),
-    phone VARCHAR(15),
-    address VARCHAR(255),
-    city VARCHAR(100),
-    postal_code VARCHAR(20),
     avatar VARCHAR(100),
     provider VARCHAR(20)
+);
+
+CREATE TABLE IF NOT EXISTS e_mall_address (
+    address_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id BIGINT NOT NULL,
+    customer_name VARCHAR(50),
+    phone VARCHAR(15),
+    address_line VARCHAR(255),
+    city VARCHAR(100),
+    postal_code VARCHAR(20),
+    is_default BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (user_id) REFERENCES e_mall_user(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS e_mall_admin (

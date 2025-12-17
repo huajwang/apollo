@@ -65,7 +65,7 @@ class AuthApiController(
                                 ResponseEntity.ok(
                                     UserInfo(
                                         id = user.oauthId ?: "",
-                                        name = user.nickName ?: user.customerName ?: user.email ?: "User",
+                                        name = user.nickName ?: user.email ?: "User",
                                         email = user.email,
                                         avatar = user.avatar,
                                         provider = user.provider,

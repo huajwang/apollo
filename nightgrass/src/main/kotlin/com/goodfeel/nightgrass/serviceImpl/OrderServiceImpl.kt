@@ -94,7 +94,7 @@ class OrderServiceImpl(
                 oauthId = null,
                 guestId = guestId,
                 nickName = request.fullName,
-                email = request.email,
+                email = null,
                 avatar = null,
                 provider = null
             )

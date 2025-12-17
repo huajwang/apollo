@@ -11,7 +11,6 @@ data class PlaceOrderRequest(
     val total: Double,
     val shippingFee: Double = 0.0,
     val fullName: String,
-    val email: String,
     val phone: String,
     val address: String,
     val city: String,

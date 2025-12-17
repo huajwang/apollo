@@ -1,13 +1,18 @@
 package com.goodfeel.nightgrass.service
 
 import com.goodfeel.nightgrass.data.User
+import com.goodfeel.nightgrass.data.Address
 import com.goodfeel.nightgrass.repo.UserRepository
+import com.goodfeel.nightgrass.repo.AddressRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 
 @Service
-class UserService(private val userRepository: UserRepository) {
+class UserService(
+    private val userRepository: UserRepository,
+    private val addressRepository: AddressRepository
+) {
 
     private val logger = LoggerFactory.getLogger(UserService::class.java)
     /**
@@ -72,20 +77,37 @@ class UserService(private val userRepository: UserRepository) {
         phone: String,
         address: String,
         city: String,
-        postalCode: String,
-        email: String? = null
-    ): Mono<User> {
+        postalCode: String
+    ): Mono<Address> {
         return userRepository.findByOauthId(oauthId)
             .flatMap { user ->
-                user.customerName = customerName
-                user.phone = phone
-                user.address = address
-                user.city = city
-                user.postalCode = postalCode
-                if (!email.isNullOrBlank()) {
-                    user.email = email
-                }
-                userRepository.save(user)
+                // For now, we'll just create a new address or update the default one if it exists
+                // This logic can be expanded to support multiple addresses
+                addressRepository.findByUserIdAndIsDefaultTrue(user.id!!)
+                    .flatMap { existingAddress ->
+                        val updatedAddress = existingAddress.copy(
+                            customerName = customerName,
+                            phone = phone,
+                            addressLine = address,
+                            city = city,
+                            postalCode = postalCode
+                        )
+                        addressRepository.save(updatedAddress)
+                    }
+                    .switchIfEmpty(
+                        Mono.defer {
+                            val newAddress = Address(
+                                userId = user.id,
+                                customerName = customerName,
+                                phone = phone,
+                                addressLine = address,
+                                city = city,
+                                postalCode = postalCode,
+                                isDefault = true
+                            )
+                            addressRepository.save(newAddress)
+                        }
+                    )
             }
     }
 }

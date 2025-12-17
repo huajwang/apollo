@@ -20,7 +20,6 @@ export interface PlaceOrderRequest {
   total: number;
   shippingFee: number;
   fullName: string;
-  email: string;
   phone: string;
   address: string;
   city: string;

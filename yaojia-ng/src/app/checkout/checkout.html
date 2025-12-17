@@ -64,17 +64,6 @@
                 </mat-form-field>
 
                 <mat-form-field class="full-width">
-                  <mat-label>Email</mat-label>
-                  <input matInput type="email" formControlName="email" required />
-                  @if (checkoutForm.get('email')?.hasError('required')) {
-                    <mat-error>Email is required</mat-error>
-                  }
-                  @if (checkoutForm.get('email')?.hasError('email')) {
-                    <mat-error>Please enter a valid email</mat-error>
-                  }
-                </mat-form-field>
-
-                <mat-form-field class="full-width">
                   <mat-label>Phone</mat-label>
                   <input matInput formControlName="phone" required />
                   @if (checkoutForm.get('phone')?.hasError('required')) {

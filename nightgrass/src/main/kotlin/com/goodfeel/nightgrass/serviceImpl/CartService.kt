@@ -28,7 +28,8 @@ open class CartService(
     private val orderRepository: OrderRepository,
     private val orderItemRepository: OrderItemRepository,
     private val userRepository: UserRepository,
-    private val processedProductService: ProcessedProductService
+    private val processedProductService: ProcessedProductService,
+    private val addressRepository: AddressRepository
 ) : ICartService {
 
     companion object {
@@ -420,9 +421,14 @@ open class CartService(
             }
             .reduce(BigDecimal.ZERO, BigDecimal::add)
 
-        val userMono = if (cart.userId != null)
+        val userAddressMono = if (cart.userId != null) {
             userRepository.findByOauthId(cart.userId)
-        else if (cart.guestId != null) {
+                .flatMap { user ->
+                    addressRepository.findByUserIdAndIsDefaultTrue(user.id!!)
+                        .defaultIfEmpty(Address(userId = user.id, addressLine = "No Address"))
+                        .map { address -> user to address }
+                }
+        } else if (cart.guestId != null) {
             userRepository.findByGuestId(cart.guestId)
                 .switchIfEmpty(
                     Mono.defer {
@@ -432,14 +438,15 @@ open class CartService(
                         logger.debug("should not see this one --- create order. save user....")
                     }
                 )
+                .map { user -> user to Address(userId = user.id ?: 0, addressLine = "Guest Address") }
         } else {
-            throw IllegalArgumentException("Both userId and guestId are null")
+            Mono.error(IllegalArgumentException("Both userId and guestId are null"))
         }
 
-        return Mono.zip(userMono, discountedTotalMono, originalTotalMono).map { tuple ->
-            val user = tuple.t1
-            val discountedTotal = tuple.t2
-            val originalTotal = tuple.t3
+        return Mono.zip(discountedTotalMono, originalTotalMono, userAddressMono).map { tuple ->
+            val discountedTotal = tuple.t1
+            val originalTotal = tuple.t2
+            val address = tuple.t3.second
 
             val estimatedHst = discountedTotal.multiply(BigDecimal.valueOf(0.13))
                 .setScale(2, RoundingMode.HALF_UP)
@@ -456,9 +463,9 @@ open class CartService(
                 hst = estimatedHst,
                 shippingFee = BigDecimal.ZERO,
                 finalTotal = finalTotal,
-                contactName = user.customerName,
-                contactPhone = user.phone,
-                deliveryAddress = user.address
+                contactName = address.customerName,
+                contactPhone = address.phone,
+                deliveryAddress = address.addressLine
             )
         }
             .flatMap { order: Order ->  // Save the order and create order items in a reactive chain

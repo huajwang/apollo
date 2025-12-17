@@ -75,7 +75,6 @@ export class CheckoutComponent implements OnInit {
   // Simple checkout form
   checkoutForm = this.fb.group({
     fullName: ['', [Validators.required, Validators.minLength(3)]],
-    email: ['', [Validators.required, Validators.email]],
     phone: ['', [Validators.required, Validators.pattern(/^\+?[\d\s\-\(\)]{10,}$/)]],
     address: ['', [Validators.required, Validators.minLength(5)]],
     city: ['', [Validators.required]],
@@ -97,7 +96,6 @@ export class CheckoutComponent implements OnInit {
     if (user) {
       this.checkoutForm.patchValue({
         fullName: user.customerName || user.name,
-        email: user.email,
         phone: user.phone,
         address: user.address,
         city: user.city,
@@ -137,7 +135,6 @@ export class CheckoutComponent implements OnInit {
       total: this.total(),
       shippingFee: 0, // Can be calculated based on address if needed
       fullName: formValue.fullName || '',
-      email: formValue.email || '',
       phone: formValue.phone || '',
       address: formValue.address || '',
       city: formValue.city || '',
@@ -186,8 +183,7 @@ export class CheckoutComponent implements OnInit {
         phone: formValue.phone,
         address: formValue.address,
         city: formValue.city,
-        postalCode: formValue.postalCode,
-        email: formValue.email
+        postalCode: formValue.postalCode
       };
 
       this.authService.updateAddress(updateAddressRequest)

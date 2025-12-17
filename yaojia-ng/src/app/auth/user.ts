@@ -9,4 +9,5 @@ export interface User {
     address?: string;
     city?: string;
     postalCode?: string;
+    referralCode?: string;
 }

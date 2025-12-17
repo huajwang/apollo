@@ -1,5 +1,8 @@
 package com.goodfeel.nightgrass.rest.auth
 
+import com.goodfeel.nightgrass.data.Referral
+import com.goodfeel.nightgrass.data.User
+import com.goodfeel.nightgrass.repo.ReferralRepository
 import com.goodfeel.nightgrass.serviceImpl.JwtService
 import com.goodfeel.nightgrass.util.AuthenticationUtility
 import com.goodfeel.nightgrass.repo.UserRepository
@@ -12,13 +15,15 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
+import java.util.UUID
 
 data class UserInfo(
     val id: String,
     val name: String,
     val email: String?,
     val avatar: String?,
-    val provider: String?
+    val provider: String?,
+    val referralCode: String?
 )
 
 data class RefreshTokenRequest(val refreshToken: String)
@@ -29,7 +34,8 @@ data class TokenResponse(val accessToken: String, val refreshToken: String, val 
 class AuthApiController(
     private val jwtService: JwtService,
     private val authenticationUtility: AuthenticationUtility,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val referralRepository: ReferralRepository
 ) {
 
     private val logger = LoggerFactory.getLogger(AuthApiController::class.java)
@@ -39,17 +45,34 @@ class AuthApiController(
         return authenticationUtility.extractOAuthIdFromExchange(exchange)
             .flatMap { oauthId ->
                 userRepository.findByOauthId(oauthId)
-                    .map { user ->
-                        logger.debug("Retrieved user from database: {}", user.id)
-                        ResponseEntity.ok(
-                            UserInfo(
-                                id = user.oauthId ?: "",
-                                name = user.nickName ?: "",
-                                email = user.email,
-                                avatar = user.avatar,
-                                provider = user.provider
+                    .flatMap { user ->
+                        val sharerId = user.oauthId ?: user.id.toString()
+                        logger.debug("Checking referral for sharerId: {}", sharerId)
+                        referralRepository.findBySharerId(sharerId)
+                            .doOnNext { logger.debug("Found existing referral: {}", it.referralCode) }
+                            .switchIfEmpty(
+                                Mono.defer {
+                                    logger.debug("No referral found, creating new one for sharerId: {}", sharerId)
+                                    val newCode = generateReferralCode(user)
+                                    val newReferral = Referral(sharerId = sharerId, referralCode = newCode)
+                                    referralRepository.save(newReferral)
+                                        .doOnSuccess { logger.debug("Created new referral: {}", it.referralCode) }
+                                        .doOnError { logger.error("Failed to create referral: {}", it.message) }
+                                }
                             )
-                        )
+                            .map { referral ->
+                                logger.debug("Retrieved user from database: {}, referralCode: {}", user.id, referral.referralCode)
+                                ResponseEntity.ok(
+                                    UserInfo(
+                                        id = user.oauthId ?: "",
+                                        name = user.nickName ?: user.customerName ?: user.email ?: "User",
+                                        email = user.email,
+                                        avatar = user.avatar,
+                                        provider = user.provider,
+                                        referralCode = referral.referralCode
+                                    )
+                                )
+                            }
                     }
             }
             .switchIfEmpty(Mono.just(ResponseEntity.status(401).build()))
@@ -57,6 +80,12 @@ class AuthApiController(
                 logger.debug("Failed to retrieve current user: {}", it.message)
                 Mono.just(ResponseEntity.status(401).build())
             }
+    }
+
+    private fun generateReferralCode(user: User): String {
+        val prefix = user.nickName?.filter { it.isLetterOrDigit() }?.take(3)?.uppercase() ?: "USR"
+        val uniquePart = UUID.randomUUID().toString().substring(0, 6).uppercase()
+        return "$prefix$uniquePart"
     }
 
     @PostMapping("/refresh")

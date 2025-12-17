@@ -29,8 +29,8 @@ export class App {
     return items.reduce((sum, item) => sum + item.quantity, 0);
   });
 
-  isLoggedIn = computed(() => this.authService.isLoggedIn());
-  currentUser = computed(() => this.authService.currentUser());
+  isLoggedIn = this.authService.isAuthenticated;
+  currentUser = this.authService.currentUser;
 
   /**
    * Get the share URL based on current route
@@ -39,14 +39,19 @@ export class App {
    */
   getShareUrl(): string {
     const currentUrl = this.router.url;
+    let targetUrl = '/';
     
     // Check if we're on a product detail page
     if (currentUrl.includes('/product/detail/')) {
-      return `https://yaojiabuy.com${currentUrl}`;
+      targetUrl = currentUrl;
     }
     
-    // Default: share app URL
-    return 'https://yaojiabuy.com';
+    const user = this.currentUser();
+    if (user && user.referralCode) {
+      return `https://yaojiabuy.com/referral/${user.referralCode}?target=${encodeURIComponent(targetUrl)}`;
+    }
+    
+    return `https://yaojiabuy.com${targetUrl === '/' ? '' : targetUrl}`;
   }
 
   /**

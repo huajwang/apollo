@@ -32,7 +32,8 @@ class CustomReactiveOAuth2UserService(private val userRepository: UserRepository
 
                 // Extract additional attributes (if any)
                 val name = when (registrationId) {
-                    "google", "facebook", "github" -> oAuth2User.getAttribute<String>("name")
+                    "google", "facebook" -> oAuth2User.getAttribute<String>("name")
+                    "github" -> oAuth2User.getAttribute<String>("name") ?: oAuth2User.getAttribute<String>("login")
                     "wechat" -> oAuth2User.getAttribute<String>("nickname")
                     else -> null
                 }

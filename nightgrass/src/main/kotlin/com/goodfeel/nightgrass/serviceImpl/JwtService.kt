@@ -182,7 +182,8 @@ class JwtService(
             name = jwt.claims["name"] as String,
             email = jwt.claims["email"] as? String,
             avatar = jwt.claims["avatarUrl"] as? String,
-            provider = jwt.claims["provider"] as? String
+            provider = jwt.claims["provider"] as? String,
+            referralCode = null
         )
         return Mono.just(userInfo)
     }
